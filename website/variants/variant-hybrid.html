@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safe Anot? — Protect Your Family from Scams</title>
+
+  <!-- OG Meta Tags for WhatsApp sharing -->
+  <meta property="og:title" content="Safe Anot? — Scam Protection for Malaysian Families">
+  <meta property="og:description" content="Check suspicious links, shield your phone from scam apps, and protect your family. Free, no ads, no data collected.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://safeanot.com">
+  <meta property="og:image" content="https://safeanot.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="description" content="Safe Anot? helps Malaysian and Singaporean families check scam links, detect dangerous APKs, and stay protected. Free to download.">
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+
+  <style>
+    /* === RESET & VARIABLES === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #F7F8FA;
+      --card: #FFFFFF;
+      --primary: #2563EB;
+      --primary-light: rgba(37, 99, 235, 0.06);
+      --purple: #7C3AED;
+      --danger: #DC2626;
+      --danger-light: #FEF2F2;
+      --danger-border: #FECACA;
+      --safe: #16A34A;
+      --safe-light: rgba(22, 163, 74, 0.06);
+      --warning: #D97706;
+      --teal: #0D9488;
+      --teal-light: rgba(13, 148, 136, 0.06);
+      --text: #111827;
+      --text2: #6B7280;
+      --border: #E5E7EB;
+      --radius: 12px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* === HEADER BAR === */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      position: sticky;
+      top: 0;
+      background: rgba(247, 248, 250, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 50;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 18px;
+    }
+
+    .header .btn-download-sm {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .header .btn-download-sm:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* === HERO === */
+    .hero {
+      text-align: center;
+      padding: 48px 0 56px;
+    }
+
+    .hero h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+
+    .hero .tagline {
+      font-size: 1.15rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .hero .subtitle {
+      font-size: 0.92rem;
+      color: var(--text2);
+      margin-bottom: 32px;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+
+    /* === BUTTONS === */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 44px;
+    }
+
+    .btn {
+      padding: 13px 26px;
+      border-radius: var(--radius);
+      border: none;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: var(--card);
+      color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* === PHONE MOCKUP === */
+    .phone-wrap {
+      display: flex;
+      justify-content: center;
+    }
+
+    .phone {
+      width: 230px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 14px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.07);
+    }
+
+    .phone-notch {
+      width: 56px;
+      height: 4px;
+      background: var(--bg);
+      border-radius: 2px;
+      margin: 0 auto 14px;
+    }
+
+    .phone-screen {
+      background: var(--danger-light);
+      border-radius: 16px;
+      padding: 22px 16px;
+      text-align: center;
+      border: 1px solid var(--danger-border);
+    }
+
+    .phone-screen .verdict-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--danger);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      color: #fff;
+      font-size: 22px;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+    }
+
+    .phone-screen .verdict-label {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--danger);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .phone-screen .verdict-sub {
+      font-size: 0.72rem;
+      color: var(--text2);
+      margin-top: 2px;
+    }
+
+    .phone-screen .verdict-url {
+      font-size: 0.68rem;
+      color: var(--text2);
+      background: #fff;
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-top: 12px;
+      word-break: break-all;
+      border: 1px solid var(--border);
+    }
+
+    /* === TRUST BAR === */
+    .trust-bar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 8px 20px;
+      margin-bottom: 12px;
+    }
+
+    .trust-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text2);
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .trust-badge .material-symbols-outlined {
+      font-size: 16px;
+      color: var(--primary);
+    }
+
+    /* === STATS === */
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      justify-content: center;
+      padding: 40px 0 48px;
+    }
+
+    .stat {
+      text-align: center;
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .stat .num {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.2;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .stat .num.blue { color: var(--primary); }
+    .stat .num.teal { color: var(--teal); }
+    .stat .num.red { color: var(--danger); }
+
+    .stat .label {
+      font-size: 0.8rem;
+      color: var(--text2);
+      line-height: 1.4;
+    }
+
+    /* === SECTIONS === */
+    section {
+      padding: 48px 0;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-sub {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text2);
+      margin-bottom: 36px;
+    }
+
+    /* === FEATURE CARDS === */
+    .features {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .feature-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      transition: all 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.06);
+    }
+
+    .feature-card .ico {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .feature-card .ico.blue {
+      background: var(--primary-light);
+    }
+
+    .feature-card .ico.green {
+      background: var(--safe-light);
+    }
+
+    .feature-card .ico.teal {
+      background: var(--teal-light);
+    }
+
+    .feature-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .feature-card p {
+      font-size: 0.88rem;
+      color: var(--text2);
+      line-height: 1.55;
+    }
+
+    /* === SCAM SECTION === */
+    .scam-section {
+      background: var(--danger-light);
+      border-top: 1px solid var(--danger-border);
+      border-bottom: 1px solid var(--danger-border);
+      margin: 0 -24px;
+      padding: 48px 24px;
+    }
+
+    .scam-section .section-title {
+      color: var(--danger);
+    }
+
+    .scam-inner {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* === TIMELINE === */
+    .timeline {
+      position: relative;
+      padding-left: 36px;
+      margin-bottom: 28px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 11px;
+      top: 12px;
+      bottom: 12px;
+      width: 2px;
+      background: var(--danger-border);
+    }
+
+    .tl-item {
+      position: relative;
+      margin-bottom: 28px;
+    }
+
+    .tl-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .tl-num {
+      position: absolute;
+      left: -36px;
+      top: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--danger);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
+    .tl-item h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .tl-item p {
+      font-size: 0.85rem;
+      color: var(--text2);
+      line-height: 1.55;
+    }
+
+    .scam-callout {
+      background: var(--card);
+      border: 1px solid var(--danger-border);
+      border-left: 3px solid var(--danger);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .scam-callout strong {
+      color: var(--danger);
+    }
+
+    /* === ALERTS SECTION === */
+    .alerts {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .alert-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--danger);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      transition: all 0.2s;
+    }
+
+    .alert-card:hover {
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .alert-card h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .alert-card .alert-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.78rem;
+      color: var(--text2);
+    }
+
+    .alert-card .alert-meta .reports {
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    .alerts-link {
+      text-align: center;
+      font-size: 0.88rem;
+    }
+
+    .alerts-link a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .alerts-link a:hover {
+      color: var(--purple);
+    }
+
+    /* === CTA === */
+    .cta {
+      text-align: center;
+      padding: 56px 0;
+    }
+
+    .cta-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 48px 32px;
+    }
+
+    .cta-shield {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      color: #fff;
+      font-size: 26px;
+    }
+
+    .cta-box h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .cta-box .cta-trust {
+      color: var(--text2);
+      margin-bottom: 28px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    .cta-box .btn-primary.large {
+      padding: 15px 32px;
+      font-size: 0.95rem;
+      border-radius: var(--radius);
+    }
+
+    .cta-web-link {
+      display: block;
+      margin-top: 16px;
+      font-size: 0.82rem;
+      color: var(--text2);
+    }
+
+    .cta-web-link a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .cta-web-link a:hover {
+      text-decoration: underline;
+    }
+
+    /* === FOOTER === */
+    footer {
+      text-align: center;
+      padding: 36px 0;
+      font-size: 0.78rem;
+      color: var(--text2);
+      border-top: 1px solid var(--border);
+    }
+
+    footer .heart {
+      color: var(--danger);
+    }
+
+    footer .footer-links {
+      margin-top: 8px;
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    footer .footer-links a {
+      color: var(--text2);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    footer .footer-links a:hover {
+      color: var(--primary);
+    }
+
+    footer .social {
+      margin-top: 8px;
+      font-size: 0.76rem;
+    }
+
+    footer .social a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* === TOAST === */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--text);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      font-weight: 500;
+      font-size: 0.85rem;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 99;
+      pointer-events: none;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 480px) {
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .stats {
+        gap: 16px;
+      }
+
+      .stat {
+        min-width: 120px;
+      }
+
+      .stat .num {
+        font-size: 1.7rem;
+      }
+
+      .cta-box {
+        padding: 36px 24px;
+      }
+
+      .trust-bar {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (min-width: 600px) {
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ====== HEADER BAR ====== -->
+  <header class="header">
+    <a href="#" class="logo">
+      <div class="logo-icon">
+        <span class="material-symbols-outlined" style="font-size: 18px;">shield</span>
+      </div>
+      Safe Anot?
+    </a>
+    <button class="btn-download-sm" onclick="showToast('Download link coming soon!')">Download</button>
+  </header>
+
+  <!-- ====== HERO ====== -->
+  <section class="hero">
+    <h1>Safe Anot?</h1>
+    <p class="tagline">Check first before you click.</p>
+    <p class="subtitle">Protect your family from scam links and dangerous apps. Trusted by 12,000+ Malaysian families.</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="showToast('Download link coming soon!')">
+        Download Free
+      </button>
+      <button class="btn btn-secondary" onclick="showToast('Link checker coming soon!')">
+        Try Link Checker
+      </button>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="verdict-icon">
+            <span class="material-symbols-outlined" style="font-size: 22px;">warning</span>
+          </div>
+          <div class="verdict-label">DANGEROUS</div>
+          <p class="verdict-sub">Known scam domain detected</p>
+          <div class="verdict-url">maybank-secure-update.xyz/login</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== TRUST BADGE ====== -->
+  <div class="trust-bar">
+    <span class="trust-badge">
+      <span class="material-symbols-outlined">verified_user</span>
+      Protecting Malaysians &amp; Singaporeans
+    </span>
+  </div>
+
+  <!-- ====== STATS ====== -->
+  <div class="stats">
+    <div class="stat">
+      <span class="num blue">500K+</span>
+      <span class="label">scam domains in database</span>
+    </div>
+    <div class="stat">
+      <span class="num teal">12,000+</span>
+      <span class="label">families protected</span>
+    </div>
+    <div class="stat">
+      <span class="num red">RM 2.7B</span>
+      <span class="label">lost to scams in 2025</span>
+    </div>
+  </div>
+
+  <!-- ====== FEATURES ====== -->
+  <section>
+    <h2 class="section-title">How Safe Anot? protects you</h2>
+    <p class="section-sub">Three layers of protection for you and your family.</p>
+    <div class="features">
+      <div class="feature-card">
+        <div class="ico blue">&#128269;</div>
+        <div>
+          <h3>Check Any Link</h3>
+          <p>Paste a suspicious URL and get an instant verdict. Check before your parents click.</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="ico green">&#128737;&#65039;</div>
+        <div>
+          <h3>Shield Your Phone</h3>
+          <p>Scan which apps can install dangerous APKs. Guard your parents' phones from scam apps.</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="ico teal">&#128104;&#8205;&#128105;&#8205;&#128103;</div>
+        <div>
+          <h3>Protect Your Family</h3>
+          <p>Guardian mode alerts you when your parents' phone security changes. Peace of mind.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== HOW SCAMS WORK ====== -->
+  <div class="scam-section">
+    <div class="scam-inner">
+      <h2 class="section-title">How scam apps steal your money</h2>
+      <p class="section-sub">It only takes three steps for scammers to drain your account.</p>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-num">1</div>
+          <h3>Scammer sends APK via WhatsApp</h3>
+          <p>Disguised as a "bank update" or "security app" that looks legitimate.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-num">2</div>
+          <h3>Your phone installs it</h3>
+          <p>If "Install unknown apps" is enabled, it installs with just one tap.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-num">3</div>
+          <h3>Money gone</h3>
+          <p>The scam app steals banking credentials, OTP codes, or takes full control of your device.</p>
+        </div>
+      </div>
+      <div class="scam-callout">
+        This happened to a retired teacher in Malaysia. She lost <strong>RM 838,000</strong> to a single scam app.
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SCAM ALERTS ====== -->
+  <section>
+    <h2 class="section-title">Trending scams right now</h2>
+    <p class="section-sub">Stay ahead of the latest threats targeting Malaysians.</p>
+    <div class="alerts">
+      <div class="alert-card">
+        <h4>Fake Maybank Login Pages on WhatsApp</h4>
+        <div class="alert-meta">
+          <span class="reports">237 reports in Selangor</span>
+          <span>2 days ago</span>
+        </div>
+      </div>
+      <div class="alert-card">
+        <h4>LHDN Tax Refund Scam via SMS</h4>
+        <div class="alert-meta">
+          <span class="reports">189 reports nationwide</span>
+          <span>5 days ago</span>
+        </div>
+      </div>
+      <div class="alert-card">
+        <h4>Fake TNG eWallet Top-Up Links</h4>
+        <div class="alert-meta">
+          <span class="reports">156 reports in KL</span>
+          <span>1 week ago</span>
+        </div>
+      </div>
+    </div>
+    <div class="alerts-link">
+      <a href="#" onclick="showToast('Scam alerts available in the app!'); return false;">See all alerts in the app &rarr;</a>
+    </div>
+  </section>
+
+  <!-- ====== CTA ====== -->
+  <section class="cta">
+    <div class="cta-box">
+      <div class="cta-shield">
+        <span class="material-symbols-outlined" style="font-size: 26px;">shield</span>
+      </div>
+      <h2>Protect your family today</h2>
+      <p class="cta-trust">Free to download. No ads. No data collected.<br>All checks run on your device.</p>
+      <button class="btn btn-primary large" onclick="showToast('Download link coming soon!')">
+        Download on Google Play
+      </button>
+      <span class="cta-web-link">Also available as <a href="#" onclick="showToast('Web checker coming soon!'); return false;">web checker</a></span>
+    </div>
+  </section>
+
+  <!-- ====== FOOTER ====== -->
+  <footer>
+    <p>Made with <span class="heart">&hearts;</span> in Malaysia to fight scams</p>
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="social">
+      TikTok: <a href="https://tiktok.com/@safeanot" target="_blank" rel="noopener">@safeanot</a>
+    </div>
+  </footer>
+
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+
+</body>
+</html>

@@ -7,173 +7,211 @@
 <meta name="description" content="Someone who cares about you shared Safe Anot? — a free app that checks suspicious links and protects your phone from scam apps.">
 <meta property="og:title" content="Safe Anot? — Your Friend Wants to Protect You">
 <meta property="og:description" content="A free app that checks suspicious links and protects your phone from scam apps. Trusted by 12,000+ Malaysian families.">
-<meta property="og:image" content="https://safeanot.app/og-join.png">
+<meta property="og:image" content="https://safeanot.com/og-join.png">
+<meta property="og:url" content="https://safeanot.com/join">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #0D1117;
-  --bg-card: #161B22;
-  --bg-card-hover: #1C2129;
-  --bg-elevated: #1E2430;
-  --blue: #58A6FF;
-  --blue-dim: rgba(88,166,255,0.15);
-  --purple: #BC8CFF;
-  --green: #3FB950;
-  --green-dim: rgba(63,185,80,0.12);
-  --green-glow: rgba(63,185,80,0.3);
-  --red: #F85149;
-  --red-dim: rgba(248,81,73,0.12);
-  --orange: #D29922;
-  --text-primary: #F0F6FC;
-  --text-secondary: #8B949E;
-  --text-tertiary: #7D8590;
-  --border: rgba(240,246,252,0.06);
-  --radius: 16px;
-  --radius-sm: 12px;
-  --radius-xs: 8px;
-  --gradient-accent: linear-gradient(135deg, #58A6FF 0%, #BC8CFF 100%);
-}
 
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+
+<style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+:root {
+  --indigo: #4F46E5;
+  --indigo-light: #EEF2FF;
+  --teal: #0D9488;
+  --red: #DC2626;
+  --green: #16A34A;
+  --amber: #F59E0B;
+  --bg: #FAFAFA;
+  --card: #FFFFFF;
+  --text: #1E293B;
+  --text-secondary: #64748B;
+  --radius: 16px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+}
+
+html { scroll-behavior: smooth; }
+
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #0A0E14;
-  color: var(--text-primary);
-  font-size: 15px;
-  line-height: 1.5;
+  font-family: 'Quicksand', sans-serif;
+  color: var(--text);
+  line-height: 1.7;
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-.container {
+.wrap {
   max-width: 680px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
-nav {
-  background: rgba(10,14,20,0.85);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 0;
+/* === HERO HEADER === */
+.join-hero {
+  background: linear-gradient(160deg, #1E1B4B 0%, #312E81 50%, #3730A3 100%);
+  padding: 56px 20px 52px;
+  text-align: center;
+  color: #F1F5F9;
 }
-nav .container { display: flex; align-items: center; justify-content: center; }
-.nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-primary); font-weight: 800; font-size: 18px; }
-.nav-logo .material-symbols-outlined { color: var(--blue); font-size: 24px; }
-
-.join-page {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  padding: 48px 0;
-}
-.join-content { text-align: center; width: 100%; }
 
 .shield-icon {
-  width: 100px;
-  height: 100px;
+  width: 88px;
+  height: 88px;
   border-radius: 50%;
-  background: var(--blue-dim);
+  background: rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 28px;
+  margin: 0 auto 24px;
   animation: pulse 3s ease-in-out infinite;
-}
-.shield-icon .material-symbols-outlined { font-size: 52px; color: var(--blue); }
-@keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(88,166,255,0.2); }
-  50% { box-shadow: 0 0 0 20px rgba(88,166,255,0); }
+  border: 2px solid rgba(255, 255, 255, 0.15);
 }
 
-.join-content h1 {
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 16px;
-  line-height: 1.3;
+.shield-icon .material-symbols-rounded { font-size: 44px; color: #A5B4FC; }
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(165, 180, 252, 0.25); }
+  50% { box-shadow: 0 0 0 20px rgba(165, 180, 252, 0); }
 }
-.join-content .description {
-  font-size: 16px;
-  color: var(--text-secondary);
+
+.join-hero h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+.join-hero .description {
+  font-size: 1rem;
+  color: #C7D2FE;
   line-height: 1.7;
   max-width: 480px;
-  margin: 0 auto 32px;
+  margin: 0 auto 28px;
+  font-weight: 500;
 }
 
 .referrer-msg {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 16px 24px;
-  margin: 0 auto 32px;
-  max-width: 400px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 14px 24px;
+  margin: 0 auto 28px;
+  max-width: 420px;
   font-style: italic;
-  color: var(--text-secondary);
+  color: #C7D2FE;
+  font-weight: 600;
+  font-size: 0.92rem;
   display: none;
 }
 
-.dl-btn {
-  display: inline-flex; align-items: center; gap: 10px;
+.hero-dl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   padding: 18px 40px;
-  background: linear-gradient(135deg, #3FB950, #238636);
-  color: #fff; border: none; border-radius: var(--radius-sm);
-  font-size: 18px; font-weight: 800; cursor: pointer; text-decoration: none;
-  transition: transform 0.2s, box-shadow 0.2s;
-  margin-bottom: 40px;
+  background: linear-gradient(135deg, #4F46E5, #7C3AED);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
 }
-.dl-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(63,185,80,0.3); }
-.dl-btn .material-symbols-outlined { font-size: 24px; }
 
-/* FEATURES */
+.hero-dl-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(79, 70, 229, 0.5); }
+.hero-dl-btn:active { transform: translateY(0); }
+.hero-dl-btn .material-symbols-rounded { font-size: 24px; }
+
+/* === BODY CONTENT === */
+.join-body {
+  flex: 1;
+  padding: 40px 0;
+}
+
+/* === FEATURES === */
 .features-quick {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  max-width: 420px;
-  margin: 0 auto 40px;
-  text-align: left;
+  margin-bottom: 36px;
 }
+
 .fq-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 16px 20px;
+  gap: 16px;
+  background: var(--card);
+  border: 1px solid #E5E7EB;
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+
+.fq-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
 .fq-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
-.fq-icon .material-symbols-outlined { font-size: 22px; }
-.fq-icon.blue { background: var(--blue-dim); color: var(--blue); }
-.fq-icon.green { background: var(--green-dim); color: var(--green); }
-.fq-icon.purple { background: rgba(188,140,255,0.12); color: var(--purple); }
-.fq-text { font-size: 14px; font-weight: 500; }
+
+.fq-icon .material-symbols-rounded { font-size: 24px; }
+
+.fq-icon.indigo { background: var(--indigo-light); }
+.fq-icon.indigo .material-symbols-rounded { color: var(--indigo); }
+
+.fq-icon.teal { background: #F0FDFA; }
+.fq-icon.teal .material-symbols-rounded { color: var(--teal); }
+
+.fq-icon.purple { background: #F5F3FF; }
+.fq-icon.purple .material-symbols-rounded { color: #7C3AED; }
+
+.fq-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* === SOCIAL PROOF === */
+.social-proof {
+  text-align: center;
+  margin-bottom: 32px;
+}
 
 .social-proof-line {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: var(--text-tertiary);
-  font-size: 14px;
-  margin-bottom: 16px;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  font-weight: 700;
+  margin-bottom: 20px;
 }
-.social-proof-line .material-symbols-outlined { color: var(--green); font-size: 18px; }
+
+.social-proof-line .material-symbols-rounded { color: var(--indigo); font-size: 22px; }
 
 .trust-bar {
   display: flex;
@@ -181,107 +219,209 @@ nav .container { display: flex; align-items: center; justify-content: center; }
   justify-content: center;
   flex-wrap: wrap;
 }
+
 .trust-item {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  color: var(--text-tertiary);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-weight: 600;
 }
-.trust-item .material-symbols-outlined { font-size: 16px; color: var(--green); }
 
-footer {
-  border-top: 1px solid var(--border);
-  padding: 24px 0;
+.trust-item .material-symbols-rounded { font-size: 18px; color: var(--green); }
+
+/* === BOTTOM CTA === */
+.bottom-cta {
+  background: var(--indigo-light);
+  border-radius: var(--radius);
+  padding: 40px 28px;
   text-align: center;
+  margin-bottom: 40px;
 }
-footer p { font-size: 13px; color: var(--text-tertiary); }
-footer a { color: var(--blue); text-decoration: none; }
 
+.bottom-cta-shield {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  background: linear-gradient(135deg, var(--indigo), #6366F1);
+  border-radius: 14px 14px 18px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.25);
+}
+
+.bottom-cta-shield .material-symbols-rounded { font-size: 28px; color: #fff; }
+
+.bottom-cta h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.bottom-cta p {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+
+.bottom-dl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 36px;
+  background: linear-gradient(135deg, #4F46E5, #7C3AED);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+}
+
+.bottom-dl-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(79, 70, 229, 0.45); }
+
+/* === FOOTER === */
+footer {
+  text-align: center;
+  padding: 32px 20px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+footer .heart { color: var(--red); }
+
+footer .footer-links {
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+footer .footer-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+footer .footer-links a:hover { color: var(--indigo); }
+
+footer .tiktok {
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+/* === RESPONSIVE === */
 @media (max-width: 480px) {
-  .join-content h1 { font-size: 24px; }
-  .dl-btn { width: 100%; justify-content: center; font-size: 16px; padding: 16px 28px; }
+  .join-hero h1 { font-size: 1.6rem; }
+  .hero-dl-btn { width: 100%; justify-content: center; font-size: 1rem; padding: 16px 28px; }
 }
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="container">
-    <a href="index.html" class="nav-logo">
-      <span class="material-symbols-outlined">shield</span>
-      Safe Anot?
+<!-- ====== HERO ====== -->
+<section class="join-hero">
+  <div class="wrap">
+    <div class="shield-icon">
+      <span class="material-symbols-rounded">shield_with_heart</span>
+    </div>
+
+    <h1>Your friend wants to<br>protect you</h1>
+
+    <p class="description">Someone who cares about you shared <strong style="color:#fff">Safe Anot?</strong> — a free app that checks suspicious links and protects your phone from scam apps.</p>
+
+    <div class="referrer-msg" id="referrerMsg">
+      "Stay safe online, I'm looking out for you!"
+    </div>
+
+    <a href="#" class="hero-dl-btn">
+      <span class="material-symbols-rounded">download</span>
+      Download Safe Anot? Free
     </a>
   </div>
-</nav>
+</section>
 
-<section class="join-page">
-  <div class="container">
-    <div class="join-content">
-      <div class="shield-icon">
-        <span class="material-symbols-outlined">shield_with_heart</span>
-      </div>
-
-      <h1>Your friend wants to<br>protect you</h1>
-
-      <p class="description">Someone who cares about you shared <strong>Safe Anot?</strong> — a free app that checks suspicious links and protects your phone from scam apps.</p>
-
-      <div class="referrer-msg" id="referrerMsg">
-        "Stay safe online, I'm looking out for you!"
-      </div>
-
-      <a href="#" class="dl-btn">
-        <span class="material-symbols-outlined">download</span>
-        Download Safe Anot? Free
-      </a>
-
-      <div class="features-quick">
-        <div class="fq-item">
-          <div class="fq-icon blue">
-            <span class="material-symbols-outlined">link</span>
-          </div>
-          <div class="fq-text">Check any suspicious link instantly</div>
+<!-- ====== BODY ====== -->
+<section class="join-body">
+  <div class="wrap">
+    <div class="features-quick">
+      <div class="fq-item">
+        <div class="fq-icon indigo">
+          <span class="material-symbols-rounded">link</span>
         </div>
-        <div class="fq-item">
-          <div class="fq-icon green">
-            <span class="material-symbols-outlined">security</span>
-          </div>
-          <div class="fq-text">Scan your phone for dangerous apps</div>
-        </div>
-        <div class="fq-item">
-          <div class="fq-icon purple">
-            <span class="material-symbols-outlined">family_restroom</span>
-          </div>
-          <div class="fq-text">Let your family monitor your phone security</div>
-        </div>
+        <div class="fq-text">Check any suspicious link instantly</div>
       </div>
+      <div class="fq-item">
+        <div class="fq-icon teal">
+          <span class="material-symbols-rounded">security</span>
+        </div>
+        <div class="fq-text">Scan your phone for dangerous apps</div>
+      </div>
+      <div class="fq-item">
+        <div class="fq-icon purple">
+          <span class="material-symbols-rounded">family_restroom</span>
+        </div>
+        <div class="fq-text">Let your family monitor your phone security</div>
+      </div>
+    </div>
 
+    <div class="social-proof">
       <div class="social-proof-line">
-        <span class="material-symbols-outlined">groups</span>
+        <span class="material-symbols-rounded">groups</span>
         Join 12,000+ families already protected
       </div>
 
       <div class="trust-bar">
         <div class="trust-item">
-          <span class="material-symbols-outlined">check_circle</span>
+          <span class="material-symbols-rounded">check_circle</span>
           100% Free
         </div>
         <div class="trust-item">
-          <span class="material-symbols-outlined">check_circle</span>
+          <span class="material-symbols-rounded">check_circle</span>
           No Ads
         </div>
         <div class="trust-item">
-          <span class="material-symbols-outlined">check_circle</span>
+          <span class="material-symbols-rounded">check_circle</span>
           No Data Collected
         </div>
       </div>
     </div>
+
+    <div class="bottom-cta">
+      <div class="bottom-cta-shield">
+        <span class="material-symbols-rounded">shield</span>
+      </div>
+      <h2>Protect your family today.</h2>
+      <p>Free. No ads. No data leaves your phone.</p>
+      <a href="#" class="bottom-dl-btn">
+        <span class="material-symbols-rounded" style="font-size:20px">download</span>
+        Download on Google Play
+      </a>
+    </div>
   </div>
 </section>
 
+<!-- ====== FOOTER ====== -->
 <footer>
-  <div class="container">
-    <p>Made with ❤️ in Malaysia &nbsp;|&nbsp; <a href="index.html">Home</a> &nbsp;|&nbsp; <a href="check.html">Check Links</a> &nbsp;|&nbsp; <a href="challenge.html">Quiz</a></p>
+  <div class="wrap">
+    <p>Made with <span class="heart">❤️</span> in Malaysia to fight scams</p>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="check.html">Check Links</a>
+      <a href="challenge.html">Quiz</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+    <p class="tiktok">@safeanot on TikTok</p>
   </div>
 </footer>
 

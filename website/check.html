@@ -7,240 +7,330 @@
 <meta name="description" content="Check any suspicious link instantly. Free scam protection for Malaysia & Singapore.">
 <meta property="og:title" content="Safe Anot? — Is this link safe?">
 <meta property="og:description" content="Check any suspicious link instantly. Free scam protection for Malaysia & Singapore.">
-<meta property="og:image" content="https://safeanot.app/og-check.png">
-<meta property="og:url" content="https://safeanot.app/check">
+<meta property="og:image" content="https://safeanot.com/og-check.png">
+<meta property="og:url" content="https://safeanot.com/check">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #0D1117;
-  --bg-card: #161B22;
-  --bg-card-hover: #1C2129;
-  --bg-elevated: #1E2430;
-  --blue: #58A6FF;
-  --blue-dim: rgba(88,166,255,0.15);
-  --purple: #BC8CFF;
-  --green: #3FB950;
-  --green-dim: rgba(63,185,80,0.12);
-  --green-glow: rgba(63,185,80,0.3);
-  --red: #F85149;
-  --red-dim: rgba(248,81,73,0.12);
-  --red-glow: rgba(248,81,73,0.3);
-  --orange: #D29922;
-  --orange-dim: rgba(210,153,34,0.12);
-  --orange-glow: rgba(210,153,34,0.3);
-  --text-primary: #F0F6FC;
-  --text-secondary: #8B949E;
-  --text-tertiary: #7D8590;
-  --border: rgba(240,246,252,0.06);
-  --radius: 16px;
-  --radius-sm: 12px;
-  --radius-xs: 8px;
-  --gradient-accent: linear-gradient(135deg, #58A6FF 0%, #BC8CFF 100%);
-}
 
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+
+<style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #0A0E14;
-  color: var(--text-primary);
-  font-size: 15px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
+:root {
+  --indigo: #4F46E5;
+  --indigo-light: #EEF2FF;
+  --teal: #0D9488;
+  --teal-light: #F0FDFA;
+  --red: #DC2626;
+  --green: #16A34A;
+  --amber: #F59E0B;
+  --amber-light: #FFFBEB;
+  --bg: #FAFAFA;
+  --card: #FFFFFF;
+  --text: #1E293B;
+  --text-secondary: #64748B;
+  --radius: 16px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
 }
 
-.container {
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Quicksand', sans-serif;
+  color: var(--text);
+  line-height: 1.7;
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
   max-width: 680px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
-/* NAV */
-nav {
-  background: rgba(10,14,20,0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 0;
+/* === HEADER === */
+.site-header {
+  background: linear-gradient(160deg, #1E1B4B 0%, #312E81 50%, #3730A3 100%);
+  padding: 18px 20px;
 }
-nav .container {
+
+.site-header .wrap {
   display: flex;
   align-items: center;
   gap: 12px;
 }
+
 .nav-back {
-  color: var(--text-secondary);
+  color: #C7D2FE;
   text-decoration: none;
   display: flex;
   align-items: center;
   transition: color 0.2s;
 }
-.nav-back:hover { color: var(--text-primary); }
+
+.nav-back:hover { color: #fff; }
+
 .nav-logo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   text-decoration: none;
-  color: var(--text-primary);
-  font-weight: 800;
-  font-size: 18px;
+  color: #fff;
 }
-.nav-logo .material-symbols-outlined { color: var(--blue); font-size: 24px; }
 
-/* CHECKER */
-.checker {
-  text-align: center;
-  padding: 60px 0 40px;
+.nav-shield {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--indigo), #6366F1);
+  border-radius: 10px 10px 12px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
 }
-.checker h1 {
-  font-size: 32px;
+
+.nav-shield .material-symbols-rounded { font-size: 20px; color: #fff; }
+
+.nav-logo span.logo-text {
+  font-size: 1.15rem;
   font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+/* === CHECKER HERO === */
+.checker-hero {
+  background: linear-gradient(160deg, #1E1B4B 0%, #312E81 50%, #3730A3 100%);
+  padding: 40px 20px 48px;
+  text-align: center;
+  color: #F1F5F9;
+}
+
+.checker-hero h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
   margin-bottom: 8px;
+  letter-spacing: -0.5px;
 }
+
 .checker-sub {
-  color: var(--text-secondary);
-  margin-bottom: 32px;
-  font-size: 15px;
+  font-size: 0.95rem;
+  color: #C7D2FE;
+  margin-bottom: 28px;
 }
+
+/* === INPUT AREA === */
+.input-area {
+  padding: 32px 0 0;
+}
+
+.input-card {
+  background: var(--card);
+  border: 1px solid #E5E7EB;
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+}
+
 .input-group {
   display: flex;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
+
 .url-input {
   flex: 1;
   padding: 16px 20px;
-  background: var(--bg-card);
-  border: 2px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-size: 16px;
+  background: var(--bg);
+  border: 2px solid #E5E7EB;
+  border-radius: 14px;
+  color: var(--text);
+  font-size: 1rem;
   font-family: inherit;
+  font-weight: 600;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.url-input::placeholder { color: var(--text-tertiary); }
-.url-input:focus { border-color: var(--blue); }
+
+.url-input::placeholder { color: var(--text-secondary); font-weight: 500; }
+
+.url-input:focus {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
 .check-btn {
   padding: 16px 28px;
-  background: var(--gradient-accent);
+  background: linear-gradient(135deg, #4F46E5, #7C3AED);
   color: #fff;
   border: none;
-  border-radius: var(--radius-sm);
-  font-size: 16px;
+  border-radius: 14px;
+  font-size: 0.95rem;
   font-weight: 800;
+  font-family: inherit;
   cursor: pointer;
   letter-spacing: 0.5px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
   white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
-.check-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(88,166,255,0.3); }
+
+.check-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4); }
+.check-btn:active { transform: translateY(0); }
 .check-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
 .db-note {
-  color: var(--text-tertiary);
-  font-size: 13px;
-  margin-bottom: 20px;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
 }
-.db-note .material-symbols-outlined { font-size: 16px; color: var(--green); }
 
-/* EXAMPLE CHIPS */
-.examples { margin-bottom: 40px; }
-.examples p { font-size: 13px; color: var(--text-tertiary); margin-bottom: 10px; }
-.chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.db-note .material-symbols-rounded { font-size: 16px; color: var(--green); }
+
+/* === EXAMPLE CHIPS === */
+.examples {
+  text-align: center;
+  padding: 24px 0 8px;
+}
+
+.examples p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .chip {
   padding: 8px 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--card);
+  border: 1px solid #E5E7EB;
   border-radius: 20px;
   color: var(--text-secondary);
-  font-size: 13px;
-  font-family: 'Inter', monospace;
+  font-size: 0.82rem;
+  font-family: monospace, 'Quicksand';
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
-.chip:hover { background: var(--bg-card-hover); color: var(--text-primary); border-color: var(--blue); }
-.chip.danger { border-color: rgba(248,81,73,0.3); }
-.chip.safe { border-color: rgba(63,185,80,0.3); }
-.chip.suspicious { border-color: rgba(210,153,34,0.3); }
 
-/* RESULTS */
-#result { margin-bottom: 40px; }
+.chip:hover {
+  background: var(--indigo-light);
+  color: var(--indigo);
+  border-color: var(--indigo);
+  transform: translateY(-1px);
+}
+
+.chip.danger { border-color: #FECACA; }
+.chip.danger:hover { background: #FEF2F2; color: var(--red); border-color: var(--red); }
+.chip.safe { border-color: #BBF7D0; }
+.chip.safe:hover { background: #F0FDF4; color: var(--green); border-color: var(--green); }
+.chip.suspicious { border-color: #FDE68A; }
+.chip.suspicious:hover { background: #FFFBEB; color: var(--amber); border-color: var(--amber); }
+
+/* === RESULTS === */
+#result { padding: 24px 0; }
+
 .result-card {
+  background: var(--card);
   border-radius: var(--radius);
   padding: 32px;
   text-align: center;
+  box-shadow: var(--shadow-md);
   animation: slideUp 0.4s ease-out;
 }
+
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
 .result-card.dangerous {
-  background: var(--red-dim);
-  border: 2px solid var(--red);
-  box-shadow: 0 0 40px rgba(248,81,73,0.15);
+  border-left: 5px solid var(--red);
+  box-shadow: var(--shadow-md), -4px 0 20px rgba(220, 38, 38, 0.1);
 }
+
 .result-card.safe {
-  background: var(--green-dim);
-  border: 2px solid var(--green);
-  box-shadow: 0 0 40px rgba(63,185,80,0.15);
+  border-left: 5px solid var(--green);
+  box-shadow: var(--shadow-md), -4px 0 20px rgba(22, 163, 74, 0.1);
 }
+
 .result-card.suspicious {
-  background: var(--orange-dim);
-  border: 2px solid var(--orange);
-  box-shadow: 0 0 40px rgba(210,153,34,0.15);
+  border-left: 5px solid var(--amber);
+  box-shadow: var(--shadow-md), -4px 0 20px rgba(245, 158, 11, 0.1);
 }
+
 .result-icon { font-size: 56px; margin-bottom: 12px; }
 .result-card.dangerous .result-icon { color: var(--red); }
 .result-card.safe .result-icon { color: var(--green); }
-.result-card.suspicious .result-icon { color: var(--orange); }
+.result-card.suspicious .result-icon { color: var(--amber); }
+
 .result-verdict {
-  font-size: 28px;
-  font-weight: 900;
+  font-size: 1.6rem;
+  font-weight: 800;
   letter-spacing: 3px;
   margin-bottom: 8px;
 }
+
 .result-card.dangerous .result-verdict { color: var(--red); }
 .result-card.safe .result-verdict { color: var(--green); }
-.result-card.suspicious .result-verdict { color: var(--orange); }
+.result-card.suspicious .result-verdict { color: var(--amber); }
+
 .result-domain {
-  font-size: 14px;
+  font-size: 0.88rem;
   color: var(--text-secondary);
   word-break: break-all;
   margin-bottom: 16px;
+  font-weight: 600;
 }
+
 .result-reason {
-  font-size: 14px;
+  font-size: 0.92rem;
   color: var(--text-secondary);
   line-height: 1.6;
   margin-bottom: 8px;
+  font-weight: 500;
 }
+
 .result-real {
-  font-size: 13px;
+  font-size: 0.85rem;
   color: var(--green);
-  background: rgba(63,185,80,0.08);
+  background: #F0FDF4;
   padding: 8px 16px;
-  border-radius: var(--radius-xs);
+  border-radius: 10px;
   display: inline-block;
   margin-bottom: 20px;
+  font-weight: 700;
 }
+
 .result-warning {
-  font-size: 14px;
+  font-size: 0.92rem;
   font-weight: 700;
   color: var(--red);
+  background: #FEF2F2;
+  padding: 10px 16px;
+  border-radius: 10px;
   margin-bottom: 20px;
 }
 
-/* SHARE BUTTONS */
+/* === SHARE BUTTONS === */
 .share-buttons {
   display: flex;
   gap: 10px;
@@ -248,82 +338,172 @@ nav .container {
   flex-wrap: wrap;
   margin-top: 20px;
 }
+
 .share-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
-  border-radius: var(--radius-xs);
-  font-size: 14px;
-  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  font-weight: 700;
   cursor: pointer;
   border: none;
   text-decoration: none;
-  transition: all 0.2s;
+  transition: all 0.15s ease;
   font-family: inherit;
 }
-.share-btn:hover { transform: translateY(-1px); }
-.share-wa { background: #25D366; color: #fff; }
-.share-wa:hover { box-shadow: 0 4px 16px rgba(37,211,102,0.3); }
-.share-copy { background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border); }
-.share-copy:hover { background: var(--bg-card-hover); }
 
-/* CTA */
-.cta-section {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 32px;
-  text-align: center;
-  margin-bottom: 40px;
+.share-btn:hover { transform: translateY(-2px); }
+.share-btn:active { transform: translateY(0); }
+
+.share-wa { background: #25D366; color: #fff; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25); }
+.share-wa:hover { box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35); }
+
+.share-copy {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid #E5E7EB;
+  box-shadow: var(--shadow-sm);
 }
-.cta-section h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-.cta-section p { color: var(--text-secondary); font-size: 14px; margin-bottom: 20px; }
+.share-copy:hover { box-shadow: var(--shadow-md); }
+
+/* === LOADING === */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #E5E7EB;
+  border-top-color: var(--indigo);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* === CTA SECTION === */
+.cta-section {
+  background: var(--indigo-light);
+  border-radius: var(--radius);
+  padding: 40px 28px;
+  text-align: center;
+  margin: 16px 0 40px;
+}
+
+.cta-shield {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 16px;
+  background: linear-gradient(135deg, var(--indigo), #6366F1);
+  border-radius: 14px 14px 16px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.25);
+}
+
+.cta-shield .material-symbols-rounded { font-size: 26px; color: #fff; }
+
+.cta-section h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.cta-section p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
 .cta-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 14px 28px;
-  background: linear-gradient(135deg, #3FB950 0%, #238636 100%);
+  background: linear-gradient(135deg, #4F46E5, #7C3AED);
   color: #fff;
   border: none;
-  border-radius: var(--radius-sm);
-  font-size: 16px;
+  border-radius: 14px;
+  font-size: 1rem;
   font-weight: 700;
+  font-family: inherit;
   cursor: pointer;
   text-decoration: none;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
-.cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(63,185,80,0.3); }
 
-/* LOADING */
-.loading {
+.cta-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4); }
+
+/* === FOOTER === */
+footer {
   text-align: center;
-  padding: 40px;
+  padding: 32px 20px;
+  font-size: 0.82rem;
   color: var(--text-secondary);
 }
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--border);
-  border-top-color: var(--blue);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto 12px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
 
-/* FOOTER */
-footer {
-  border-top: 1px solid var(--border);
-  padding: 24px 0;
-  text-align: center;
-}
-footer p { font-size: 13px; color: var(--text-tertiary); }
-footer a { color: var(--blue); text-decoration: none; }
+footer .heart { color: var(--red); }
 
+footer .footer-links {
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+footer .footer-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+footer .footer-links a:hover { color: var(--indigo); }
+
+footer .tiktok {
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+/* === TOAST === */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--indigo);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: var(--radius);
+  font-weight: 700;
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 99;
+  pointer-events: none;
+  box-shadow: 0 6px 24px rgba(79, 70, 229, 0.3);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* === RESPONSIVE === */
 @media (max-width: 480px) {
-  .checker h1 { font-size: 26px; }
+  .checker-hero h1 { font-size: 1.6rem; }
   .input-group { flex-direction: column; }
   .check-btn { width: 100%; padding: 16px; }
 }
@@ -331,32 +511,42 @@ footer a { color: var(--blue); text-decoration: none; }
 </head>
 <body>
 
-<nav>
-  <div class="container">
+<!-- ====== HEADER ====== -->
+<header class="site-header">
+  <div class="wrap" style="display:flex;align-items:center;gap:12px;">
     <a href="index.html" class="nav-back">
-      <span class="material-symbols-outlined">arrow_back</span>
+      <span class="material-symbols-rounded" style="font-size:22px">arrow_back</span>
     </a>
     <a href="index.html" class="nav-logo">
-      <span class="material-symbols-outlined">shield</span>
-      Safe Anot?
+      <div class="nav-shield">
+        <span class="material-symbols-rounded">shield</span>
+      </div>
+      <span class="logo-text">Safe Anot?</span>
     </a>
   </div>
-</nav>
+</header>
 
-<section class="checker">
-  <div class="container">
+<!-- ====== CHECKER HERO ====== -->
+<section class="checker-hero">
+  <div class="wrap">
     <h1>Check any suspicious link</h1>
     <p class="checker-sub">Paste a URL you received via WhatsApp, SMS, or email.</p>
+  </div>
+</section>
 
-    <div class="input-group">
-      <input type="text" class="url-input" id="urlInput" placeholder="Paste a URL here..." autocomplete="off" spellcheck="false">
-      <button class="check-btn" id="checkBtn" onclick="checkURL()">CHECK NOW</button>
+<!-- ====== INPUT AREA ====== -->
+<div class="wrap">
+  <section class="input-area">
+    <div class="input-card">
+      <div class="input-group">
+        <input type="text" class="url-input" id="urlInput" placeholder="Paste a URL here..." autocomplete="off" spellcheck="false">
+        <button class="check-btn" id="checkBtn" onclick="checkURL()">CHECK NOW</button>
+      </div>
+      <p class="db-note">
+        <span class="material-symbols-rounded">verified</span>
+        We check against 500,000+ known scam domains
+      </p>
     </div>
-
-    <p class="db-note">
-      <span class="material-symbols-outlined">verified</span>
-      We check against 500,000+ known scam domains
-    </p>
 
     <div class="examples">
       <p>Try these examples:</p>
@@ -370,23 +560,44 @@ footer a { color: var(--blue); text-decoration: none; }
     <div id="result"></div>
 
     <div class="cta-section">
+      <div class="cta-shield">
+        <span class="material-symbols-rounded">shield</span>
+      </div>
       <h3>Want full protection?</h3>
       <p>The app scans your phone for risky apps, checks links automatically, and protects your family in real-time.</p>
-      <a href="#" class="cta-btn">
-        <span class="material-symbols-outlined">download</span>
+      <a href="#" class="cta-btn" onclick="showToast('Coming to Google Play soon!'); return false;">
+        <span class="material-symbols-rounded" style="font-size:20px">download</span>
         Download Safe Anot?
       </a>
     </div>
-  </div>
-</section>
+  </section>
+</div>
 
+<!-- ====== FOOTER ====== -->
 <footer>
-  <div class="container">
-    <p>Made with ❤️ in Malaysia &nbsp;|&nbsp; <a href="index.html">Home</a> &nbsp;|&nbsp; <a href="challenge.html">Spot the Fake Quiz</a></p>
+  <div class="wrap">
+    <p>Made with <span class="heart">❤️</span> in Malaysia to fight scams</p>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="challenge.html">Spot the Fake Quiz</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+    <p class="tiktok">@safeanot on TikTok</p>
   </div>
 </footer>
 
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
 <script>
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
 const SCAM_DB = {
   'maybank-secure-update.xyz': {
     verdict: 'dangerous',
@@ -447,7 +658,6 @@ const SCAM_DB = {
 function extractDomain(url) {
   url = url.trim().toLowerCase();
   url = url.replace(/^https?:\/\//, '').replace(/^www\./, '');
-  // Keep path for shortened URLs
   if (url.startsWith('bit.ly/') || url.startsWith('tinyurl.com/')) {
     return url.split(/[?#]/)[0];
   }
@@ -472,7 +682,6 @@ function checkURL() {
     const data = SCAM_DB[domain];
 
     if (!data) {
-      // Unknown domains — treat as suspicious by default for demo
       const isSuspiciousTLD = /\.(xyz|top|buzz|click|loan|work|gq|ml|tk|cf|ga|info)$/i.test(domain);
       if (isSuspiciousTLD) {
         showResult(domain, 'suspicious', 'This domain uses a TLD commonly associated with scam websites. Exercise caution and verify through official channels.', null);
@@ -502,7 +711,7 @@ function showResult(domain, verdict, reason, real) {
 
   let html = `
     <div class="result-card ${verdict}">
-      <div class="result-icon"><span class="material-symbols-outlined" style="font-size:56px">${icons[verdict]}</span></div>
+      <div class="result-icon"><span class="material-symbols-rounded" style="font-size:56px">${icons[verdict]}</span></div>
       <div class="result-verdict">${labels[verdict]}</div>
       <div class="result-domain">${domain}</div>
       <div class="result-reason">${reason}</div>
@@ -510,11 +719,11 @@ function showResult(domain, verdict, reason, real) {
       ${verdict === 'dangerous' ? '<div class="result-warning">⚠ Do NOT enter passwords on this site</div>' : ''}
       <div class="share-buttons">
         <a href="${whatsappUrl}" target="_blank" class="share-btn share-wa">
-          <span class="material-symbols-outlined" style="font-size:18px">share</span>
+          <span class="material-symbols-rounded" style="font-size:18px">share</span>
           Share on WhatsApp
         </a>
         <button class="share-btn share-copy" onclick="copyResult('${resultUrl}')">
-          <span class="material-symbols-outlined" style="font-size:18px">content_copy</span>
+          <span class="material-symbols-rounded" style="font-size:18px">content_copy</span>
           Copy Link
         </button>
       </div>
@@ -528,7 +737,7 @@ function copyResult(url) {
   navigator.clipboard.writeText(url).then(() => {
     const btn = document.querySelector('.share-copy');
     const orig = btn.innerHTML;
-    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">check</span> Copied!';
+    btn.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px">check</span> Copied!';
     setTimeout(() => { btn.innerHTML = orig; }, 2000);
   });
 }

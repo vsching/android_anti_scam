@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safe Anot? — National Scam Protection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* === RESET & VARIABLES === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --navy: #003580;
+      --gold: #FFD700;
+      --red: #DC3545;
+      --green: #198754;
+      --text: #1A1A2E;
+      --text-light: #555;
+      --bg: #FFFFFF;
+      --radius: 4px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .wrap {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* === FLAG STRIPE (decorative) === */
+    .flag-stripe {
+      height: 6px;
+      background: linear-gradient(
+        90deg,
+        var(--navy) 33%,
+        var(--red) 33% 50%,
+        var(--bg) 50% 66%,
+        var(--gold) 66%
+      );
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    /* === HERO === */
+    .hero {
+      text-align: center;
+      padding: 48px 20px 40px;
+      background: var(--navy);
+      color: #fff;
+      margin: 0 -20px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--navy);
+      background: var(--gold);
+      padding: 6px 18px;
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.1;
+    }
+
+    .hero .tagline {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin: 8px 0 4px;
+    }
+
+    .hero .subtitle {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.65);
+      margin-bottom: 28px;
+    }
+
+    /* === BUTTONS === */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border-radius: var(--radius);
+      border: none;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #fff;
+      border: 2px solid #fff;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* === PHONE MOCKUP === */
+    .phone-wrap {
+      display: flex;
+      justify-content: center;
+    }
+
+    .phone {
+      width: 210px;
+      background: var(--navy);
+      border: 3px solid var(--gold);
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .phone-notch {
+      width: 60px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 2px;
+      margin: 0 auto 10px;
+    }
+
+    .phone-screen {
+      background: #1a1a2e;
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+    }
+
+    .phone-screen .verdict-icon {
+      font-size: 34px;
+      color: var(--red);
+    }
+
+    .phone-screen .verdict-label {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--red);
+      margin: 6px 0 2px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .phone-screen .verdict-sub {
+      font-size: 0.7rem;
+      color: #999;
+    }
+
+    .phone-screen .verdict-url {
+      font-size: 0.65rem;
+      color: #777;
+      background: #111;
+      padding: 6px 8px;
+      border-radius: var(--radius);
+      margin-top: 10px;
+      word-break: break-all;
+      border: 1px solid #333;
+    }
+
+    /* === STATS === */
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      padding: 44px 0;
+    }
+
+    .stat {
+      text-align: center;
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .stat .num {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--navy);
+      border-bottom: 3px solid var(--gold);
+      display: inline-block;
+      padding-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .stat p {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 8px;
+    }
+
+    .stat.danger .num {
+      color: var(--red);
+      border-bottom-color: var(--red);
+    }
+
+    /* === SECTIONS === */
+    section {
+      padding: 44px 0;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 28px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--navy);
+    }
+
+    .section-divider {
+      width: 60px;
+      height: 3px;
+      background: var(--gold);
+      margin: 0 auto 28px;
+    }
+
+    /* === FEATURE CARDS === */
+    .feature-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+
+    .feature-card:hover {
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .feature-card .card-header {
+      background: var(--navy);
+      color: #fff;
+      padding: 12px 18px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .feature-card .card-header .ico {
+      font-size: 1.3rem;
+    }
+
+    .feature-card .card-body {
+      padding: 16px 18px;
+      font-size: 0.9rem;
+      color: var(--text-light);
+      line-height: 1.6;
+    }
+
+    /* === SCAM STEPS === */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .step-num {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--red);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .step-content h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .step-content p {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    /* === CTA === */
+    .cta {
+      text-align: center;
+      padding: 52px 20px;
+      background: var(--navy);
+      color: #fff;
+      margin: 0 -20px;
+    }
+
+    .cta h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .cta p {
+      color: rgba(255, 255, 255, 0.65);
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+    }
+
+    /* === FOOTER === */
+    footer {
+      text-align: center;
+      padding: 28px 0;
+      font-size: 0.75rem;
+      color: var(--text-light);
+      border-top: 3px solid var(--navy);
+    }
+
+    /* === TOAST === */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--navy);
+      color: var(--gold);
+      padding: 14px 28px;
+      border-radius: var(--radius);
+      font-weight: 700;
+      font-size: 0.9rem;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 99;
+      pointer-events: none;
+      border: 2px solid var(--gold);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* === RESPONSIVE === */
+    @media (min-width: 540px) {
+      .steps {
+        flex-direction: row;
+        gap: 20px;
+      }
+
+      .step {
+        flex: 1;
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .step-num {
+        margin: 0 auto 10px;
+      }
+
+      .step-content {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Flag stripe decoration -->
+<div class="flag-stripe"></div>
+
+<div class="wrap">
+
+  <!-- ====== HERO ====== -->
+  <section class="hero">
+    <div class="hero-badge">🛡️ SAFE ANOT?</div>
+    <h1>Safe Anot?</h1>
+    <p class="tagline">Check first before you click.</p>
+    <p class="subtitle">Malaysia & Singapore's scam protection app</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="showToast('Download link coming soon.')">
+        DOWNLOAD FREE
+      </button>
+      <button class="btn btn-secondary" onclick="document.querySelector('.cta').scrollIntoView()">
+        TRY LINK CHECKER
+      </button>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="verdict-icon">&#9888;</div>
+          <div class="verdict-label">DANGEROUS</div>
+          <p class="verdict-sub">Known scam domain detected</p>
+          <div class="verdict-url">maybank2u-secure.xyz/login</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== STATS ====== -->
+  <div class="stats">
+    <div class="stat">
+      <div class="num">500,000+</div>
+      <p>Scam domains checked</p>
+    </div>
+    <div class="stat">
+      <div class="num">12,000+</div>
+      <p>Families protected</p>
+    </div>
+    <div class="stat danger">
+      <div class="num">RM 2.7B</div>
+      <p>Lost to scams in MY (2025)</p>
+    </div>
+  </div>
+
+  <!-- ====== FEATURES ====== -->
+  <section>
+    <h2 class="section-title">Capabilities</h2>
+    <div class="section-divider"></div>
+    <div class="feature-card">
+      <div class="card-header"><span class="ico">🔍</span> Check Any Link</div>
+      <div class="card-body">Paste any URL and receive an instant verdict — safe, suspicious, or dangerous.</div>
+    </div>
+    <div class="feature-card">
+      <div class="card-header"><span class="ico">🛡️</span> Shield Your Phone</div>
+      <div class="card-body">Scan your device for risky install sources and unauthorized APK files.</div>
+    </div>
+    <div class="feature-card">
+      <div class="card-header"><span class="ico">👨‍👩‍👧</span> Protect Your Family</div>
+      <div class="card-body">Set up guardian alerts to be notified when family members encounter threats.</div>
+    </div>
+  </section>
+
+  <!-- ====== HOW SCAMS WORK ====== -->
+  <section>
+    <h2 class="section-title">How Scams Operate</h2>
+    <div class="section-divider"></div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Scammer Sends APK</h3>
+          <p>A malicious application is distributed via WhatsApp or SMS.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Phone Installs It</h3>
+          <p>If unknown sources are permitted, the malware gains entry to the device.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Money Stolen</h3>
+          <p>The malware accesses banking applications and transfers funds out.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== CTA ====== -->
+  <section class="cta">
+    <h2>Protect Yourself Now</h2>
+    <p>Do not become the next victim. Download Safe Anot today.</p>
+    <button class="btn btn-primary" onclick="showToast('Download link coming soon.')">
+      DOWNLOAD FREE
+    </button>
+  </section>
+
+  <!-- ====== FOOTER ====== -->
+  <footer>
+    <p>&copy; 2025 Safe Anot? — Protecting Malaysians & Singaporeans from scams</p>
+  </footer>
+
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+
+</body>
+</html>
