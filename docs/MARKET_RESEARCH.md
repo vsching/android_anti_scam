@@ -27,38 +27,200 @@ Sources: [Meta/WhatsApp](https://about.fb.com/news/2025/08/new-whatsapp-tools-ti
 
 ## 2. Competitor Analysis
 
-### Direct Competitors
+### 2.1 Detailed Competitor Profiles
 
-| App | Publisher | Focus | Downloads | Key Features |
-|-----|-----------|-------|-----------|--------------|
-| **ScamShield** | Singapore Government (OGP + SPF) | Scam call/SMS blocking | ~790K | Block scam calls, filter SMS, check suspicious links/messages, report scams. Works for SMS, WhatsApp, Telegram screenshots. Free. |
-| **Verify Scams** | VerifyScams | AI scam detection | N/A | AI-powered scam detection platform for checking suspicious content |
-| **APK Protector** | Damylola | Anti-mod APK | N/A | Protects APKs from being modded/repackaged (developer tool, not consumer) |
+#### ScamShield (Singapore Government)
+- **Publisher:** Open Government Products (OGP) + Singapore Police Force (SPF) + NCPC
+- **Platform:** Android & iOS
+- **Downloads:** ~790K (~13% penetration in Singapore's 5.9M population)
+- **Price:** Free
+- **Rating:** Available on [Google Play](https://play.google.com/store/apps/details?id=sg.gov.scamshield&hl=en_SG) and [App Store](https://apps.apple.com/sg/app/scamshield/id1497144087)
 
-### Indirect Competitors (Antivirus/Security Suites)
+**Features:**
+- Block known scam phone numbers
+- Filter scam SMS to junk folder (iOS) / notify about scam SMS (Android)
+- Check suspicious messages, links, and phone numbers
+- Upload screenshots from SMS, WhatsApp, Telegram for scam checking
+- Report scam calls, messages, and links
+- Notifications when a reported number is officially confirmed as scam by authorities
 
-| App | Publisher | Downloads | Relevant Features |
-|-----|-----------|-----------|-------------------|
-| **AVG AntiVirus** | AVG Mobile | 100M+ | Scam site blocking, real-time app scanning, password leak alerts |
-| **Bitdefender** | Bitdefender | 10M+ | Malware scanning, web protection, scam alerts |
-| **Malwarebytes** | Malwarebytes | 50M+ | Malware detection, ad/tracker blocking |
-| **Protectstar Anti Spy** | Protectstar | 1M+ | Spy app detection, AI-based threat scanning |
+**Limitations:**
+- Only scans SMS from **unknown numbers** — cannot read messages from saved contacts
+- Android version can only **notify** about scam SMS, cannot auto-filter to junk (OS limitation)
+- Call blocking depends on device/telco settings — not fully under app's control
+- Reporting in-app is **not** the same as filing an official police report
+- **Does NOT audit device settings or "Install unknown apps" permissions**
+- **Does NOT guide users to harden their device against sideloading**
 
-### Government Tools
+**Our differentiation:** ScamShield is *reactive* (check after receiving a suspicious message). APK Guard is *proactive* (harden the device before a scam APK can ever be installed).
 
-| Tool | Country | Type | Features |
-|------|---------|------|----------|
-| **ScamShield** | Singapore | App | Call/SMS blocking, scam checking, reporting |
-| **SemakMule** | Malaysia | Web portal | Check bank accounts & phone numbers against fraud database. 193K+ flagged accounts, 164K+ suspicious numbers, 1.9M+ searches |
-| **Enhanced Fraud Protection** | Singapore (CSA) | Android feature | Pilot launched Feb 2024 - blocks app installs requesting sensitive permissions |
+Sources: [ScamShield](https://www.scamshield.gov.sg/about-scamshield/), [ScamShield FAQ](https://ask.gov.sg/scamshield), [NCPC](https://www.ncpc.org.sg/aboutscamshield.html)
 
-### Competitive Gap
+---
+
+#### Truecaller
+- **Publisher:** Truecaller (True Software Scandinavia AB)
+- **Platform:** Android & iOS
+- **Downloads:** 500M+
+- **Price:** Free with premium tiers
+
+**Features:**
+- Caller ID — identify unknown callers from global database
+- Spam/scam call blocking with real-time database updates from millions of users
+- AI Call Scanner — analyzes voice in real-time to detect AI-synthesized voices (deepfake calls)
+- AI Assistant — screens calls with 90%+ spam/scam accuracy
+- SMS spam marking with red warning notifications
+- Dangerous links in SMS are automatically disabled
+- Block callers by country, number sequence, robocalls, unknown Caller ID
+
+**Limitations:**
+- Focused exclusively on **calls and SMS**
+- No APK/sideload protection whatsoever
+- No device security audit capability
+- No guidance on disabling "Install unknown apps"
+- Heavy app with significant permissions footprint
+
+**Our differentiation:** Truecaller doesn't touch the install-source problem at all. Different threat vector entirely.
+
+Source: [Truecaller on Google Play](https://play.google.com/store/apps/details?id=com.truecaller&hl=en)
+
+---
+
+#### Appdome (B2B SDK)
+- **Type:** Enterprise SDK / no-code mobile security platform (not a consumer app)
+- **Target:** App developers and enterprises
+
+**Features:**
+- Detects when "Install from unknown sources" is enabled on a device
+- Prevents malware from leveraging untrusted distribution channels
+- Jailbreak/root detection
+- No-code integration for mobile app security
+
+**Limitations:**
+- **Not a standalone consumer app** — must be integrated into other apps by developers
+- Enterprise pricing / B2B sales cycle
+- End users don't interact with Appdome directly
+
+**Our differentiation:** Appdome validates our technical approach (detecting unknown-source settings is a real security vector). APK Guard brings this capability directly to consumers as a standalone app.
+
+Source: [Appdome Unknown Sources Detection](https://www.appdome.com/how-to/mobile-app-security/jailbreak-root-detection/detect-unknown-sources-protect-android-apps/)
+
+---
+
+#### Google Play Protect (Platform-Level)
+- **Publisher:** Google
+- **Coverage:** 2.8 billion Android devices, 185 markets
+- **Price:** Built into Android (free)
+
+**Features:**
+- Scans 350 billion+ apps daily
+- Blocked 1.75M policy-violating apps from Play Store in 2025
+- Enhanced Fraud Protection: auto-blocks installs from browsers/messaging apps requesting sensitive permissions
+- Blocked 266M risky sideload installation attempts in 2025
+- Protected users from 872K unique high-risk applications
+- New 2025: prevents users from disabling Play Protect during phone calls (anti-social-engineering)
+- Real-time code-level scanning on novel apps
+
+**Limitations:**
+- Works **silently in the background** — users have no visibility into which apps can sideload
+- Cannot show users a dashboard of their install-source risk
+- No guided remediation flow
+- Enhanced Fraud Protection is automatic, not user-controllable
+- Users don't know their risk posture
+
+**Our differentiation:** Play Protect is invisible infrastructure. APK Guard makes the risk **visible and actionable** — showing users exactly which apps can sideload APKs and guiding them to fix it. We complement Play Protect, not compete with it.
+
+Sources: [Google Security Blog](https://security.googleblog.com/2026/02/keeping-google-play-android-app-ecosystem-safe-2025.html), [Google Play Protect](https://support.google.com/googleplay/answer/2812853)
+
+---
+
+#### Verify Scams
+- **Publisher:** VerifyScams
+- **Platform:** Android
+- **Downloads:** N/A (small)
+
+**Features:**
+- AI-powered scam detection platform
+- Check suspicious content for scam patterns
+
+**Limitations:**
+- Small/niche app with limited traction
+- No device security audit
+
+---
+
+#### APK Protector (Damylola)
+- **Publisher:** Damylola
+- **Platform:** Android
+
+**Features:**
+- Protects APKs from being modded/repackaged
+
+**Limitations:**
+- **Developer tool**, not a consumer protection app
+- Prevents reverse engineering of APKs, not scam prevention
+- Not a competitor in our space
+
+---
+
+### 2.2 Indirect Competitors (Antivirus/Security Suites)
+
+| App | Publisher | Downloads | Relevant Features | Limitations vs APK Guard |
+|-----|-----------|-----------|-------------------|--------------------------|
+| **AVG AntiVirus** | AVG Mobile | 100M+ | Scam site blocking, real-time app scanning, password leak alerts | No install-source audit, heavy, many permissions |
+| **Bitdefender** | Bitdefender | 10M+ | Malware scanning, web protection, scam alerts | Post-install only, no sideload prevention |
+| **Malwarebytes** | Malwarebytes | 50M+ | Malware detection, ad/tracker blocking | Post-install scanning only |
+| **Protectstar Anti Spy** | Protectstar | 1M+ | Spy app detection, AI-based threat scanning | Focused on spyware, not sideload sources |
+
+**Key weakness of all AV apps:** They scan **after** an app is installed. APK Guard prevents the risk **before** installation by hardening the device settings.
+
+### 2.3 Government Tools
+
+| Tool | Country | Type | Downloads/Usage | Features | Gap |
+|------|---------|------|-----------------|----------|-----|
+| **ScamShield** | Singapore | Mobile app | ~790K downloads | Call/SMS blocking, scam checking, reporting | No device hardening |
+| **SemakMule** | Malaysia | Web portal | 1.9M+ searches | Check bank accounts & phone numbers against fraud database (193K+ flagged accounts, 164K+ suspicious numbers) | Web only, no app, no device audit |
+| **Enhanced Fraud Protection** | Singapore (CSA) | Android OS feature | Pilot (Feb 2024) | Blocks installs requesting sensitive permissions from sideloading sources | Silent/automatic, no user visibility |
+| **Safe App Portal** | Singapore (CSA) | Web portal | Pilot (Oct 2025) | Security insights for app developers | Developer-facing, not consumer |
+
+### 2.4 Enterprise MDM Solutions
+
+| Solution | Type | Relevant Capability |
+|----------|------|---------------------|
+| **Samsung Knox** | MDM | Block unknown sources globally on managed devices |
+| **Nomid MDM** | MDM | Disable "Install from Unknown Sources" across device fleets |
+| **VMware Workspace ONE** | MDM | Enterprise app management, sideload prevention |
+| **Google Android Enterprise** | MDM | Work profile policies, app allowlisting |
+
+**Not competitors** — these require enterprise enrollment. Not available to individual consumers.
+
+### 2.5 Competitive Positioning Matrix
+
+| Capability | ScamShield | Truecaller | AV Apps | Play Protect | MDM | **APK Guard** |
+|---|---|---|---|---|---|---|
+| Block scam calls/SMS | Yes | Yes | Some | No | No | No (not our focus) |
+| Check suspicious links/messages | Yes | No | Some | No | No | v2 |
+| Audit "Install unknown apps" per source | No | No | No | Silent only | Enterprise only | **Yes** |
+| Guide user to disable per app | No | No | No | No | Admin only | **Yes** |
+| Play Protect status check | No | No | No | N/A | Some | **Yes** |
+| Security score dashboard | No | No | Yes | No | Yes | **Yes** |
+| Periodic recheck reminders | No | No | Some | Silent | Yes | **Yes** |
+| Zero dangerous permissions | Yes | No | No | N/A | No | **Yes** |
+| Works on unmanaged personal devices | Yes | Yes | Yes | Yes | No | **Yes** |
+
+### 2.6 Competitive Gap Summary
 
 **No existing app focuses specifically on auditing and guiding users to disable "Install unknown apps" permissions per source app.** This is our unique positioning:
-- ScamShield focuses on call/SMS filtering and scam checking
-- Antivirus apps focus on malware scanning after install
-- Government tools focus on reporting and checking known scam identifiers
-- **APK Guard fills the pre-install prevention gap** — hardening the device before a scam APK can be installed
+
+1. **ScamShield** focuses on call/SMS filtering and scam checking — reactive, not preventive
+2. **Truecaller** focuses on caller ID and call blocking — different threat vector
+3. **Antivirus apps** focus on malware scanning after install — too late in the kill chain
+4. **Google Play Protect** works silently — no user visibility or guided remediation
+5. **Government tools** focus on reporting and checking known scam identifiers — not device hardening
+6. **Enterprise MDM** can enforce policies — but not available to consumers
+7. **Appdome SDK** detects unknown sources — but only as an embedded SDK, not a consumer app
+
+**APK Guard fills the pre-install prevention gap** — hardening the device before a scam APK can be installed. We are the only consumer-facing app that makes install-source risk visible and actionable.
 
 ---
 
