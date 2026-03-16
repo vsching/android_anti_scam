@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APK Guard — Protect Your Phone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #1a73e8;
+  --primary-light: #e8f0fe;
+  --primary-dark: #1557b0;
+  --green: #34a853;
+  --green-light: #e6f4ea;
+  --red: #ea4335;
+  --red-light: #fce8e6;
+  --orange: #f9ab00;
+  --orange-light: #fef7e0;
+  --gray: #9aa0a6;
+  --gray-light: #f1f3f4;
+  --text-primary: #202124;
+  --text-secondary: #5f6368;
+  --surface: #ffffff;
+  --background: #f8f9fa;
+  --radius: 16px;
+  --radius-sm: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.12), 0 8px 32px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background: #e8eaed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: var(--text-primary);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Focus visible styles for keyboard navigation */
+*:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+button:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.phone-frame {
+  width: 375px;
+  height: 812px;
+  background: var(--background);
+  border-radius: 40px;
+  box-shadow: 0 0 0 8px #1a1a2e, 0 0 0 10px #3a3a5c, var(--shadow-lg), 0 20px 60px rgba(0,0,0,0.3);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Status bar */
+.status-bar {
+  height: 44px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+  z-index: 10;
+}
+.status-bar .time { font-weight: 600; }
+.status-bar .icons { display: flex; gap: 4px; align-items: center; }
+.status-bar .icons .material-symbols-outlined { font-size: 18px; }
+
+/* Screens */
+.screen {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--background);
+  overflow-y: auto;
+  overflow-x: hidden;
+  opacity: 0;
+  transform: translateX(30px);
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  -webkit-overflow-scrolling: touch;
+}
+.screen.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+.screen.slide-out-left {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+.screen::-webkit-scrollbar { width: 0; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .screen,
+  .score-ring-progress,
+  .toast,
+  .scan-overlay,
+  .success-overlay,
+  .toggle,
+  .toggle::after,
+  .accordion-content,
+  .accordion-header .material-symbols-outlined,
+  .btn,
+  .app-card,
+  .fix-btn,
+  .icon-btn {
+    transition: none !important;
+    animation: none !important;
+  }
+  .scan-spinner {
+    animation: spin 2s linear infinite !important;
+  }
+}
+
+/* Top App Bar */
+.top-bar {
+  background: var(--surface);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.top-bar h1 {
+  font-size: 20px;
+  font-weight: 500;
+  flex: 1;
+}
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background 0.2s;
+}
+.icon-btn:hover { background: var(--gray-light); }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 100px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 1px 3px rgba(26,115,232,0.3);
+}
+.btn-primary:hover { background: var(--primary-dark); box-shadow: 0 2px 8px rgba(26,115,232,0.4); }
+.btn-primary:active { transform: scale(0.97); }
+.btn-primary:disabled {
+  background: #bdc1c6;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.btn-outlined {
+  background: transparent;
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+}
+.btn-outlined:hover { background: var(--primary-light); }
+.btn-outlined:active { transform: scale(0.97); }
+.btn-outlined:disabled {
+  color: #bdc1c6;
+  border-color: #bdc1c6;
+  cursor: not-allowed;
+}
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-text:hover { color: var(--primary); }
+.btn-full { width: 100%; }
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 0 16px 12px;
+  box-shadow: var(--shadow);
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.badge-red { background: var(--red-light); color: var(--red); }
+.badge-green { background: var(--green-light); color: var(--green); }
+.badge-gray { background: var(--gray-light); color: var(--gray); }
+.badge-orange { background: var(--orange-light); color: var(--orange); }
+
+/* Toast — aria-live region */
+.toast {
+  position: absolute;
+  bottom: 32px;
+  left: 16px;
+  right: 16px;
+  background: #323232;
+  color: white;
+  padding: 14px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  z-index: 100;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+  text-align: center;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========== SCREEN 1: ONBOARDING ========== */
+#screen-onboarding {
+  background: linear-gradient(180deg, #e8f0fe 0%, var(--background) 50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px 24px;
+  text-align: center;
+}
+.onboarding-shield {
+  width: 88px;
+  height: 88px;
+  background: linear-gradient(135deg, var(--primary), #4285f4);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(26,115,232,0.3);
+}
+.onboarding-shield .material-symbols-outlined {
+  font-size: 48px;
+  color: white;
+}
+.onboarding-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.onboarding-tagline {
+  font-size: 16px;
+  color: var(--primary);
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.onboarding-desc {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 28px;
+  max-width: 320px;
+}
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  margin-bottom: 32px;
+}
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.feature-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 12px;
+  background: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.feature-icon .material-symbols-outlined {
+  font-size: 24px;
+  color: var(--primary);
+}
+.feature-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Scan animation */
+.scan-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.scan-overlay.show { opacity: 1; pointer-events: auto; }
+.scan-spinner {
+  width: 64px;
+  height: 64px;
+  border: 4px solid var(--primary-light);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 20px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.scan-text {
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ========== SCREEN 2: DASHBOARD ========== */
+#screen-dashboard { padding-bottom: 24px; }
+
+.score-section {
+  background: var(--surface);
+  padding: 28px 16px 24px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+.score-ring-container {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 16px;
+}
+.score-ring-container svg {
+  width: 160px;
+  height: 160px;
+  transform: rotate(-90deg);
+}
+.score-ring-bg {
+  fill: none;
+  stroke: var(--gray-light);
+  stroke-width: 10;
+}
+.score-ring-progress {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s ease, stroke 0.5s ease;
+}
+.score-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+.score-number {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+}
+.score-percent {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.score-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.score-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.section-header {
+  padding: 20px 16px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.app-card {
+  background: var(--surface);
+  margin: 0 16px 10px;
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border-left: 4px solid transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Only needs-review cards are interactive */
+.app-card[data-status="needs-review"] {
+  border-left-color: var(--red);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.app-card[data-status="needs-review"]:hover { background: #fef7f6; }
+.app-card[data-status="needs-review"]:active { transform: scale(0.98); }
+.app-card[data-status="secured"] {
+  border-left-color: var(--green);
+}
+.app-card[data-status="not-installed"] {
+  border-left-color: var(--gray);
+  opacity: 0.7;
+}
+
+.app-card-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+}
+.app-card-body { flex: 1; min-width: 0; }
+.app-card-name { font-size: 16px; font-weight: 500; }
+.app-card-desc { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.app-card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: fit-content; }
+.fix-btn {
+  background: var(--red-light);
+  color: var(--red);
+  border: none;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.fix-btn:hover { background: var(--red); color: white; }
+
+.recheck-container {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* ========== SCREEN 3: FIX FLOW ========== */
+#screen-fix { padding-bottom: 24px; }
+
+.risk-card {
+  background: var(--red-light);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin: 16px;
+  display: flex;
+  gap: 12px;
+}
+.risk-card .material-symbols-outlined {
+  font-size: 28px;
+  color: var(--red);
+  min-width: 28px;
+}
+.risk-card p {
+  font-size: 15px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.steps-section {
+  padding: 8px 16px 0;
+}
+.steps-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.step {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+.step-num {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 600;
+}
+.step-text {
+  font-size: 16px;
+  color: var(--text-primary);
+  padding-top: 4px;
+}
+
+.settings-mock {
+  margin: 8px 16px 20px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.settings-mock-header {
+  background: #37474f;
+  color: white;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.settings-mock-header .material-symbols-outlined { font-size: 20px; }
+.settings-mock-row {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.settings-mock-label { font-size: 15px; font-weight: 500; }
+.settings-mock-sublabel { font-size: 13px; color: var(--text-secondary); }
+
+/* Toggle switch — semantic button */
+.toggle-btn {
+  width: 48px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--red);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+  border: none;
+  padding: 0;
+}
+.toggle-btn[aria-checked="false"] { background: #bdc1c6; }
+.toggle-btn::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: white;
+  top: 3px;
+  left: 23px;
+  transition: left 0.3s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-btn[aria-checked="false"]::after { left: 3px; }
+
+/* Confirmation hint in fix flow */
+.fix-hint {
+  margin: 0 16px 8px;
+  padding: 10px 14px;
+  background: var(--orange-light);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: #b06000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fix-hint .material-symbols-outlined { font-size: 20px; color: var(--orange); }
+.fix-hint.hidden { display: none; }
+
+.fix-buttons {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ========== SCREEN 4: SETTINGS ========== */
+#screen-settings { padding-bottom: 24px; }
+
+.settings-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  margin: 12px 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.settings-card-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 16px 16px 8px;
+}
+.settings-row {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--gray-light);
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row-label { font-size: 16px; }
+
+.settings-select {
+  padding: 8px 12px;
+  border: 1.5px solid #dadce0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--surface);
+}
+
+.privacy-note {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  align-items: flex-start;
+}
+.privacy-note .material-symbols-outlined {
+  font-size: 24px;
+  color: var(--green);
+  min-width: 24px;
+}
+.privacy-note p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.accordion-item {
+  border-bottom: 1px solid var(--gray-light);
+}
+.accordion-item:last-child { border-bottom: none; }
+.accordion-btn {
+  width: 100%;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 15px;
+  text-align: left;
+  color: var(--text-primary);
+}
+.accordion-btn:hover { background: var(--gray-light); }
+.accordion-btn .accordion-label { flex: 1; padding-right: 8px; }
+.accordion-btn .material-symbols-outlined {
+  font-size: 22px;
+  color: var(--text-secondary);
+  transition: transform 0.3s;
+}
+.accordion-item.open .accordion-btn .material-symbols-outlined {
+  transform: rotate(180deg);
+}
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.accordion-content p {
+  padding: 0 16px 14px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.about-section {
+  padding: 16px;
+  text-align: center;
+}
+.about-section .version {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.about-section .made-with {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Success animation overlay */
+.success-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.success-overlay.show { opacity: 1; pointer-events: auto; }
+.success-check {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  animation: popIn 0.4s ease;
+}
+@keyframes popIn {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.success-check .material-symbols-outlined {
+  font-size: 44px;
+  color: white;
+}
+.success-text {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--green);
+}
+
+/* Mobile responsive */
+@media (max-width: 420px) {
+  body {
+    background: var(--background);
+    align-items: flex-start;
+  }
+  .phone-frame {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <!-- Status Bar -->
+  <div class="status-bar" aria-hidden="true">
+    <span class="time">9:41</span>
+    <div class="icons">
+      <span class="material-symbols-outlined">signal_cellular_alt</span>
+      <span class="material-symbols-outlined">wifi</span>
+      <span class="material-symbols-outlined">battery_5_bar</span>
+    </div>
+  </div>
+
+  <!-- Scan Overlay -->
+  <div class="scan-overlay" id="scanOverlay" role="status" aria-live="polite">
+    <div class="scan-spinner" aria-hidden="true"></div>
+    <div class="scan-text">Scanning your device...</div>
+  </div>
+
+  <!-- Success Overlay -->
+  <div class="success-overlay" id="successOverlay" role="status" aria-live="assertive">
+    <div class="success-check" aria-hidden="true">
+      <span class="material-symbols-outlined">check</span>
+    </div>
+    <div class="success-text">Secured!</div>
+  </div>
+
+  <!-- Toast — live region for screen readers -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ========== SCREEN 1: ONBOARDING ========== -->
+  <div class="screen active" id="screen-onboarding">
+    <div class="onboarding-shield" aria-hidden="true">
+      <span class="material-symbols-outlined">shield</span>
+    </div>
+    <h1 class="onboarding-title">APK Guard</h1>
+    <p class="onboarding-tagline">Protect your phone from scam app installs</p>
+    <p class="onboarding-desc">Scammers trick people into installing dangerous apps via WhatsApp, Telegram, and other messaging apps. APK Guard checks your phone's security settings and guides you to fix them.</p>
+    <div class="features">
+      <div class="feature-item">
+        <div class="feature-icon" aria-hidden="true">
+          <span class="material-symbols-outlined">search</span>
+        </div>
+        <span class="feature-text">Detect risky installer sources</span>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon" aria-hidden="true">
+          <span class="material-symbols-outlined">checklist</span>
+        </div>
+        <span class="feature-text">Step-by-step security guide</span>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon" aria-hidden="true">
+          <span class="material-symbols-outlined">notifications</span>
+        </div>
+        <span class="feature-text">Periodic safety reminders</span>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" id="btnStartScan">
+      <span class="material-symbols-outlined" aria-hidden="true">security</span>
+      Start Security Check
+    </button>
+  </div>
+
+  <!-- ========== SCREEN 2: DASHBOARD ========== -->
+  <div class="screen" id="screen-dashboard">
+    <div class="top-bar">
+      <span class="material-symbols-outlined" style="color:var(--primary);font-size:28px;" aria-hidden="true">shield</span>
+      <h1>APK Guard</h1>
+      <button class="icon-btn" id="btnSettings" aria-label="Open settings">
+        <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+      </button>
+    </div>
+
+    <div class="score-section">
+      <div class="score-ring-container" role="img" aria-label="Security score">
+        <svg viewBox="0 0 160 160" aria-hidden="true">
+          <circle class="score-ring-bg" cx="80" cy="80" r="65"/>
+          <circle class="score-ring-progress" id="scoreRing" cx="80" cy="80" r="65"
+            stroke-dasharray="408.4" stroke-dashoffset="408.4"/>
+        </svg>
+        <div class="score-value">
+          <span class="score-number" id="scoreNumber">0</span><span class="score-percent">%</span>
+          <div class="score-label">Your Security Score</div>
+        </div>
+      </div>
+      <p class="score-subtitle" id="scoreSubtitle" aria-live="polite">0 of 0 items secured</p>
+    </div>
+
+    <div class="section-header">Messaging Apps</div>
+    <div id="cards-messaging"></div>
+
+    <div class="section-header">Browsers</div>
+    <div id="cards-browsers"></div>
+
+    <div class="section-header">File Managers</div>
+    <div id="cards-files"></div>
+
+    <div class="section-header">Protection Status</div>
+    <div id="cards-protection"></div>
+
+    <div class="recheck-container">
+      <button class="btn btn-outlined" id="btnRecheck">
+        <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+        Recheck All
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN 3: FIX FLOW ========== -->
+  <div class="screen" id="screen-fix">
+    <div class="top-bar">
+      <button class="icon-btn" id="btnFixBack" aria-label="Back to dashboard">
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+      </button>
+      <h1 id="fix-title">Fix WhatsApp</h1>
+    </div>
+
+    <div class="risk-card">
+      <span class="material-symbols-outlined" aria-hidden="true">warning</span>
+      <p id="fix-risk-text"></p>
+    </div>
+
+    <div class="steps-section">
+      <div class="steps-title">Follow these steps</div>
+      <div class="step">
+        <div class="step-num" aria-hidden="true">1</div>
+        <div class="step-text">Tap <strong>"Open Settings"</strong> below</div>
+      </div>
+      <div class="step">
+        <div class="step-num" aria-hidden="true">2</div>
+        <div class="step-text">Find <strong>"Allow from this source"</strong></div>
+      </div>
+      <div class="step">
+        <div class="step-num" aria-hidden="true">3</div>
+        <div class="step-text">Make sure it is turned <strong>OFF</strong></div>
+      </div>
+      <div class="step">
+        <div class="step-num" aria-hidden="true">4</div>
+        <div class="step-text">Come back here and tap <strong>"I've Done It"</strong></div>
+      </div>
+    </div>
+
+    <div class="settings-mock">
+      <div class="settings-mock-header">
+        <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+        <span>Android Settings</span>
+      </div>
+      <div class="settings-mock-row">
+        <div>
+          <div class="settings-mock-label">Allow from this source</div>
+          <div class="settings-mock-sublabel" id="mock-sublabel">Currently enabled — turn this OFF</div>
+        </div>
+        <button class="toggle-btn" id="mockToggle" role="switch" aria-checked="true" aria-label="Allow from this source"></button>
+      </div>
+    </div>
+
+    <div class="fix-hint" id="fixHint">
+      <span class="material-symbols-outlined" aria-hidden="true">info</span>
+      <span>Turn off the toggle above before confirming</span>
+    </div>
+
+    <div class="fix-buttons">
+      <button class="btn btn-primary btn-full" id="btnOpenSettings">
+        <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+        Open Settings
+      </button>
+      <button class="btn btn-outlined btn-full" id="btnMarkFixed" disabled>
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        I've Done It
+      </button>
+      <button class="btn-text" id="btnSkip">Skip for now</button>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN 4: SETTINGS ========== -->
+  <div class="screen" id="screen-settings">
+    <div class="top-bar">
+      <button class="icon-btn" id="btnSettingsBack" aria-label="Back to dashboard">
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+      </button>
+      <h1>Settings</h1>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-card-title">Reminders</div>
+      <div class="settings-row">
+        <label class="settings-row-label" for="reminderToggle">Weekly security reminders</label>
+        <button class="toggle-btn" id="reminderToggle" role="switch" aria-checked="true" aria-label="Weekly security reminders"></button>
+      </div>
+      <div class="settings-row">
+        <label class="settings-row-label" for="reminderDay">Reminder day</label>
+        <select class="settings-select" id="reminderDay">
+          <option selected>Monday</option>
+          <option>Tuesday</option>
+          <option>Wednesday</option>
+          <option>Thursday</option>
+          <option>Friday</option>
+          <option>Saturday</option>
+          <option>Sunday</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-card-title">Privacy</div>
+      <div class="privacy-note">
+        <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+        <p>APK Guard does not collect any personal data. All security checks run locally on your device.</p>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-card-title">Anti-Scam Tips</div>
+      <div class="accordion-item">
+        <button class="accordion-btn" aria-expanded="false">
+          <span class="accordion-label">Never install APKs from WhatsApp or Telegram</span>
+          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+        </button>
+        <div class="accordion-content" role="region">
+          <p>Scammers send APK files through messaging apps disguised as legitimate apps, updates, or tools. Never download and install APK files received through these channels.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" aria-expanded="false">
+          <span class="accordion-label">Only install apps from Google Play Store</span>
+          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+        </button>
+        <div class="accordion-content" role="region">
+          <p>The Google Play Store screens apps for malware and malicious behavior. Installing apps from other sources bypasses these safety checks and puts your device at risk.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" aria-expanded="false">
+          <span class="accordion-label">Keep Google Play Protect enabled</span>
+          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+        </button>
+        <div class="accordion-content" role="region">
+          <p>Google Play Protect continuously scans your device for potentially harmful apps. It should always be enabled for maximum protection.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" aria-expanded="false">
+          <span class="accordion-label">If someone asks you to install an APK, it's likely a scam</span>
+          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+        </button>
+        <div class="accordion-content" role="region">
+          <p>Legitimate companies and services will never ask you to sideload an APK. If someone — even a trusted contact — sends you an APK file and asks you to install it, treat it as a scam.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-card-title">About</div>
+      <div class="about-section">
+        <div class="version">Version 1.0.0</div>
+        <div class="made-with">Made with &#10084;&#65039; to fight scams</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== APP DATA ==========
+const apps = [
+  // Messaging Apps
+  { id: 'whatsapp', name: 'WhatsApp', abbr: 'WA', color: '#25D366', category: 'messaging', status: 'needs-review', desc: 'Can receive and install APK files', riskText: 'WhatsApp can be used to send you dangerous APK files. If "Install unknown apps" is enabled, these files could be installed on your phone.' },
+  { id: 'whatsapp-biz', name: 'WhatsApp Business', abbr: 'WB', color: '#25D366', category: 'messaging', status: 'not-installed', desc: 'Not detected on this device', riskText: 'WhatsApp Business can be used to send you dangerous APK files. If "Install unknown apps" is enabled, these files could be installed on your phone.' },
+  { id: 'telegram', name: 'Telegram', abbr: 'TG', color: '#0088cc', category: 'messaging', status: 'needs-review', desc: 'Can receive and install APK files', riskText: 'Telegram can be used to send you dangerous APK files. If "Install unknown apps" is enabled, these files could be installed on your phone.' },
+
+  // Browsers
+  { id: 'chrome', name: 'Chrome', abbr: 'CR', color: '#4285F4', category: 'browsers', status: 'needs-review', desc: 'Common source for APK downloads', riskText: 'Chrome can be used to download dangerous APK files from the internet. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
+  { id: 'samsung-internet', name: 'Samsung Internet', abbr: 'SI', color: '#6e4bbd', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Samsung Internet can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
+  { id: 'edge', name: 'Microsoft Edge', abbr: 'ED', color: '#0078D7', category: 'browsers', status: 'secured', desc: 'Install permission disabled', riskText: 'Microsoft Edge can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
+  { id: 'firefox', name: 'Firefox', abbr: 'FF', color: '#FF7139', category: 'browsers', status: 'needs-review', desc: 'Can download and install APK files', riskText: 'Firefox can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
+  { id: 'opera', name: 'Opera', abbr: 'OP', color: '#FF1B2D', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Opera can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
+  { id: 'opera-mini', name: 'Opera Mini', abbr: 'OM', color: '#FF1B2D', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Opera Mini can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
+  { id: 'brave', name: 'Brave', abbr: 'BR', color: '#FB542B', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Brave can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
+  { id: 'uc-browser', name: 'UC Browser', abbr: 'UC', color: '#F58220', category: 'browsers', status: 'needs-review', desc: 'Can download and install APK files', riskText: 'UC Browser can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
+  { id: 'duckduckgo', name: 'DuckDuckGo', abbr: 'DD', color: '#DE5833', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'DuckDuckGo browser can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
+  { id: 'vivaldi', name: 'Vivaldi', abbr: 'VI', color: '#EF3939', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Vivaldi can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
+  { id: 'mi-browser', name: 'Mi Browser', abbr: 'MI', color: '#FF6900', category: 'browsers', status: 'needs-review', desc: 'Pre-installed browser — can download APKs', riskText: 'Mi Browser can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
+  { id: 'vivo-browser', name: 'Vivo Browser', abbr: 'VV', color: '#415FFF', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Vivo Browser can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
+  { id: 'oppo-browser', name: 'OPPO Browser', abbr: 'OB', color: '#1BA784', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'OPPO Browser can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
+  { id: 'huawei-browser', name: 'Huawei Browser', abbr: 'HW', color: '#CF0A2C', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Huawei Browser can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
+
+  // File Managers
+  { id: 'files-google', name: 'Files by Google', abbr: 'FG', color: '#34a853', category: 'files', status: 'secured', desc: 'Install permission disabled', riskText: 'Files by Google can open APK files stored on your device. If "Install unknown apps" is enabled, those files could be installed.' },
+  { id: 'mi-file-manager', name: 'Mi File Manager', abbr: 'MF', color: '#FF6900', category: 'files', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Mi File Manager can open APK files stored on your device. If "Install unknown apps" is enabled, those files could be installed.' },
+
+  // Protection
+  { id: 'playprotect', name: 'Google Play Protect', abbr: null, color: '#34a853', category: 'protection', status: 'secured', desc: 'Active and up to date', riskText: '' },
+];
+
+let currentFixApp = null;
+let currentScreen = 'screen-onboarding';
+
+// ========== RENDER CARDS ==========
+function renderCards() {
+  const containers = {
+    messaging: document.getElementById('cards-messaging'),
+    browsers: document.getElementById('cards-browsers'),
+    files: document.getElementById('cards-files'),
+    protection: document.getElementById('cards-protection'),
+  };
+
+  Object.values(containers).forEach(c => c.innerHTML = '');
+
+  apps.forEach(app => {
+    const container = containers[app.category];
+    if (!container) return;
+
+    const card = document.createElement('div');
+    card.className = 'app-card';
+    card.dataset.status = app.status;
+    card.dataset.app = app.id;
+
+    const iconContent = app.id === 'playprotect'
+      ? '<span class="material-symbols-outlined" style="font-size:22px;color:white;">verified_user</span>'
+      : app.abbr;
+
+    const descText = app.status === 'secured' ? 'Install permission disabled'
+      : app.status === 'not-installed' ? 'Not detected on this device'
+      : app.desc;
+
+    let badgeHtml, actionHtml = '';
+    if (app.status === 'secured') {
+      badgeHtml = '<span class="badge badge-green"><span class="material-symbols-outlined" style="font-size:14px;" aria-hidden="true">check</span> Secured</span>';
+    } else if (app.status === 'not-installed') {
+      badgeHtml = '<span class="badge badge-gray">Not Installed</span>';
+    } else {
+      badgeHtml = '<span class="badge badge-red">Needs Review</span>';
+      actionHtml = `<button class="fix-btn" data-fix="${app.id}">Fix Now</button>`;
+    }
+
+    card.innerHTML = `
+      <div class="app-card-icon" style="background:${app.color};">${iconContent}</div>
+      <div class="app-card-body">
+        <div class="app-card-name">${app.name}</div>
+        <div class="app-card-desc">${descText}</div>
+      </div>
+      <div class="app-card-right">
+        ${badgeHtml}
+        ${actionHtml}
+      </div>
+    `;
+
+    // Only make needs-review cards clickable
+    if (app.status === 'needs-review') {
+      card.addEventListener('click', () => openFix(app.id));
+    }
+
+    // Fix button stops propagation
+    const fixBtn = card.querySelector('.fix-btn');
+    if (fixBtn) {
+      fixBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openFix(app.id);
+      });
+    }
+
+    container.appendChild(card);
+  });
+}
+
+// ========== SCORE ==========
+function getInstalledApps() {
+  return apps.filter(a => a.status !== 'not-installed');
+}
+
+function getSecuredCount() {
+  return apps.filter(a => a.status === 'secured').length;
+}
+
+function getTotalAuditableCount() {
+  return getInstalledApps().length;
+}
+
+function getScorePercent() {
+  const total = getTotalAuditableCount();
+  if (total === 0) return 100;
+  return Math.round((getSecuredCount() / total) * 100);
+}
+
+function getScoreColor(pct) {
+  if (pct < 50) return 'var(--red)';
+  if (pct < 80) return 'var(--orange)';
+  return 'var(--green)';
+}
+
+function updateDashboard() {
+  const pct = getScorePercent();
+  const secured = getSecuredCount();
+  const total = getTotalAuditableCount();
+  const circumference = 2 * Math.PI * 65;
+  const offset = circumference - (pct / 100) * circumference;
+  const color = getScoreColor(pct);
+
+  const ring = document.getElementById('scoreRing');
+  ring.style.strokeDasharray = circumference;
+  ring.style.strokeDashoffset = offset;
+  ring.style.stroke = color;
+
+  const num = document.getElementById('scoreNumber');
+  num.style.color = color;
+  animateNumber(num, parseInt(num.textContent) || 0, pct, 600);
+
+  document.getElementById('scoreSubtitle').textContent = `${secured} of ${total} installed items secured`;
+
+  renderCards();
+}
+
+function animateNumber(el, from, to, duration) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    el.textContent = to;
+    return;
+  }
+  const start = performance.now();
+  function update(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(from + (to - from) * eased);
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+// ========== NAVIGATION ==========
+function showScreen(id) {
+  const current = document.querySelector('.screen.active');
+  if (current) {
+    current.classList.remove('active');
+    current.classList.add('slide-out-left');
+    setTimeout(() => current.classList.remove('slide-out-left'), 300);
+  }
+  setTimeout(() => {
+    const target = document.getElementById(id);
+    target.scrollTop = 0;
+    target.classList.add('active');
+    // Move focus to first heading for screen readers
+    const heading = target.querySelector('h1');
+    if (heading) heading.focus();
+  }, 50);
+  currentScreen = id;
+}
+
+// ========== SCAN ==========
+function startScan() {
+  const overlay = document.getElementById('scanOverlay');
+  overlay.classList.add('show');
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    showScreen('screen-dashboard');
+    setTimeout(updateDashboard, 100);
+  }, 2000);
+}
+
+// ========== FIX FLOW ==========
+function openFix(appId) {
+  const app = apps.find(a => a.id === appId);
+  if (!app || app.status !== 'needs-review') return;
+
+  currentFixApp = appId;
+  document.getElementById('fix-title').textContent = `Fix ${app.name}`;
+  document.getElementById('fix-risk-text').textContent = app.riskText;
+
+  // Reset mock toggle to ON (dangerous state)
+  const toggle = document.getElementById('mockToggle');
+  toggle.setAttribute('aria-checked', 'true');
+  document.getElementById('mock-sublabel').textContent = 'Currently enabled — turn this OFF';
+  document.getElementById('mock-sublabel').style.color = '';
+
+  // Disable confirm button, show hint
+  document.getElementById('btnMarkFixed').disabled = true;
+  document.getElementById('fixHint').classList.remove('hidden');
+
+  showScreen('screen-fix');
+}
+
+function toggleMock() {
+  const toggle = document.getElementById('mockToggle');
+  const isOn = toggle.getAttribute('aria-checked') === 'true';
+  toggle.setAttribute('aria-checked', isOn ? 'false' : 'true');
+
+  const sublabel = document.getElementById('mock-sublabel');
+  const confirmBtn = document.getElementById('btnMarkFixed');
+  const hint = document.getElementById('fixHint');
+
+  if (isOn) {
+    // Turned OFF — safe
+    sublabel.textContent = 'Disabled — this is the safe setting';
+    sublabel.style.color = 'var(--green)';
+    confirmBtn.disabled = false;
+    hint.classList.add('hidden');
+  } else {
+    // Turned ON — dangerous
+    sublabel.textContent = 'Currently enabled — turn this OFF';
+    sublabel.style.color = '';
+    confirmBtn.disabled = true;
+    hint.classList.remove('hidden');
+  }
+}
+
+function markFixed() {
+  if (!currentFixApp) return;
+
+  // Only allow if toggle is in safe position
+  const toggle = document.getElementById('mockToggle');
+  if (toggle.getAttribute('aria-checked') === 'true') {
+    showToast('Please turn off the toggle first');
+    return;
+  }
+
+  const app = apps.find(a => a.id === currentFixApp);
+  if (app) app.status = 'secured';
+
+  const overlay = document.getElementById('successOverlay');
+  overlay.classList.add('show');
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    showScreen('screen-dashboard');
+    setTimeout(updateDashboard, 100);
+  }, 1200);
+}
+
+// ========== RECHECK ==========
+function recheckAll() {
+  const overlay = document.getElementById('scanOverlay');
+  document.querySelector('#scanOverlay .scan-text').textContent = 'Rechecking security settings...';
+  overlay.classList.add('show');
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    document.querySelector('#scanOverlay .scan-text').textContent = 'Scanning your device...';
+    updateDashboard();
+    showToast('Security check complete');
+  }, 1500);
+}
+
+// ========== TOAST ==========
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+// ========== ACCORDION ==========
+function toggleAccordion(btn) {
+  const item = btn.parentElement;
+  const content = item.querySelector('.accordion-content');
+  const isOpen = item.classList.contains('open');
+
+  // Close all
+  document.querySelectorAll('.accordion-item.open').forEach(i => {
+    i.classList.remove('open');
+    i.querySelector('.accordion-content').style.maxHeight = '0';
+    i.querySelector('.accordion-btn').setAttribute('aria-expanded', 'false');
+  });
+
+  if (!isOpen) {
+    item.classList.add('open');
+    content.style.maxHeight = content.scrollHeight + 'px';
+    btn.setAttribute('aria-expanded', 'true');
+  }
+}
+
+// ========== EVENT LISTENERS (no inline handlers) ==========
+document.addEventListener('DOMContentLoaded', () => {
+  // Onboarding
+  document.getElementById('btnStartScan').addEventListener('click', startScan);
+
+  // Dashboard
+  document.getElementById('btnSettings').addEventListener('click', () => showScreen('screen-settings'));
+  document.getElementById('btnRecheck').addEventListener('click', recheckAll);
+
+  // Fix flow
+  document.getElementById('mockToggle').addEventListener('click', toggleMock);
+  document.getElementById('btnOpenSettings').addEventListener('click', () => showToast('Opening Android Settings...'));
+  document.getElementById('btnMarkFixed').addEventListener('click', markFixed);
+  document.getElementById('btnSkip').addEventListener('click', () => showScreen('screen-dashboard'));
+  document.getElementById('btnFixBack').addEventListener('click', () => showScreen('screen-dashboard'));
+
+  // Settings
+  document.getElementById('btnSettingsBack').addEventListener('click', () => showScreen('screen-dashboard'));
+  document.getElementById('reminderToggle').addEventListener('click', function() {
+    const isOn = this.getAttribute('aria-checked') === 'true';
+    this.setAttribute('aria-checked', isOn ? 'false' : 'true');
+  });
+
+  // Accordion buttons
+  document.querySelectorAll('.accordion-btn').forEach(btn => {
+    btn.addEventListener('click', () => toggleAccordion(btn));
+  });
+
+  // Make headings focusable for screen navigation
+  document.querySelectorAll('.top-bar h1, .onboarding-title').forEach(h => {
+    h.setAttribute('tabindex', '-1');
+  });
+
+  // Initial render
+  renderCards();
+});
+</script>
+</body>
+</html>

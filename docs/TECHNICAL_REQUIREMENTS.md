@@ -415,11 +415,21 @@ The following packages must be declared in `AndroidManifest.xml` for Android 11+
         <package android:name="com.whatsapp.w4b" />           <!-- WhatsApp Business -->
         <package android:name="org.telegram.messenger" />
 
-        <!-- Browsers -->
-        <package android:name="com.android.chrome" />
-        <package android:name="com.sec.android.app.sbrowser" /> <!-- Samsung Internet -->
+        <!-- Browsers — Global & Regional (SE Asia focus) -->
+        <package android:name="com.android.chrome" />          <!-- Chrome (~71% market share) -->
+        <package android:name="com.sec.android.app.sbrowser" /> <!-- Samsung Internet (pre-installed on Samsung) -->
         <package android:name="com.microsoft.emmx" />           <!-- Microsoft Edge -->
-        <package android:name="org.mozilla.firefox" />
+        <package android:name="org.mozilla.firefox" />          <!-- Firefox -->
+        <package android:name="com.opera.browser" />            <!-- Opera -->
+        <package android:name="com.opera.mini.native" />        <!-- Opera Mini (popular in emerging markets) -->
+        <package android:name="com.brave.browser" />            <!-- Brave -->
+        <package android:name="com.UCMobile.intl" />            <!-- UC Browser (popular in India/Indonesia) -->
+        <package android:name="com.duckduckgo.mobile.android" /> <!-- DuckDuckGo -->
+        <package android:name="com.vivaldi.browser" />          <!-- Vivaldi -->
+        <package android:name="com.mi.globalbrowser" />         <!-- Mi Browser (pre-installed on Xiaomi) -->
+        <package android:name="com.vivo.browser" />             <!-- Vivo Browser (pre-installed on Vivo) -->
+        <package android:name="com.heytap.browser" />           <!-- OPPO Browser (pre-installed on OPPO) -->
+        <package android:name="com.huawei.browser" />           <!-- Huawei Browser (pre-installed on Huawei) -->
 
         <!-- File Managers -->
         <package android:name="com.google.android.apps.nbu.files" /> <!-- Files by Google -->
