@@ -18,8 +18,8 @@
            │
            ▼
 ┌──────────────────────────┐     ┌───────────────────┐
-│   Cloudflare Workers      │────▶│  Cloudflare KV     │  ← Scam domain cache
-│   (Edge API — 300+ cities)│     │  (Key-Value store)  │     500K+ domains
+│   Cloudflare Workers      │────▶│  Cloudflare KV     │  ← Allowlist + new discoveries
+│   (Edge API — 300+ cities)│     │  (Key-Value store)  │     NOT bulk domain store
 │                           │     └───────────────────┘     Sub-ms lookup
 │   /api/check   — lookup   │
 │   /api/report  — submit   │     ┌───────────────────┐
@@ -37,17 +37,17 @@
 │   ($6/mo, 1 small VPS)   │     Scraping, processing, feed updates
 │                           │
 │   Scrapling cron jobs:    │     ┌───────────────────┐
-│   - SemakMule scraper     │────▶│  Cloudflare KV     │  Push processed data
-│   - Scam news scraper     │     │  (via bulk API)     │  to edge cache
+│   - SemakMule scraper     │────▶│  Cloudflare R2     │  Push bulk DB artifacts
+│   - Scam news scraper     │     │  (Object storage)   │  (SQLite, Bloom, delta)
 │   - Open-source feeds     │     └───────────────────┘
-│   - Domain monitor        │
+│   - Domain monitor        │     + KV: allowlist + new discoveries only
 └──────────────────────────┘
 ```
 
 ## Design Principles
 
-1. **Users never hit DigitalOcean directly.** All user-facing traffic goes through Cloudflare edge. If the droplet goes down, the app still works (cached data).
-2. **Edge-first.** Link checker lookups happen in KV (sub-millisecond), not a database query. 99% of requests are cache hits.
+1. **Users never hit DigitalOcean directly.** All user-facing traffic goes through Cloudflare edge. If the droplet goes down, the app still works (cached data on device + R2).
+2. **Device-first.** 95%+ of link checks happen locally on the device (SQLite + Bloom filter). The API handles only the remaining ~5% unknowns.
 3. **Scale to zero.** Free tier covers 100K requests/day. No cost when idle.
 4. **Scale to millions.** Cloudflare Workers auto-scale across 300+ cities. No configuration change needed.
 5. **Separate data plane from serving plane.** DigitalOcean processes data in the background. Cloudflare serves it to users. They're independent.
@@ -103,46 +103,49 @@ User pastes URL → App checks local DB first (95% resolved here, no API call)
 | High traffic | 50,000,000 | ~$45 |
 | Viral spike | 100,000,000+ | ~$100-200 |
 
-### 2. Cloudflare KV (Domain Cache)
+### 2. Cloudflare KV (Allowlist + New Discoveries Only)
 
 **What:** Global key-value store replicated to all Cloudflare edge locations. Optimized for read-heavy workloads.
 
-**Why:** The scam domain database is a perfect KV use case — 500K+ entries, read 99.99% of the time, written once per day by the pipeline.
+**Why:** KV stores ONLY the allowlist of safe domains and newly discovered scam domains (from user reports/heuristics). The bulk 500K+ domain database lives in R2 and is downloaded to devices — NOT stored in KV.
+
+**Important:** KV is NOT the bulk domain store. The bulk scam DB lives in R2 (downloaded to device SQLite). KV handles only:
+- ~500 allowlisted safe domains (banks, gov, e-commerce)
+- ~1K-10K newly discovered scam domains (from reports + heuristic confirmations)
+- Cached alert metadata (15-min TTL)
+- Cached R2 manifest metadata (1-hour TTL)
 
 **Data structure:**
 
 ```
-Key: "domain:maybank-secure-update.xyz"
-Value: {
-  "verdict": "dangerous",
-  "reason": "Impersonates Maybank",
-  "realDomain": "maybank2u.com.my",
-  "source": "phishing-database",
-  "firstSeen": "2026-03-10",
-  "reportCount": 48,
-  "region": "MY"
-}
-
-Key: "domain:shopee.com.my"
+Key: "safe:shopee.com.my"
 Value: {
   "verdict": "safe",
   "reason": "Official Shopee Malaysia domain",
   "source": "allowlist",
   "verified": true
 }
+
+Key: "discovery:new-scam-site.xyz"
+Value: {
+  "verdict": "dangerous",
+  "reason": "Confirmed scam via user reports",
+  "reportCount": 48,
+  "discoveredAt": "2026-03-15"
+}
 ```
 
 **Size estimate:**
-- 500K scam domains × ~200 bytes avg value = ~100MB
-- 500 allowlisted safe domains × ~100 bytes = ~50KB
-- Well within KV limits (25GB on paid plan)
+- ~500 allowlisted safe domains × ~100 bytes = ~50KB
+- ~5K-10K discovered scam domains × ~200 bytes = ~2MB
+- Total: well under 1MB for most of KV's life
 
 **Pricing:**
 
 | Tier | Reads/day | Writes/day | Monthly Cost |
 |------|-----------|------------|--------------|
 | Free | 100,000 | 1,000 | $0 |
-| Paid | 10,000,000+ | 1,000 (daily pipeline) | $5/mo |
+| Paid | Up to 500K (only unknowns that miss local + cache) | ~100-500 (new discoveries) | $0-5/mo |
 
 ### 3. Cloudflare D1 (Edge Database)
 
@@ -202,6 +205,20 @@ CREATE TABLE shared_scores (
   total_count INTEGER,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Suspicious domains queued for pipeline review (async discovery)
+CREATE TABLE pending_discoveries (
+  id TEXT PRIMARY KEY,
+  domain TEXT NOT NULL,
+  verdict TEXT,            -- heuristic verdict (suspicious/unknown)
+  reason TEXT,
+  source TEXT,             -- 'heuristic', 'user_report'
+  check_count INTEGER DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  processed BOOLEAN DEFAULT FALSE,
+  processed_at DATETIME
+);
+CREATE INDEX idx_pending_unprocessed ON pending_discoveries(processed, created_at);
 ```
 
 **Pricing:**
