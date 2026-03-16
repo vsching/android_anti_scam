@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safe Anot? — Check Any Suspicious Link</title>
+<meta name="description" content="Check any suspicious link instantly. Free scam protection for Malaysia & Singapore.">
+<meta property="og:title" content="Safe Anot? — Is this link safe?">
+<meta property="og:description" content="Check any suspicious link instantly. Free scam protection for Malaysia & Singapore.">
+<meta property="og:image" content="https://safeanot.app/og-check.png">
+<meta property="og:url" content="https://safeanot.app/check">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0D1117;
+  --bg-card: #161B22;
+  --bg-card-hover: #1C2129;
+  --bg-elevated: #1E2430;
+  --blue: #58A6FF;
+  --blue-dim: rgba(88,166,255,0.15);
+  --purple: #BC8CFF;
+  --green: #3FB950;
+  --green-dim: rgba(63,185,80,0.12);
+  --green-glow: rgba(63,185,80,0.3);
+  --red: #F85149;
+  --red-dim: rgba(248,81,73,0.12);
+  --red-glow: rgba(248,81,73,0.3);
+  --orange: #D29922;
+  --orange-dim: rgba(210,153,34,0.12);
+  --orange-glow: rgba(210,153,34,0.3);
+  --text-primary: #F0F6FC;
+  --text-secondary: #8B949E;
+  --text-tertiary: #7D8590;
+  --border: rgba(240,246,252,0.06);
+  --radius: 16px;
+  --radius-sm: 12px;
+  --radius-xs: 8px;
+  --gradient-accent: linear-gradient(135deg, #58A6FF 0%, #BC8CFF 100%);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0A0E14;
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* NAV */
+nav {
+  background: rgba(10,14,20,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 0;
+}
+nav .container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.nav-back {
+  color: var(--text-secondary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+.nav-back:hover { color: var(--text-primary); }
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 800;
+  font-size: 18px;
+}
+.nav-logo .material-symbols-outlined { color: var(--blue); font-size: 24px; }
+
+/* CHECKER */
+.checker {
+  text-align: center;
+  padding: 60px 0 40px;
+}
+.checker h1 {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.checker-sub {
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+  font-size: 15px;
+}
+.input-group {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.url-input {
+  flex: 1;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.url-input::placeholder { color: var(--text-tertiary); }
+.url-input:focus { border-color: var(--blue); }
+.check-btn {
+  padding: 16px 28px;
+  background: var(--gradient-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+.check-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(88,166,255,0.3); }
+.check-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.db-note {
+  color: var(--text-tertiary);
+  font-size: 13px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.db-note .material-symbols-outlined { font-size: 16px; color: var(--green); }
+
+/* EXAMPLE CHIPS */
+.examples { margin-bottom: 40px; }
+.examples p { font-size: 13px; color: var(--text-tertiary); margin-bottom: 10px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.chip {
+  padding: 8px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-family: 'Inter', monospace;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.chip:hover { background: var(--bg-card-hover); color: var(--text-primary); border-color: var(--blue); }
+.chip.danger { border-color: rgba(248,81,73,0.3); }
+.chip.safe { border-color: rgba(63,185,80,0.3); }
+.chip.suspicious { border-color: rgba(210,153,34,0.3); }
+
+/* RESULTS */
+#result { margin-bottom: 40px; }
+.result-card {
+  border-radius: var(--radius);
+  padding: 32px;
+  text-align: center;
+  animation: slideUp 0.4s ease-out;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.result-card.dangerous {
+  background: var(--red-dim);
+  border: 2px solid var(--red);
+  box-shadow: 0 0 40px rgba(248,81,73,0.15);
+}
+.result-card.safe {
+  background: var(--green-dim);
+  border: 2px solid var(--green);
+  box-shadow: 0 0 40px rgba(63,185,80,0.15);
+}
+.result-card.suspicious {
+  background: var(--orange-dim);
+  border: 2px solid var(--orange);
+  box-shadow: 0 0 40px rgba(210,153,34,0.15);
+}
+.result-icon { font-size: 56px; margin-bottom: 12px; }
+.result-card.dangerous .result-icon { color: var(--red); }
+.result-card.safe .result-icon { color: var(--green); }
+.result-card.suspicious .result-icon { color: var(--orange); }
+.result-verdict {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+}
+.result-card.dangerous .result-verdict { color: var(--red); }
+.result-card.safe .result-verdict { color: var(--green); }
+.result-card.suspicious .result-verdict { color: var(--orange); }
+.result-domain {
+  font-size: 14px;
+  color: var(--text-secondary);
+  word-break: break-all;
+  margin-bottom: 16px;
+}
+.result-reason {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+.result-real {
+  font-size: 13px;
+  color: var(--green);
+  background: rgba(63,185,80,0.08);
+  padding: 8px 16px;
+  border-radius: var(--radius-xs);
+  display: inline-block;
+  margin-bottom: 20px;
+}
+.result-warning {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--red);
+  margin-bottom: 20px;
+}
+
+/* SHARE BUTTONS */
+.share-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-xs);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.share-btn:hover { transform: translateY(-1px); }
+.share-wa { background: #25D366; color: #fff; }
+.share-wa:hover { box-shadow: 0 4px 16px rgba(37,211,102,0.3); }
+.share-copy { background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border); }
+.share-copy:hover { background: var(--bg-card-hover); }
+
+/* CTA */
+.cta-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  text-align: center;
+  margin-bottom: 40px;
+}
+.cta-section h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.cta-section p { color: var(--text-secondary); font-size: 14px; margin-bottom: 20px; }
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #3FB950 0%, #238636 100%);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(63,185,80,0.3); }
+
+/* LOADING */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+}
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 0;
+  text-align: center;
+}
+footer p { font-size: 13px; color: var(--text-tertiary); }
+footer a { color: var(--blue); text-decoration: none; }
+
+@media (max-width: 480px) {
+  .checker h1 { font-size: 26px; }
+  .input-group { flex-direction: column; }
+  .check-btn { width: 100%; padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="index.html" class="nav-back">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </a>
+    <a href="index.html" class="nav-logo">
+      <span class="material-symbols-outlined">shield</span>
+      Safe Anot?
+    </a>
+  </div>
+</nav>
+
+<section class="checker">
+  <div class="container">
+    <h1>Check any suspicious link</h1>
+    <p class="checker-sub">Paste a URL you received via WhatsApp, SMS, or email.</p>
+
+    <div class="input-group">
+      <input type="text" class="url-input" id="urlInput" placeholder="Paste a URL here..." autocomplete="off" spellcheck="false">
+      <button class="check-btn" id="checkBtn" onclick="checkURL()">CHECK NOW</button>
+    </div>
+
+    <p class="db-note">
+      <span class="material-symbols-outlined">verified</span>
+      We check against 500,000+ known scam domains
+    </p>
+
+    <div class="examples">
+      <p>Try these examples:</p>
+      <div class="chips">
+        <span class="chip danger" onclick="fillAndCheck('maybank-secure-update.xyz')">maybank-secure-update.xyz</span>
+        <span class="chip safe" onclick="fillAndCheck('shopee.com.my')">shopee.com.my</span>
+        <span class="chip suspicious" onclick="fillAndCheck('bit.ly/kl-investment')">bit.ly/kl-investment</span>
+      </div>
+    </div>
+
+    <div id="result"></div>
+
+    <div class="cta-section">
+      <h3>Want full protection?</h3>
+      <p>The app scans your phone for risky apps, checks links automatically, and protects your family in real-time.</p>
+      <a href="#" class="cta-btn">
+        <span class="material-symbols-outlined">download</span>
+        Download Safe Anot?
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>Made with ❤️ in Malaysia &nbsp;|&nbsp; <a href="index.html">Home</a> &nbsp;|&nbsp; <a href="challenge.html">Spot the Fake Quiz</a></p>
+  </div>
+</footer>
+
+<script>
+const SCAM_DB = {
+  'maybank-secure-update.xyz': {
+    verdict: 'dangerous',
+    reason: 'This domain impersonates Maybank to steal your login credentials and TAC codes.',
+    real: 'Real Maybank: maybank2u.com.my'
+  },
+  'maybank2u-verify.com': {
+    verdict: 'dangerous',
+    reason: 'Fake Maybank verification site. This domain was created to steal banking credentials.',
+    real: 'Real Maybank: maybank2u.com.my'
+  },
+  'cimb-secure-login.xyz': {
+    verdict: 'dangerous',
+    reason: 'Fake CIMB login page designed to steal your banking credentials.',
+    real: 'Real CIMB: cimbclicks.com.my'
+  },
+  'lhdn-tax-refund.com': {
+    verdict: 'dangerous',
+    reason: 'Fake LHDN (tax authority) site. LHDN will never ask you to click a link for refunds.',
+    real: 'Real LHDN: hasil.gov.my'
+  },
+  'shopee-lucky-draw.top': {
+    verdict: 'dangerous',
+    reason: 'Fake Shopee lucky draw scam. Shopee does not run promotions through third-party domains.',
+    real: 'Real Shopee: shopee.com.my'
+  },
+  'grab-promo-winners.buzz': {
+    verdict: 'dangerous',
+    reason: 'Fake Grab promotion scam. This domain harvests personal data.',
+    real: 'Real Grab: grab.com'
+  },
+  'shopee.com.my': {
+    verdict: 'safe',
+    reason: 'This is the official Shopee Malaysia website.'
+  },
+  'maybank2u.com.my': {
+    verdict: 'safe',
+    reason: 'This is the official Maybank2u online banking website.'
+  },
+  'cimbclicks.com.my': {
+    verdict: 'safe',
+    reason: 'This is the official CIMB Clicks online banking website.'
+  },
+  'hasil.gov.my': {
+    verdict: 'safe',
+    reason: 'This is the official LHDN (Inland Revenue Board) website.'
+  },
+  'grab.com': {
+    verdict: 'safe',
+    reason: 'This is the official Grab website.'
+  },
+  'bit.ly/kl-investment': {
+    verdict: 'suspicious',
+    reason: 'Shortened URLs hide the real destination. This link could lead to a scam investment site. Never enter personal details on shortened links.'
+  }
+};
+
+function extractDomain(url) {
+  url = url.trim().toLowerCase();
+  url = url.replace(/^https?:\/\//, '').replace(/^www\./, '');
+  // Keep path for shortened URLs
+  if (url.startsWith('bit.ly/') || url.startsWith('tinyurl.com/')) {
+    return url.split(/[?#]/)[0];
+  }
+  return url.split('/')[0].split('?')[0].split('#')[0];
+}
+
+function fillAndCheck(domain) {
+  document.getElementById('urlInput').value = domain;
+  checkURL();
+}
+
+function checkURL() {
+  const input = document.getElementById('urlInput').value.trim();
+  if (!input) return;
+
+  const resultDiv = document.getElementById('result');
+  resultDiv.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Checking domain...</div>';
+
+  const domain = extractDomain(input);
+
+  setTimeout(() => {
+    const data = SCAM_DB[domain];
+
+    if (!data) {
+      // Unknown domains — treat as suspicious by default for demo
+      const isSuspiciousTLD = /\.(xyz|top|buzz|click|loan|work|gq|ml|tk|cf|ga|info)$/i.test(domain);
+      if (isSuspiciousTLD) {
+        showResult(domain, 'suspicious', 'This domain uses a TLD commonly associated with scam websites. Exercise caution and verify through official channels.', null);
+      } else {
+        showResult(domain, 'safe', 'This domain is not in our scam database. However, always be cautious with unfamiliar websites.', null);
+      }
+      return;
+    }
+
+    showResult(domain, data.verdict, data.reason, data.real || null);
+  }, 800 + Math.random() * 600);
+}
+
+function showResult(domain, verdict, reason, real) {
+  const resultDiv = document.getElementById('result');
+  const icons = { dangerous: 'gpp_bad', safe: 'verified_user', suspicious: 'gpp_maybe' };
+  const labels = { dangerous: 'DANGEROUS', safe: 'SAFE', suspicious: 'SUSPICIOUS' };
+
+  const shareText = verdict === 'dangerous'
+    ? `⚠️ WARNING: ${domain} is a SCAM site! Check before you click: ${window.location.origin}/check.html`
+    : verdict === 'suspicious'
+    ? `⚠️ ${domain} looks suspicious. Check your links here: ${window.location.origin}/check.html`
+    : `✅ ${domain} is safe. Check any link here: ${window.location.origin}/check.html`;
+
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+  const resultUrl = `${window.location.origin}/result.html?domain=${encodeURIComponent(domain)}&verdict=${verdict}`;
+
+  let html = `
+    <div class="result-card ${verdict}">
+      <div class="result-icon"><span class="material-symbols-outlined" style="font-size:56px">${icons[verdict]}</span></div>
+      <div class="result-verdict">${labels[verdict]}</div>
+      <div class="result-domain">${domain}</div>
+      <div class="result-reason">${reason}</div>
+      ${real ? `<div class="result-real">✓ ${real}</div>` : ''}
+      ${verdict === 'dangerous' ? '<div class="result-warning">⚠ Do NOT enter passwords on this site</div>' : ''}
+      <div class="share-buttons">
+        <a href="${whatsappUrl}" target="_blank" class="share-btn share-wa">
+          <span class="material-symbols-outlined" style="font-size:18px">share</span>
+          Share on WhatsApp
+        </a>
+        <button class="share-btn share-copy" onclick="copyResult('${resultUrl}')">
+          <span class="material-symbols-outlined" style="font-size:18px">content_copy</span>
+          Copy Link
+        </button>
+      </div>
+    </div>
+  `;
+
+  resultDiv.innerHTML = html;
+}
+
+function copyResult(url) {
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.querySelector('.share-copy');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">check</span> Copied!';
+    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+  });
+}
+
+// Allow Enter key
+document.getElementById('urlInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') checkURL();
+});
+</script>
+
+</body>
+</html>

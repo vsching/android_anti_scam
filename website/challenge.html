@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safe Anot? — Spot the Fake Domain Quiz</title>
+<meta name="description" content="Can you spot fake scam domains? Take the quiz and test your scam-spotting skills.">
+<meta property="og:title" content="Safe Anot? — Can You Spot the Fake?">
+<meta property="og:description" content="Test your scam-spotting skills! 5 rounds, 2 domains — pick the real one. Can you get 5/5?">
+<meta property="og:image" content="https://safeanot.app/og-challenge.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0D1117;
+  --bg-card: #161B22;
+  --bg-card-hover: #1C2129;
+  --bg-elevated: #1E2430;
+  --blue: #58A6FF;
+  --blue-dim: rgba(88,166,255,0.15);
+  --purple: #BC8CFF;
+  --green: #3FB950;
+  --green-dim: rgba(63,185,80,0.12);
+  --green-glow: rgba(63,185,80,0.3);
+  --red: #F85149;
+  --red-dim: rgba(248,81,73,0.12);
+  --red-glow: rgba(248,81,73,0.3);
+  --orange: #D29922;
+  --orange-dim: rgba(210,153,34,0.12);
+  --text-primary: #F0F6FC;
+  --text-secondary: #8B949E;
+  --text-tertiary: #7D8590;
+  --border: rgba(240,246,252,0.06);
+  --radius: 16px;
+  --radius-sm: 12px;
+  --radius-xs: 8px;
+  --gradient-accent: linear-gradient(135deg, #58A6FF 0%, #BC8CFF 100%);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0A0E14;
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+nav {
+  background: rgba(10,14,20,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 0;
+}
+nav .container { display: flex; align-items: center; gap: 12px; }
+.nav-back { color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; transition: color 0.2s; }
+.nav-back:hover { color: var(--text-primary); }
+.nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-primary); font-weight: 800; font-size: 18px; }
+.nav-logo .material-symbols-outlined { color: var(--blue); font-size: 24px; }
+
+.quiz-page { padding: 48px 0 40px; }
+
+/* HEADER */
+.quiz-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.quiz-header h1 {
+  font-size: 32px;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+.quiz-header p {
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+/* PROGRESS */
+.progress-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 32px;
+}
+.progress-dot {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 0.3s;
+}
+.progress-dot.active { background: var(--blue); }
+.progress-dot.correct { background: var(--green); }
+.progress-dot.wrong { background: var(--red); }
+
+.round-label {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.round-question {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 28px;
+}
+
+/* DOMAIN OPTIONS */
+.domain-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.domain-option {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 17px;
+  font-weight: 600;
+  font-family: 'Inter', monospace;
+  word-break: break-all;
+}
+.domain-option:hover:not(.disabled) {
+  border-color: var(--blue);
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+}
+.domain-option.selected-correct {
+  border-color: var(--green);
+  background: var(--green-dim);
+  box-shadow: 0 0 24px rgba(63,185,80,0.15);
+}
+.domain-option.selected-wrong {
+  border-color: var(--red);
+  background: var(--red-dim);
+  box-shadow: 0 0 24px rgba(248,81,73,0.15);
+}
+.domain-option.revealed-real {
+  border-color: var(--green);
+  background: var(--green-dim);
+}
+.domain-option.revealed-fake {
+  border-color: var(--red);
+  background: var(--red-dim);
+  opacity: 0.6;
+}
+.domain-option.disabled { cursor: default; }
+.domain-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 8px;
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+.domain-label.real { color: var(--green); background: rgba(63,185,80,0.1); }
+.domain-label.fake { color: var(--red); background: rgba(248,81,73,0.1); }
+
+/* EXPLANATION */
+.explanation {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  margin-bottom: 24px;
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.explanation h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.explanation h4.correct { color: var(--green); }
+.explanation h4.wrong { color: var(--red); }
+.explanation p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+/* NEXT BUTTON */
+.next-btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background: var(--gradient-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s;
+  font-family: inherit;
+}
+.next-btn:hover { transform: translateY(-2px); }
+
+/* RESULTS SCREEN */
+.results-screen {
+  text-align: center;
+  animation: fadeIn 0.5s ease-out;
+}
+.score-circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  font-size: 48px;
+  font-weight: 900;
+}
+.score-circle.perfect { background: var(--green-dim); color: var(--green); border: 3px solid var(--green); box-shadow: 0 0 40px rgba(63,185,80,0.2); }
+.score-circle.good { background: var(--blue-dim); color: var(--blue); border: 3px solid var(--blue); }
+.score-circle.ok { background: var(--orange-dim); color: var(--orange); border: 3px solid var(--orange); }
+.score-circle.bad { background: var(--red-dim); color: var(--red); border: 3px solid var(--red); }
+.results-screen h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+.results-screen .subtitle { color: var(--text-secondary); font-size: 15px; margin-bottom: 32px; }
+
+.share-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.share-card p { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+.share-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.share-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px; border-radius: var(--radius-xs);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  border: none; text-decoration: none; transition: all 0.2s; font-family: inherit;
+}
+.share-btn:hover { transform: translateY(-1px); }
+.share-wa { background: #25D366; color: #fff; }
+.share-wa:hover { box-shadow: 0 4px 16px rgba(37,211,102,0.3); }
+.share-copy { background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border); }
+
+.parent-note {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.parent-note p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; }
+.parent-note strong { color: var(--text-primary); }
+
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #3FB950, #238636);
+  color: #fff; border: none; border-radius: var(--radius-sm);
+  font-size: 16px; font-weight: 700; cursor: pointer; text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.dl-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(63,185,80,0.3); }
+
+.play-again {
+  display: inline-block;
+  margin-top: 16px;
+  color: var(--blue);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+}
+.play-again:hover { text-decoration: underline; }
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 0;
+  text-align: center;
+  margin-top: 40px;
+}
+footer p { font-size: 13px; color: var(--text-tertiary); }
+footer a { color: var(--blue); text-decoration: none; }
+
+@media (max-width: 480px) {
+  .quiz-header h1 { font-size: 26px; }
+  .round-question { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="index.html" class="nav-back"><span class="material-symbols-outlined">arrow_back</span></a>
+    <a href="index.html" class="nav-logo">
+      <span class="material-symbols-outlined">shield</span>
+      Safe Anot?
+    </a>
+  </div>
+</nav>
+
+<section class="quiz-page">
+  <div class="container">
+    <div class="quiz-header">
+      <h1>Can you spot the fake?</h1>
+      <p>5 rounds. 2 domains. Tap the one you think is REAL.</p>
+    </div>
+
+    <div id="quizArea"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>Made with ❤️ in Malaysia &nbsp;|&nbsp; <a href="index.html">Home</a> &nbsp;|&nbsp; <a href="check.html">Check Links</a></p>
+  </div>
+</footer>
+
+<script>
+const rounds = [
+  {
+    real: 'maybank2u.com.my',
+    fake: 'maybank2u-verify.com',
+    explanation: 'The real Maybank uses maybank2u.com.my — a .com.my domain. The fake adds "-verify" and uses a generic .com domain. Banks never use extra words in their domain.'
+  },
+  {
+    real: 'cimbclicks.com.my',
+    fake: 'cimb-secure-login.xyz',
+    explanation: 'The real CIMB Clicks is at cimbclicks.com.my. The fake uses a .xyz domain with "secure-login" — a classic phishing tactic to sound trustworthy.'
+  },
+  {
+    real: 'shopee.com.my',
+    fake: 'shopee-lucky-draw.top',
+    explanation: 'The real Shopee is shopee.com.my. The fake uses a .top domain and adds "lucky-draw" — Shopee never runs promotions from third-party domains.'
+  },
+  {
+    real: 'hasil.gov.my',
+    fake: 'lhdn-tax-refund.com',
+    explanation: 'LHDN\'s official site is hasil.gov.my — a government .gov.my domain. The fake uses a generic .com with "tax-refund". Government sites always end in .gov.my.'
+  },
+  {
+    real: 'grab.com',
+    fake: 'grab-promo-winners.buzz',
+    explanation: 'The real Grab is at grab.com. The fake uses a .buzz domain with "promo-winners". Legitimate companies never use exotic TLDs like .buzz for promotions.'
+  }
+];
+
+let currentRound = 0;
+let score = 0;
+let answered = false;
+
+function render() {
+  if (currentRound >= rounds.length) {
+    showResults();
+    return;
+  }
+
+  const r = rounds[currentRound];
+  // Randomize order
+  const showFakeFirst = Math.random() > 0.5;
+  const opt1 = showFakeFirst ? r.fake : r.real;
+  const opt2 = showFakeFirst ? r.real : r.fake;
+
+  answered = false;
+
+  let progressHTML = '<div class="progress-bar">';
+  for (let i = 0; i < rounds.length; i++) {
+    let cls = '';
+    if (i < currentRound) cls = 'correct'; // simplified
+    else if (i === currentRound) cls = 'active';
+    progressHTML += `<div class="progress-dot ${cls}"></div>`;
+  }
+  progressHTML += '</div>';
+
+  document.getElementById('quizArea').innerHTML = `
+    ${progressHTML}
+    <div class="round-label">Round ${currentRound + 1} of 5</div>
+    <div class="round-question">Which domain is REAL?</div>
+    <div class="domain-options">
+      <div class="domain-option" id="opt1" onclick="answer('${opt1}', '${r.real}', 'opt1', 'opt2')">${opt1}</div>
+      <div class="domain-option" id="opt2" onclick="answer('${opt2}', '${r.real}', 'opt2', 'opt1')">${opt2}</div>
+    </div>
+    <div id="feedback"></div>
+  `;
+}
+
+function answer(chosen, real, chosenId, otherId) {
+  if (answered) return;
+  answered = true;
+
+  const r = rounds[currentRound];
+  const isCorrect = chosen === real;
+  if (isCorrect) score++;
+
+  const chosenEl = document.getElementById(chosenId);
+  const otherEl = document.getElementById(otherId);
+  const chosenIsReal = chosen === real;
+  const otherIsReal = !chosenIsReal;
+
+  chosenEl.classList.add('disabled', chosenIsReal ? 'selected-correct' : 'selected-wrong');
+  otherEl.classList.add('disabled', otherIsReal ? 'revealed-real' : 'revealed-fake');
+
+  // Add labels
+  function addLabel(el, isReal) {
+    const label = document.createElement('div');
+    label.className = `domain-label ${isReal ? 'real' : 'fake'}`;
+    label.innerHTML = isReal
+      ? '<span class="material-symbols-outlined" style="font-size:14px">verified</span> REAL'
+      : '<span class="material-symbols-outlined" style="font-size:14px">dangerous</span> FAKE';
+    el.appendChild(label);
+  }
+  addLabel(chosenEl, chosenIsReal);
+  addLabel(otherEl, otherIsReal);
+
+  // Update progress dot
+  const dots = document.querySelectorAll('.progress-dot');
+  dots[currentRound].className = `progress-dot ${isCorrect ? 'correct' : 'wrong'}`;
+
+  // Show explanation
+  document.getElementById('feedback').innerHTML = `
+    <div class="explanation">
+      <h4 class="${isCorrect ? 'correct' : 'wrong'}">
+        <span class="material-symbols-outlined" style="font-size:20px">${isCorrect ? 'check_circle' : 'cancel'}</span>
+        ${isCorrect ? 'Correct!' : 'Wrong!'}
+      </h4>
+      <p>${r.explanation}</p>
+    </div>
+    <button class="next-btn" onclick="nextRound()">${currentRound < rounds.length - 1 ? 'Next Round' : 'See Results'}</button>
+  `;
+}
+
+function nextRound() {
+  currentRound++;
+  render();
+}
+
+function showResults() {
+  const scoreClass = score === 5 ? 'perfect' : score >= 4 ? 'good' : score >= 3 ? 'ok' : 'bad';
+  const emoji = score === 5 ? '🏆' : score >= 4 ? '👏' : score >= 3 ? '🤔' : '😬';
+  const message = score === 5
+    ? 'Perfect! You can spot scams like a pro.'
+    : score >= 4
+    ? 'Almost perfect! You have sharp eyes.'
+    : score >= 3
+    ? 'Not bad, but scammers are getting trickier.'
+    : 'Scammers might fool you. Time to learn more!';
+
+  const shareText = `${emoji} I scored ${score}/5 on the Safe Anot? scam quiz! Can you beat me? Try it: ${window.location.href}`;
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+
+  document.getElementById('quizArea').innerHTML = `
+    <div class="results-screen">
+      <div class="score-circle ${scoreClass}">${score}/5</div>
+      <h2>You got ${score} out of 5!</h2>
+      <p class="subtitle">${message}</p>
+
+      <div class="share-card">
+        <p>${emoji} I scored ${score}/5 on Safe Anot? Can you beat me?</p>
+        <div class="share-btns">
+          <a href="${waUrl}" target="_blank" class="share-btn share-wa">
+            <span class="material-symbols-outlined" style="font-size:18px">share</span>
+            Share on WhatsApp
+          </a>
+          <button class="share-btn share-copy" onclick="copyScore()">
+            <span class="material-symbols-outlined" style="font-size:18px">content_copy</span>
+            Copy
+          </button>
+        </div>
+      </div>
+
+      <div class="parent-note">
+        <p><strong>Your parents might not score as well.</strong><br>Download Safe Anot? to protect them from scam links and dangerous apps — before it's too late.</p>
+      </div>
+
+      <a href="#" class="dl-btn">
+        <span class="material-symbols-outlined">download</span>
+        Download Safe Anot? Free
+      </a>
+      <br>
+      <a href="javascript:resetQuiz()" class="play-again">Play Again</a>
+    </div>
+  `;
+}
+
+function copyScore() {
+  const text = `I scored ${score}/5 on the Safe Anot? scam quiz! Can you beat me? Try it: ${window.location.href}`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.share-copy');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">check</span> Copied!';
+    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+  });
+}
+
+function resetQuiz() {
+  currentRound = 0;
+  score = 0;
+  render();
+}
+
+render();
+</script>
+
+</body>
+</html>
