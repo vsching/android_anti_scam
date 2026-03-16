@@ -53,6 +53,136 @@ Every screen should have a share button:
 - **After fixing all items** → "My phone is secured! 🛡️" → celebration card
 - **Family Guardian** → "Invite family member" → WhatsApp deep link
 
+### 1.4 Advanced Viral Loops (15 Additional Mechanics)
+
+Beyond the basic sharing surfaces, these are the deeper viral mechanics that drive exponential growth:
+
+#### Tier 1 — High Impact, Easy to Build (v1-v1.1)
+
+**1. Trusted Family Reply Assistant**
+- **What:** After a DANGEROUS verdict, one-tap sends a polite warning reply back to the WhatsApp group: "This link is dangerous. Please don't click. Check with Safe Anot?"
+- **Trigger:** Dangerous or suspicious verdict from a shared link
+- **Why users share:** Reduces social friction of warning others — many people don't share because they don't know what to say. Pre-written replies in polite, urgent, and elder-friendly tones (BM/English/Chinese).
+- **Growth driver:** The reply travels inside the original scam conversation, where ALL the highest-intent prospects already are. The app link is embedded in the warning.
+- **K-factor multiplier:** Very high — goes directly to people who received the same scam.
+
+**2. "Forwarded by Someone You Love" Rescue Card**
+- **What:** After a dangerous verdict, generate a share card: "This scam was forwarded to me by someone I care about. Check your family's links before they click."
+- **Trigger:** Immediately after a DANGEROUS result
+- **Why users share:** Reframes from "I almost got scammed" to "I'm protecting my family." More socially acceptable than bragging.
+- **Growth driver:** People in the same WhatsApp group received the exact same scam. Installs happen in clusters.
+
+**3. "Could Your Parents Spot the Fake?" Challenge**
+- **What:** A quiz game — guess which of two links is real: `maybank2u.com.my` vs `maybank2u-secure-login.xyz`. Shareable scorecard: "I got 5/5. Can your family beat me?"
+- **Trigger:** After onboarding, after a safe verdict, or as a daily challenge
+- **Why users share:** Competitive + curiosity. People love testing others with deceptively similar links.
+- **Growth driver:** Challenge links playable WITHOUT installing (web-based). After playing → "Want full scam checks? Install Safe Anot?"
+- **Platforms:** WhatsApp-native first, TikTok-friendly second.
+
+**4. "This Scam Is Spreading Now" Live Counter**
+- **What:** When a checked domain matches other recent submissions, show: "This scam was checked 48 times in the last 24 hours in Selangor."
+- **Trigger:** Dangerous or suspicious verdict with cluster match
+- **Why users share:** Real-time social proof makes the threat feel immediate and worth warning about.
+- **Growth driver:** Creates urgency and legitimacy. Recipients think, "This isn't just one weird link. It's everywhere." Great for screenshots and TikTok voiceovers.
+- **Tags:** Region + platform tags (WhatsApp, Telegram, Selangor, Singapore).
+
+#### Tier 2 — High Impact, Medium Effort (v2)
+
+**5. "Check Your Family Group" Burst Mode**
+- **What:** Quickly check multiple suspicious links from one WhatsApp thread → share a summary card: "3 checked, 2 dangerous, 1 suspicious."
+- **Trigger:** After the second suspicious link checked within a short window
+- **Why users share:** Turns one scam into a group event. "I checked 3 links from our family chat, 2 were dangerous."
+- **Growth driver:** Summary card is shared back into the EXACT thread where the scam is circulating → highest-intent installs.
+
+**6. Family Panic Button**
+- **What:** Big red button: "My parent is being scammed RIGHT NOW." Sends urgent WhatsApp to siblings/relatives with app link.
+- **Trigger:** Dangerous verdict, APK risk detected, or guardian alert
+- **Why users share:** Urgency overrides hesitation. In fear moments, people want backup, not content.
+- **Growth driver:** Siblings install because the app is positioned as the coordination tool to protect the parent immediately.
+- **Message:** "Please help check Mum's phone now. I found a dangerous scam link. Install this app and join guardian mode."
+
+**7. WhatsApp Status-First Verdict Templates**
+- **What:** 9:16 vertical cards designed specifically for WhatsApp Status (not TikTok). Large verdict, minimal text, local tone.
+- **Trigger:** Dangerous/suspicious verdicts, scam alerts, family milestones
+- **Why users share:** Many won't post to TikTok, but WILL post to WhatsApp Status where their close network sees it.
+- **Growth driver:** Status viewers are warm leads: relatives, school parent groups, office contacts. Ideal for MY/SG distribution.
+- **CTA:** "Got a weird link? Check with Safe Anot?"
+
+**8. "Scam-Proof Your Parents in 60 Seconds" Challenge**
+- **What:** Timed challenge — children secure a parent's phone, post before/after score or completion video.
+- **Trigger:** Family visits, festive periods (Hari Raya, CNY, Deepavali), creator campaigns
+- **Why users share:** TikTok-native. Transformation + urgency + family love + visible result.
+- **Growth driver:** Viewers try it on their own parents. App becomes a family ritual, not just a utility.
+- **Hashtag:** #ScamProofYourParents #SafeAnot
+
+**9. Parent-Safe Morning Brief**
+- **What:** Daily scam brief for elderly users: one scam type, one fake-vs-real example, one tap to share to children/spouse.
+- **Trigger:** Daily at a fixed, non-intrusive time (9am)
+- **Why users share:** Flips elderly from passive target to active protector. Parents FORWARD the brief to their children.
+- **Growth driver:** Family members receiving briefs install to explain, monitor, or send checks back. Creates daily habit.
+- **Design:** Large text, minimal jargon, bilingual, voice-readout support.
+
+**10. "Before You Pay, Check" Invoice Mode**
+- **What:** Special mode for links related to deliveries, bills, tax refunds, parking fines, bank actions. High-drama warnings.
+- **Trigger:** Detection of payment/refund/parcel/OTP/suspension keywords in checked content
+- **Why users share:** These are the EXACT emotional states where people panic and consult others.
+- **Growth driver:** "If anyone gets a parcel/refund/payment link like this, check it here first." Broadens use case beyond hardcore security users.
+- **Verdict cards:** Tailored by scenario: "Fake parcel fee scam", "Fake LHDN tax refund", with recognizable local brands.
+
+#### Tier 3 — Network Effects (v3, needs user base)
+
+**11. Neighborhood Scam Heatmap**
+- **What:** Live map/feed: "Scams reported near you today" by city/state/district.
+- **Trigger:** App open, after link check, daily push: "12 dangerous links reported in PJ today."
+- **Why users share:** Fear becomes LOCAL. "This is happening in our area" is far more shareable than generic news.
+- **Growth driver:** Screenshots shared in neighborhood, condo, mosque, church WhatsApp groups → hyperlocal installs.
+
+**12. Family Safety Streaks**
+- **What:** Shared family streak for consecutive days with no risky settings + at least one scam check completed.
+- **Trigger:** Daily open, successful checks, guardian compliance
+- **Why users share:** Accountability + family competition without public leaderboards.
+- **Growth driver:** To keep the streak alive, users pull in parents/siblings. One inactive member pressures others to install.
+- **Message:** "Your family is on a 9-day scam-safe streak!"
+
+**13. Scam Hunter Identity**
+- **What:** Reputation titles: "Family Protector", "Group Saver", "Scam Hunter", earned by checks shared and warnings that led to installs.
+- **Trigger:** Successful shares, confirmed scam reports, referred installs
+- **Why users share:** Social status. Being the "tech-savvy child who warns everyone" is a real identity.
+- **Growth driver:** Badge signals utility, not spam. Share: "Protected 7 people from suspicious links this month."
+
+**14. Community-Verified Scam Library**
+- **What:** Browseable feed of real scams submitted by users, ranked by "most shared", "most reported", "targeting seniors."
+- **Trigger:** Home feed, after checks, notifications about trending scams
+- **Why users share:** "Look, this exact scam hit someone else already." Community content feels alive.
+- **Growth driver:** More users = more scam examples = better feed. True network effect.
+
+**15. Scam Comeback Stories**
+- **What:** Users submit short stories: "My dad almost clicked this fake Maybank link." App turns them into anonymized, stylized story cards.
+- **Trigger:** After dangerous verdict or after fixing a risky setting
+- **Why users share:** Real stories outperform generic warnings. Relatable family situations drive emotional sharing.
+- **Growth driver:** Viewers relate and install to test their own parents' phones.
+- **Export:** TikTok/IG Reels/WhatsApp Status templates.
+
+#### Viral Loop Priority Matrix
+
+| Priority | Loop | K-Factor | Effort | Phase |
+|----------|------|----------|--------|-------|
+| P0 | Trusted family reply assistant (#1) | Very High | Low | v1 |
+| P0 | "Forwarded by Someone You Love" card (#2) | High | Low | v1 |
+| P0 | WhatsApp Status verdict templates (#7) | High | Low | v1 |
+| P1 | "Spot the Fake" challenge (#3) | High | Medium | v1.1 |
+| P1 | Live scam counter (#4) | High | Medium | v1.1 |
+| P1 | "Scam-proof in 60s" TikTok challenge (#8) | High | Low | v1.1 |
+| P1 | "Before you pay, check" mode (#10) | Medium | Medium | v1.1 |
+| P2 | Family group burst mode (#5) | High | Medium | v2 |
+| P2 | Family panic button (#6) | Medium | Medium | v2 |
+| P2 | Parent morning brief (#9) | Medium | Medium | v2 |
+| P2 | Family safety streaks (#12) | Medium | Medium | v2 |
+| P3 | Neighborhood heatmap (#11) | High | High | v3 |
+| P3 | Scam hunter identity (#13) | Medium | Medium | v3 |
+| P3 | Community scam library (#14) | High | High | v3 |
+| P3 | Scam comeback stories (#15) | Medium | Medium | v3 |
+
 ---
 
 ## Part 2: TikTok & Content Strategy
