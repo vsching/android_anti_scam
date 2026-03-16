@@ -1,13 +1,13 @@
-# Viral Apps Case Studies — Lessons for APK Guard
+# Viral Apps Case Studies — Lessons for Safe Anot?
 
 > **Date:** 2026-03-16
-> **Purpose:** Study 8 viral apps from 2022-2026, extract their growth tactics, and map what APK Guard can steal.
+> **Purpose:** Study 8 viral apps from 2022-2026, extract their growth tactics, and map what Safe Anot? can steal.
 
 ---
 
 ## Quick Reference
 
-| App | Category | Peak Growth | Key Viral Mechanic | Applicable to APK Guard? |
+| App | Category | Peak Growth | Key Viral Mechanic | Applicable to Safe Anot?? |
 |-----|----------|-------------|--------------------|----|
 | **Cal AI** | Health/Calories | 15M downloads, $40M rev in 18 months | TikTok multi-account + product IS content | YES — detailed in separate doc |
 | **死了没 (Are You Dead?)** | Safety/Social | #1 paid app in China, global viral | Emotional hook + dead-simple product + news virality | YES — very applicable |
@@ -36,9 +36,9 @@ Three young Chinese professionals built a safety check-in app for $210 (1,500 yu
 | **Universal fear** | "What if something happens to me and nobody notices?" Everyone has thought this. |
 | **Tiny team, tiny cost** | Built for $210. Proves you don't need a big budget to go viral — you need a big insight. |
 
-### What APK Guard Can Steal
+### What Safe Anot? Can Steal
 
-| 死了没 Tactic | APK Guard Adaptation |
+| 死了没 Tactic | Safe Anot? Adaptation |
 |------------|---------------------|
 | **Provocative name/positioning** | Our "Are You Dead?" equivalent: **"Is Your Phone Protecting You? Or Helping Scammers?"** — frame it as a wake-up call, not a utility. |
 | **Dead-simple core action** | One button: "Check This Link" → instant verdict. Or: "Scan My Phone" → instant score. No signup, no tutorial. |
@@ -48,7 +48,7 @@ Three young Chinese professionals built a safety check-in app for $210 (1,500 yu
 | **Paid app model** | They charged from day 1 (paid app). We could consider a one-time RM 4.90 purchase instead of subscription — low barrier, feels more trustworthy for a security app. |
 
 ### Key Lesson
-> **"Are You Dead?" proves that a dead-simple product built around a universal human fear can go global with zero marketing budget. APK Guard's fear — "scammers are coming for your parents' money" — is equally powerful.**
+> **"Are You Dead?" proves that a dead-simple product built around a universal human fear can go global with zero marketing budget. Safe Anot?'s fear — "scammers are coming for your parents' money" — is equally powerful.**
 
 Sources: [CNN](https://www.cnn.com/2026/01/14/china/china-viral-app-are-you-dead-yet-intl-hnk), [Newsweek](https://www.newsweek.com/are-you-dead-what-to-know-about-chinas-new-viral-phone-app-11360096), [The Diplomat](https://thediplomat.com/2026/02/chinas-new-viral-app-asks-are-you-dead)
 
@@ -69,9 +69,9 @@ Built by a college student for his long-distance girlfriend. Photo widget appear
 | **Creator quality control** | Underperforming creators replaced after only a few dozen videos | Keeps content fresh and effective |
 | **No paid ads initially** | Zero paid advertising in the early phase | Pure organic + creator content |
 
-### What APK Guard Can Steal
+### What Safe Anot? Can Steal
 
-| Locket Tactic | APK Guard Adaptation |
+| Locket Tactic | Safe Anot? Adaptation |
 |---------------|---------------------|
 | **Founder's origin TikTok** | Record a personal video: "I built this because my parents almost got scammed" — authentic, emotional, filmable |
 | **26 creators, 2-3 posts/day** | Our goal: 10-20 creators, 2 posts/day = 200-400 videos/month. Replace underperformers quickly. |
@@ -100,9 +100,9 @@ Chinese e-commerce app that hit 500M downloads in 2024 through aggressive gamifi
 | **Super Bowl ads** | Massive paid advertising ($500M in Q1 2024 alone) to drive brand awareness. |
 | **Social sharing baked in** | Sharing deals is a core action, not an afterthought. Every product has a share button. |
 
-### What APK Guard Can Steal
+### What Safe Anot? Can Steal
 
-| Temu Tactic | APK Guard Adaptation |
+| Temu Tactic | Safe Anot? Adaptation |
 |-------------|---------------------|
 | **Gamified referrals with real rewards** | "Invite 3 friends → unlock Family Guardian for free" or "Refer 5 people → get 1 month premium" |
 | **Daily check-in** | "Daily scam alert" — open app, see today's scam warning, get a streak badge. 7-day streak = "Scam Spotter" badge. |
@@ -135,19 +135,19 @@ French photo app — get a notification at a random time, take a photo within 2 
 | **FOMO mechanic** | Random daily notification → "Post now or miss out" → friends see you didn't post → social pressure to participate |
 | **Anti-Instagram positioning** | "Be real, not performative" — counter-cultural messaging that resonated with Gen Z |
 
-### What APK Guard Can Steal
+### What Safe Anot? Can Steal
 
-| BeReal Tactic | APK Guard Adaptation |
+| BeReal Tactic | Safe Anot? Adaptation |
 |---------------|---------------------|
 | **Campus/community ambassador program** | Malaysian university ambassadors: pay students RM 10 per referral to install on parents' phones. Target: 50 ambassadors at top universities. |
 | **Community seeding** | Seed in Malaysian WhatsApp groups: parenting groups, surau/mosque groups, community groups. These are where scam links actually circulate. |
 | **FOMO mechanic** | "Your family has 3 unsecured phones. Be the one who protects them." → social pressure to act |
-| **Counter-positioning** | "Other apps scan after you're infected. APK Guard prevents the infection." — anti-antivirus positioning |
+| **Counter-positioning** | "Other apps scan after you're infected. Safe Anot? prevents the infection." — anti-antivirus positioning |
 
 ### What We Should Learn From Their Decline
 - BeReal's core action (random photo) got boring after the novelty wore off
 - Retention requires **ongoing value**, not just novelty
-- APK Guard's scam checker + scam feed provide ongoing value (new scams every week)
+- Safe Anot?'s scam checker + scam feed provide ongoing value (new scams every week)
 
 ### Key Lesson
 > **Ambassador programs work for seeding. But retention requires continuous value delivery, not just a novelty mechanic. Our scam feed and domain checker provide that ongoing value.**
@@ -170,14 +170,14 @@ AI search engine. 80M+ downloads, $9B valuation. Grew through strategic partners
 | **Product so good it creates word of mouth** | 68% of traffic is direct (users coming back on their own) |
 | **Tech influencer seeding** | VCs and tech influencers tweeted about it as a "Google challenger" |
 
-### What APK Guard Can Steal
+### What Safe Anot? Can Steal
 
-| Perplexity Tactic | APK Guard Adaptation |
+| Perplexity Tactic | Safe Anot? Adaptation |
 |-------------------|---------------------|
-| **Telco/bank bundle** | Partner with Maxis, Celcom, Digi, U Mobile to pre-install APK Guard or bundle free premium with data plans. Partner with Maybank, CIMB to recommend APK Guard in their security alerts. |
+| **Telco/bank bundle** | Partner with Maxis, Celcom, Digi, U Mobile to pre-install Safe Anot? or bundle free premium with data plans. Partner with Maybank, CIMB to recommend Safe Anot? in their security alerts. |
 | **Bold PR** | Pitch to Malaysian media around scam crisis stories: "This free app could have prevented the RM 838K WhatsApp scam." Time press releases to major scam news. |
-| **Government endorsement** | Get NACSA or PDRM to recommend APK Guard, like Singapore's CSA recommends ScamShield. |
-| **Direct habit-building** | Make the domain checker so useful that people come to APK Guard every time they get a suspicious message. Build direct traffic, not just social-driven. |
+| **Government endorsement** | Get NACSA or PDRM to recommend Safe Anot?, like Singapore's CSA recommends ScamShield. |
+| **Direct habit-building** | Make the domain checker so useful that people come to Safe Anot? every time they get a suspicious message. Build direct traffic, not just social-driven. |
 
 ### Key Lesson
 > **Partnerships with telcos, banks, and government agencies can drive massive distribution without ad spend. This is our Phase 2 strategy — but we need the user base from Phase 1 to be credible partners.**
@@ -186,7 +186,7 @@ Sources: [Business of Apps](https://www.businessofapps.com/data/perplexity-ai-st
 
 ---
 
-## Synthesis: APK Guard's Viral Playbook
+## Synthesis: Safe Anot?'s Viral Playbook
 
 ### The 8 Tactics We're Adopting
 
@@ -201,14 +201,14 @@ Sources: [Business of Apps](https://www.businessofapps.com/data/perplexity-ai-st
 | 7 | **News-jacking scam stories** — every scam headline is a PR opportunity | 死了没, Perplexity | P1 — ongoing |
 | 8 | **Strategic partnerships** — telcos, banks, government | Perplexity | P2 — after user base |
 
-### What Makes APK Guard Uniquely Viral
+### What Makes Safe Anot? Uniquely Viral
 
-Unlike most of these apps, APK Guard has something special: **every scam attempt becomes marketing for us.**
+Unlike most of these apps, Safe Anot? has something special: **every scam attempt becomes marketing for us.**
 
 - Cal AI needed users to film their food voluntarily
 - Locket needed users to share photos voluntarily
 - BeReal needed users to post at random times
-- **APK Guard:** Scammers do the marketing for us. Every fake Maybank link circulating on WhatsApp is a potential APK Guard demo video waiting to happen.
+- **Safe Anot?:** Scammers do the marketing for us. Every fake Maybank link circulating on WhatsApp is a potential Safe Anot? demo video waiting to happen.
 
 The scam problem is getting worse (RM 2.7B in 2025, growing). Which means our viral fuel source is **growing, not shrinking**.
 
@@ -216,10 +216,10 @@ The scam problem is getting worse (RM 2.7B in 2025, growing). Which means our vi
 
 ```
 Scammer sends fake link on WhatsApp
-  → Recipient checks it in APK Guard
+  → Recipient checks it in Safe Anot?
     → Gets dramatic "🔴 DANGEROUS" verdict
       → Screenshots it, shares on WhatsApp group / TikTok
-        → 10 people see it, 3 download APK Guard
+        → 10 people see it, 3 download Safe Anot?
           → They check their own suspicious links
             → They share their results
               → Next scam attempt fuels more growth

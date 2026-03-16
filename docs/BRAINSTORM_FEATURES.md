@@ -1,4 +1,4 @@
-# APK Guard — Feature Brainstorm
+# Safe Anot? — Feature Brainstorm
 
 > **Date:** 2026-03-16
 > **Status:** Ideation — not all ideas will be built. Prioritize based on impact vs effort.
@@ -7,7 +7,7 @@
 
 ## Context
 
-APK Guard v1 is a security checklist app. But the real value is **protecting vulnerable people** — elderly parents, non-tech-savvy users, and people in high-scam-risk regions (Malaysia, Singapore, SE Asia).
+Safe Anot? v1 is a security checklist app. But the real value is **protecting vulnerable people** — elderly parents, non-tech-savvy users, and people in high-scam-risk regions (Malaysia, Singapore, SE Asia).
 
 The scam problem is massive:
 - Malaysia: RM 2.7B reported losses in 2025, experts estimate true losses up to **RM 54B** (~3% of GDP)
@@ -26,17 +26,17 @@ The scam problem is massive:
 
 **The problem:** Elderly parents don't know they're at risk. By the time anyone notices, the money is gone.
 
-**Core concept:** A child/family member links their phone to the parent's APK Guard app and gets notified when risky changes happen.
+**Core concept:** A child/family member links their phone to the parent's Safe Anot? app and gets notified when risky changes happen.
 
 **Features:**
-- **Guardian linking** — Parent's app generates a pairing code. Child scans it or enters it in their own APK Guard app. Simple, no account needed.
+- **Guardian linking** — Parent's app generates a pairing code. Child scans it or enters it in their own Safe Anot? app. Simple, no account needed.
 - **Alert triggers** — Notify guardian when:
   - Parent re-enables "Install unknown apps" for WhatsApp/Chrome/etc.
   - Parent installs a new app from outside Play Store (if detectable)
   - Parent's security score drops below a threshold
   - Parent disables Play Protect
   - Parent grants Accessibility permission to a new app
-  - Parent hasn't opened APK Guard in 30+ days (went dark)
+  - Parent hasn't opened Safe Anot? in 30+ days (went dark)
 - **Guardian dashboard** — Child sees parent's security score remotely. Green = safe, red = needs attention.
 - **Gentle nudge, not control** — The parent still controls their phone. The child gets notified and can call to help. This respects autonomy while adding a safety net.
 - **Multiple guardians** — Support 2-3 family members per protected device.
@@ -46,7 +46,7 @@ The scam problem is massive:
 - Lightweight backend: Firebase Cloud Messaging for push notifications
 - Pairing via unique codes (no account/login needed for v1)
 - Periodic heartbeat from parent's app (WorkManager) reports security score
-- Guardian app is the same APK Guard app in "guardian mode"
+- Guardian app is the same Safe Anot? app in "guardian mode"
 
 **Why this is powerful:**
 - Emotional hook: "Protect your parents"
@@ -99,7 +99,7 @@ The scam problem is massive:
 **Features:**
 - **Paste & check** — User pastes a message, link, or phone number. App analyzes it.
 - **Screenshot check** — User uploads a screenshot of a WhatsApp/Telegram message. App uses OCR to extract text, then analyzes.
-- **Share intent** — User shares suspicious content directly from WhatsApp/Telegram/SMS to APK Guard for instant checking.
+- **Share intent** — User shares suspicious content directly from WhatsApp/Telegram/SMS to Safe Anot? for instant checking.
 - **Check against known databases:**
   - SemakMule (Malaysia) — bank accounts, phone numbers
   - ScamShield (Singapore) — reported scam numbers
@@ -231,7 +231,7 @@ The scam problem is massive:
 - **Weekly quiz** — "Can you spot the scam?" with real examples
 - **Achievement badges** — "Phone Hardened", "Scam Spotter", "Family Guardian"
 - **Leaderboard** — Family group leaderboard for quiz scores (optional, fun)
-- **Share security score** — "I scored 100% on APK Guard! Check your phone too" — organic sharing/growth
+- **Share security score** — "I scored 100% on Safe Anot?! Check your phone too" — organic sharing/growth
 
 ---
 
@@ -293,7 +293,7 @@ The scam problem is massive:
 
 ## The Big Picture
 
-APK Guard starts as a simple security checklist.
+Safe Anot? starts as a simple security checklist.
 
 But the **real product** is:
 

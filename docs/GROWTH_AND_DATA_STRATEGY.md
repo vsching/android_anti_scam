@@ -1,4 +1,4 @@
-# APK Guard — Growth Strategy & Data Sources
+# Safe Anot? — Growth Strategy & Data Sources
 
 > **Date:** 2026-03-16
 > **Core Principle:** Phase 1 is about viral growth and user acquisition. Phase 2 and 3 build on the user base with partnerships and community data.
@@ -69,7 +69,7 @@ Every screen should have a share button:
 
 | Pillar | Format | Example |
 |--------|--------|---------|
-| **"Is This Real?"** | Duet/stitch with scam messages | Show a real WhatsApp scam message → check it in APK Guard → reveal verdict |
+| **"Is This Real?"** | Duet/stitch with scam messages | Show a real WhatsApp scam message → check it in Safe Anot? → reveal verdict |
 | **"Check Your Parents' Phone"** | POV/lifestyle | "POV: You visit your parents and check their phone security score... it's 14% 😱" |
 | **"Scam of the Week"** | Educational short | 30-sec breakdown of trending scam with real screenshots (redacted) |
 | **"Fake vs Real"** | Side-by-side comparison | Show fake Maybank domain vs real one. "Can you spot the difference?" |
@@ -82,7 +82,7 @@ Every screen should have a share button:
 | Phase | Timeline | Actions |
 |-------|----------|---------|
 | **Seed** | Pre-launch | Create 10 "Is This Real?" videos. Build anticipation. |
-| **Launch** | Week 1-2 | Launch app + "Check Your Parents' Phone Challenge". Hashtag: #APKGuard #ProtectYourParents |
+| **Launch** | Week 1-2 | Launch app + "Check Your Parents' Phone Challenge". Hashtag: #SafeAnot #ProtectYourParents |
 | **Grow** | Month 1-3 | Weekly "Scam of the Week" series. Partner with 5-10 Malaysian/SG micro-influencers (10K-100K followers). |
 | **Sustain** | Ongoing | UGC submissions ("I spotted a scam" stories). Duet with scam news. React to trending scam cases. |
 
@@ -119,7 +119,7 @@ Malaysian banks have confirmed:
 
 **How it works:**
 
-1. User **pastes a URL** or **shares it from WhatsApp/browser** to APK Guard
+1. User **pastes a URL** or **shares it from WhatsApp/browser** to Safe Anot?
 2. App **analyzes the domain** against multiple checks:
 
 | Check | Method | Example |
@@ -208,7 +208,7 @@ They will:
 1. **Screenshot it**
 2. **Share it in their WhatsApp family group** — "See! I told you don't click!"
 3. **Post it on TikTok/Facebook** — "Almost got scammed!"
-4. **Tell friends** — "Download APK Guard, it caught this"
+4. **Tell friends** — "Download Safe Anot?, it caught this"
 
 This is the **single most viral feature** we can build. Every scam attempt becomes free marketing for our app.
 
@@ -324,14 +324,14 @@ Curated list of social engineering trigger phrases in English + Malay + Chinese:
 - [ ] **"Is This Link Safe?" checker** — paste URL or share from WhatsApp, get verdict card
 - [ ] **Verdict share card** — "🔴 DANGEROUS" or "🟢 SAFE" card with app branding, one-tap share
 - [ ] **"Protect Your Parents" onboarding flow** — emotional hook: "Set up protection for someone you love"
-- [ ] **Family Guardian invite** — WhatsApp deep link to install APK Guard
+- [ ] **Family Guardian invite** — WhatsApp deep link to install Safe Anot?
 - [ ] **Scam of the Week notification** — weekly push with trending scam
 - [ ] **Referral link** — "Invite friends, both get premium features"
 
 ### Must-Have for TikTok Launch
 
 - [ ] 10 seed videos before app launch
-- [ ] #APKGuard #ProtectYourParents hashtag campaign
+- [ ] #SafeAnot #ProtectYourParents hashtag campaign
 - [ ] 5 Malaysian micro-influencers (parenting/tech/finance niche, 10K-100K followers)
 - [ ] "Check Your Parents' Phone" challenge template
 - [ ] Fake vs Real domain comparison video series

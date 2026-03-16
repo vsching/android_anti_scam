@@ -1,7 +1,7 @@
-# Cal AI Case Study — What We Can Learn & Apply to APK Guard
+# Cal AI Case Study — What We Can Learn & Apply to Safe Anot?
 
 > **Date:** 2026-03-16
-> **Purpose:** Study Cal AI's viral growth playbook and map applicable tactics to APK Guard.
+> **Purpose:** Study Cal AI's viral growth playbook and map applicable tactics to Safe Anot?.
 
 ---
 
@@ -106,11 +106,11 @@ No explanations. No feature lists. Just **show it working**.
 
 ---
 
-## Mapping Cal AI's Playbook to APK Guard
+## Mapping Cal AI's Playbook to Safe Anot?
 
 ### What Translates Directly
 
-| Cal AI Tactic | APK Guard Adaptation | Feasibility |
+| Cal AI Tactic | Safe Anot? Adaptation | Feasibility |
 |---------------|----------------------|-------------|
 | **Multi-account TikTok** | Run 5-10 TikTok accounts with different angles: scam awareness, parent protection, fake domain reveals, Malaysian/SG humor, tech tips | HIGH — we can start with 3-5 accounts |
 | **Micro-influencer network** | Partner with Malaysian/SG micro-influencers in: parenting, finance, tech, elder care niches. Target $5 CPM. | HIGH — cheaper in SE Asia than US |
@@ -144,7 +144,7 @@ This is our **core viral action**. Everything should be built around making this
 
 ### Our "Calorie Number" Is the Scam Verdict
 
-| Cal AI | APK Guard |
+| Cal AI | Safe Anot? |
 |--------|-----------|
 | Photo → "847 calories" | Link → "🔴 DANGEROUS — Fake Maybank domain" |
 | Reaction: "Wow, that burger is 847 calories?!" | Reaction: "OMG, that WhatsApp link is a SCAM?!" |
@@ -153,27 +153,27 @@ This is our **core viral action**. Everything should be built around making this
 
 ---
 
-## APK Guard TikTok Content Strategy (Cal AI Model)
+## Safe Anot? TikTok Content Strategy (Cal AI Model)
 
 ### Account Structure (Start with 5)
 
 | Account | Angle | Content Type |
 |---------|-------|-------------|
-| `@apkguard` | Main — high production | Product demos, scam reveals, verdict reactions |
-| `@apkguard.my` | Malaysian focus | Malay language, local scams, local bank fakes, "Mak" humor |
-| `@apkguard.sg` | Singapore focus | English/Chinese, SG scams, ScamShield complement |
+| `@safeanot` | Main — high production | Product demos, scam reveals, verdict reactions |
+| `@safeanot.my` | Malaysian focus | Malay language, local scams, local bank fakes, "Mak" humor |
+| `@safeanot.sg` | Singapore focus | English/Chinese, SG scams, ScamShield complement |
 | `@protectyourparents` | Family/emotional | POV: checking parents' phones, elder protection stories |
 | `@scamalertmy` | News/education | Scam of the week, fake vs real domains, trending scam breakdowns |
 
 ### Content Formats That Map to Cal AI's Winners
 
-| Format | Cal AI Version | APK Guard Version |
+| Format | Cal AI Version | Safe Anot? Version |
 |--------|---------------|-------------------|
 | **Product demo** | Film food → get calories | Film pasting scam URL → get DANGEROUS verdict |
 | **Surprise/reaction** | "This salad is 1,200 calories?!" | "This Maybank link is FAKE?! 😱" |
 | **Before/after** | Weight loss journey | "My dad's phone: 14% secure → 100% secure" |
 | **Challenge** | "Guess the calories" | "Can you spot the fake? Real vs fake domain" |
-| **UGC/testimonial** | "Cal AI changed my diet" | "APK Guard saved my mum from a scam" |
+| **UGC/testimonial** | "Cal AI changed my diet" | "Safe Anot? saved my mum from a scam" |
 | **Duet/stitch** | React to unhealthy meals | React to viral scam messages circulating on WhatsApp |
 | **Tutorial** | "How I track meals" | "How to check if a WhatsApp link is safe in 3 seconds" |
 
@@ -263,7 +263,7 @@ Based on Cal AI's playbook, here's what we should build first to enable viral gr
 User checks suspicious link
   → Gets dramatic DANGEROUS verdict
     → Screenshots / shares on WhatsApp & TikTok
-      → Friends see it, download APK Guard
+      → Friends see it, download Safe Anot?
         → They check their own suspicious links
           → They share their results
             → More downloads

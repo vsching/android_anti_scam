@@ -1,4 +1,4 @@
-# APK Guard - Technical & Requirements Documentation
+# Safe Anot? - Technical & Requirements Documentation
 
 > **Version:** 1.0 (Draft)
 > **Last Updated:** 2026-03-16
@@ -24,8 +24,8 @@
 
 | Field | Detail |
 |---|---|
-| **App Name** | APK Guard |
-| **Tagline** | "Detect, warn, and reduce APK scam risk before users get compromised" |
+| **App Name** | Safe Anot? |
+| **Tagline** | "Safe anot? Check first before you click." |
 | **Platform** | Android |
 | **Minimum SDK** | API 26 (Android 8.0 Oreo) |
 | **Target SDK** | API 34+ (Android 14+) |
@@ -39,7 +39,7 @@ There is no built-in Android feature that gives users a single, clear view of wh
 
 ### 1.2 Solution
 
-APK Guard provides a security-checklist companion that:
+Safe Anot? provides a security-checklist companion that:
 
 1. **Detects** which high-risk sideload-capable apps are installed on the device.
 2. **Warns** users with a clear dashboard showing which apps need attention.
@@ -186,7 +186,7 @@ startActivity(intent)
 - Content covers:
   1. What APK scams are and how they work.
   2. How scam APKs reach your device (WhatsApp, Telegram, Chrome, etc.).
-  3. What APK Guard does to protect you.
+  3. What Safe Anot? does to protect you.
   4. Quick-start: "Let's audit your device now."
 - "Skip" and "Next" navigation.
 - Onboarding completion state persisted in SharedPreferences.
@@ -280,8 +280,8 @@ app/
 ├── build.gradle.kts
 ├── src/main/
 │   ├── AndroidManifest.xml
-│   └── java/com/apkguard/
-│       ├── ApkGuardApp.kt                  # Application class (Hilt entry point)
+│   └── java/com/safeanot/
+│       ├── SafeAnotApp.kt                  # Application class (Hilt entry point)
 │       ├── MainActivity.kt                 # Single-activity host
 │       │
 │       ├── core/                           # Shared utilities
@@ -440,7 +440,7 @@ The following packages must be declared in `AndroidManifest.xml` for Android 11+
 </manifest>
 ```
 
-**Important:** The `QUERY_ALL_PACKAGES` permission must **NOT** be used. Google Play policy restricts this permission to specific app categories (device management, antivirus, financial apps with regulatory requirements). APK Guard does not qualify and would be rejected during review.
+**Important:** The `QUERY_ALL_PACKAGES` permission must **NOT** be used. Google Play policy restricts this permission to specific app categories (device management, antivirus, financial apps with regulatory requirements). Safe Anot? does not qualify and would be rejected during review.
 
 ### 3.6 Dependency Versions (Indicative)
 
@@ -539,7 +539,7 @@ The app explicitly avoids requesting any dangerous permissions to maintain user 
 Onboarding (first launch only)
   ├── Page 1: What are APK scams?
   ├── Page 2: How scam APKs reach you
-  ├── Page 3: What APK Guard does
+  ├── Page 3: What Safe Anot? does
   └── Page 4: Let's audit your device
 
 Main App
@@ -770,7 +770,7 @@ The database is pre-seeded with the following audit items on first launch:
 | **`canRequestPackageInstalls()` scope** | `PackageManager.canRequestPackageInstalls()` only returns the status for the **calling** package, not for arbitrary packages. | We cannot read whether WhatsApp/Chrome/etc. currently have install permission. We must rely on user self-reporting. |
 | **No public API for other apps' install permission state** | There is no Android API to query whether a third-party app has been granted `REQUEST_INSTALL_PACKAGES`. | Reinforces the checklist/user-confirmation model as the only viable approach. |
 | **`QUERY_ALL_PACKAGES` prohibited** | Google Play policy restricts this permission. Using it would result in app rejection. | Must declare specific `<queries>` entries for each package to detect. New packages require an app update. |
-| **`REQUEST_INSTALL_PACKAGES` prohibited** | APK Guard must not request this permission as it would contradict the app's purpose. | The app itself cannot install APKs, which is the correct behavior. |
+| **`REQUEST_INSTALL_PACKAGES` prohibited** | Safe Anot? must not request this permission as it would contradict the app's purpose. | The app itself cannot install APKs, which is the correct behavior. |
 | **WorkManager minimum interval** | `PeriodicWorkRequest` has a minimum interval of 15 minutes. | Not a practical issue since our minimum reminder interval is 3 days. |
 
 ### 7.2 UX Constraints
@@ -855,7 +855,7 @@ The following are explicitly **out of scope** for v1:
 | Users mark items "Secured" without actually fixing | Medium | Medium | Periodic reminders to re-audit; educational content explaining importance |
 | OEM-specific settings pages break deep-links | Medium | Low | Provide fallback to general app settings; include manual instructions |
 | New sideload-capable apps not in query list | Medium | Low | Regular app updates to add new packages; v2 could add user-reported apps |
-| Users confuse APK Guard with an antivirus app | Medium | Low | Clear onboarding and Play Store description managing expectations |
+| Users confuse Safe Anot? with an antivirus app | Medium | Low | Clear onboarding and Play Store description managing expectations |
 
 ---
 

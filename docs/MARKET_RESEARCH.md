@@ -1,4 +1,4 @@
-# APK Guard - Market Research Report
+# Safe Anot? - Market Research Report
 
 > **Date:** 2026-03-16
 > **Status:** Initial Research
@@ -52,7 +52,7 @@ Sources: [Meta/WhatsApp](https://about.fb.com/news/2025/08/new-whatsapp-tools-ti
 - **Does NOT audit device settings or "Install unknown apps" permissions**
 - **Does NOT guide users to harden their device against sideloading**
 
-**Our differentiation:** ScamShield is *reactive* (check after receiving a suspicious message). APK Guard is *proactive* (harden the device before a scam APK can ever be installed).
+**Our differentiation:** ScamShield is *reactive* (check after receiving a suspicious message). Safe Anot? is *proactive* (harden the device before a scam APK can ever be installed).
 
 Sources: [ScamShield](https://www.scamshield.gov.sg/about-scamshield/), [ScamShield FAQ](https://ask.gov.sg/scamshield), [NCPC](https://www.ncpc.org.sg/aboutscamshield.html)
 
@@ -101,7 +101,7 @@ Source: [Truecaller on Google Play](https://play.google.com/store/apps/details?i
 - Enterprise pricing / B2B sales cycle
 - End users don't interact with Appdome directly
 
-**Our differentiation:** Appdome validates our technical approach (detecting unknown-source settings is a real security vector). APK Guard brings this capability directly to consumers as a standalone app.
+**Our differentiation:** Appdome validates our technical approach (detecting unknown-source settings is a real security vector). Safe Anot? brings this capability directly to consumers as a standalone app.
 
 Source: [Appdome Unknown Sources Detection](https://www.appdome.com/how-to/mobile-app-security/jailbreak-root-detection/detect-unknown-sources-protect-android-apps/)
 
@@ -128,7 +128,7 @@ Source: [Appdome Unknown Sources Detection](https://www.appdome.com/how-to/mobil
 - Enhanced Fraud Protection is automatic, not user-controllable
 - Users don't know their risk posture
 
-**Our differentiation:** Play Protect is invisible infrastructure. APK Guard makes the risk **visible and actionable** — showing users exactly which apps can sideload APKs and guiding them to fix it. We complement Play Protect, not compete with it.
+**Our differentiation:** Play Protect is invisible infrastructure. Safe Anot? makes the risk **visible and actionable** — showing users exactly which apps can sideload APKs and guiding them to fix it. We complement Play Protect, not compete with it.
 
 Sources: [Google Security Blog](https://security.googleblog.com/2026/02/keeping-google-play-android-app-ecosystem-safe-2025.html), [Google Play Protect](https://support.google.com/googleplay/answer/2812853)
 
@@ -165,14 +165,14 @@ Sources: [Google Security Blog](https://security.googleblog.com/2026/02/keeping-
 
 ### 2.2 Indirect Competitors (Antivirus/Security Suites)
 
-| App | Publisher | Downloads | Relevant Features | Limitations vs APK Guard |
+| App | Publisher | Downloads | Relevant Features | Limitations vs Safe Anot? |
 |-----|-----------|-----------|-------------------|--------------------------|
 | **AVG AntiVirus** | AVG Mobile | 100M+ | Scam site blocking, real-time app scanning, password leak alerts | No install-source audit, heavy, many permissions |
 | **Bitdefender** | Bitdefender | 10M+ | Malware scanning, web protection, scam alerts | Post-install only, no sideload prevention |
 | **Malwarebytes** | Malwarebytes | 50M+ | Malware detection, ad/tracker blocking | Post-install scanning only |
 | **Protectstar Anti Spy** | Protectstar | 1M+ | Spy app detection, AI-based threat scanning | Focused on spyware, not sideload sources |
 
-**Key weakness of all AV apps:** They scan **after** an app is installed. APK Guard prevents the risk **before** installation by hardening the device settings.
+**Key weakness of all AV apps:** They scan **after** an app is installed. Safe Anot? prevents the risk **before** installation by hardening the device settings.
 
 ### 2.3 Government Tools
 
@@ -196,7 +196,7 @@ Sources: [Google Security Blog](https://security.googleblog.com/2026/02/keeping-
 
 ### 2.5 Competitive Positioning Matrix
 
-| Capability | ScamShield | Truecaller | AV Apps | Play Protect | MDM | **APK Guard** |
+| Capability | ScamShield | Truecaller | AV Apps | Play Protect | MDM | **Safe Anot?** |
 |---|---|---|---|---|---|---|
 | Block scam calls/SMS | Yes | Yes | Some | No | No | No (not our focus) |
 | Check suspicious links/messages | Yes | No | Some | No | No | v2 |
@@ -220,7 +220,7 @@ Sources: [Google Security Blog](https://security.googleblog.com/2026/02/keeping-
 6. **Enterprise MDM** can enforce policies — but not available to consumers
 7. **Appdome SDK** detects unknown sources — but only as an embedded SDK, not a consumer app
 
-**APK Guard fills the pre-install prevention gap** — hardening the device before a scam APK can be installed. We are the only consumer-facing app that makes install-source risk visible and actionable.
+**Safe Anot? fills the pre-install prevention gap** — hardening the device before a scam APK can be installed. We are the only consumer-facing app that makes install-source risk visible and actionable.
 
 ---
 
@@ -235,7 +235,7 @@ Sources: [Google Security Blog](https://security.googleblog.com/2026/02/keeping-
 
 Sources: [Google Security Blog](https://security.googleblog.com/2026/02/keeping-google-play-android-app-ecosystem-safe-2025.html), [Google Blog](https://blog.google/products-and-platforms/platforms/google-play/how-we-kept-google-play-safe-in-2025/)
 
-**Implication:** Google is investing heavily in platform-level protection, but there's still a gap in user-facing audit tools. APK Guard complements Play Protect rather than competing with it.
+**Implication:** Google is investing heavily in platform-level protection, but there's still a gap in user-facing audit tools. Safe Anot? complements Play Protect rather than competing with it.
 
 ---
 
@@ -264,7 +264,7 @@ Sources: [SemakMule](https://semakmule.rmp.gov.my/), [Lexology](https://www.lexo
 - Cross-border law enforcement cooperation increasing
 - Growing regulatory pressure on messaging platforms (Meta, Telegram)
 
-**Opportunity:** Governments are actively investing in anti-scam measures. APK Guard could partner with or complement government initiatives, especially in Malaysia where no equivalent to ScamShield exists as an app.
+**Opportunity:** Governments are actively investing in anti-scam measures. Safe Anot? could partner with or complement government initiatives, especially in Malaysia where no equivalent to ScamShield exists as an app.
 
 ---
 
@@ -283,7 +283,7 @@ Sources: [SemakMule](https://semakmule.rmp.gov.my/), [Lexology](https://www.lexo
 
 Based on how similar apps and services monetize:
 
-| Model | Description | Examples | Fit for APK Guard |
+| Model | Description | Examples | Fit for Safe Anot? |
 |-------|-------------|----------|-------------------|
 | **Free (ad-supported)** | Free app with ads | Most AV apps (free tier) | Good for user acquisition |
 | **Freemium** | Basic audit free, premium features paid | AVG, Bitdefender | Good — free audit, paid monitoring/alerts |

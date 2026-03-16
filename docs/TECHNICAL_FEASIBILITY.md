@@ -1,4 +1,4 @@
-# APK Guard — Technical Feasibility Assessment
+# Safe Anot? — Technical Feasibility Assessment
 
 > **Date:** 2026-03-16
 > **Purpose:** Evaluate whether each brainstormed feature is technically possible on a normal (non-rooted, non-MDM) Android consumer device.
