@@ -610,11 +610,13 @@ button:focus-visible {
   transition: all 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
-.app-card[data-status="needs-review"] {
-  border-left: 3px solid var(--red);
+.app-card {
   cursor: pointer;
 }
-.app-card[data-status="needs-review"]:hover { background: var(--bg-card-hover); }
+.app-card:hover { background: var(--bg-card-hover); }
+.app-card[data-status="needs-review"] {
+  border-left: 3px solid var(--red);
+}
 .app-card[data-status="needs-review"]:active { transform: scale(0.98); }
 .app-card[data-status="secured"] {
   border-left: 3px solid var(--green);
@@ -1458,6 +1460,216 @@ button:focus-visible {
 }
 .toast.show { opacity: 1; transform: translateY(0); }
 
+/* ========== SHIELD EDUCATION ========== */
+.edu-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 20px 16px;
+  text-align: center;
+}
+.edu-icon-wrapper {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 16px;
+}
+.edu-icon-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  animation: eduGlow 2.5s ease-in-out infinite;
+}
+@keyframes eduGlow {
+  0%, 100% { box-shadow: 0 0 25px var(--red-glow), 0 0 50px rgba(248,81,73,0.1); }
+  50% { box-shadow: 0 0 40px var(--red-glow), 0 0 70px rgba(248,81,73,0.2); }
+}
+.edu-icon-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--red-dim);
+  border: 2px solid rgba(248,81,73,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+.edu-icon-inner .material-symbols-outlined {
+  font-size: 40px;
+  color: var(--red);
+  font-variation-settings: 'FILL' 1;
+}
+.edu-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+.edu-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  max-width: 300px;
+}
+
+.edu-steps {
+  padding: 0 20px;
+  margin-bottom: 16px;
+}
+.edu-step {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  position: relative;
+}
+.edu-step-num {
+  position: absolute;
+  top: -10px;
+  left: 16px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--red);
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.edu-step-content {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.edu-step-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 10px;
+  background: var(--red-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.edu-step-icon .material-symbols-outlined {
+  font-size: 22px;
+  color: var(--red);
+}
+.edu-step-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.edu-step-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.edu-step-arrow {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0;
+  color: var(--text-tertiary);
+}
+.edu-step-arrow .material-symbols-outlined { font-size: 20px; }
+
+.edu-stat-card {
+  margin: 0 20px 16px;
+  padding: 16px;
+  background: var(--orange-dim);
+  border: 1px solid rgba(210,153,34,0.15);
+  border-radius: var(--radius-sm);
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.edu-stat-card .material-symbols-outlined {
+  font-size: 28px;
+  color: var(--orange);
+  min-width: 28px;
+}
+.edu-stat-number {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--orange);
+  letter-spacing: -0.5px;
+}
+.edu-stat-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.edu-bottom {
+  padding: 0 20px 24px;
+  text-align: center;
+}
+.edu-cta-text {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.edu-scan-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--gradient-accent);
+  color: white;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(88,166,255,0.25);
+}
+.edu-scan-btn:hover { box-shadow: 0 4px 24px rgba(88,166,255,0.35); transform: translateY(-1px); }
+.edu-scan-btn:active { transform: scale(0.98); }
+.edu-reassure {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-top: 10px;
+}
+
+/* Why button in shield results header */
+.btn-text-why {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+.btn-text-why:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+.btn-text-why .material-symbols-outlined { font-size: 16px; }
+
+/* App card expanded "why" explanation */
+.app-card-why {
+  display: none;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.app-card.expanded .app-card-why { display: block; }
+.app-card-why strong { color: var(--text-primary); font-weight: 600; }
+
 /* Mobile responsive */
 @media (max-width: 420px) {
   body {
@@ -1551,7 +1763,7 @@ button:focus-visible {
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <!-- ========== SCREEN 1: CHECK ========== -->
-  <div class="screen active" id="screen-check">
+  <div class="screen" id="screen-check">
     <div class="check-header">
       <div class="logo">
         <div class="logo-icon" aria-hidden="true">
@@ -1626,40 +1838,117 @@ button:focus-visible {
     </div>
   </div>
 
-  <!-- ========== SCREEN 2: SHIELD ========== -->
-  <div class="screen" id="screen-shield">
-    <div class="shield-header">
-      <h2>Your Phone Shield</h2>
-    </div>
+  <!-- ========== SCREEN: SHIELD ========== -->
+  <div class="screen active" id="screen-shield">
 
-    <div class="shield-hero">
-      <div class="shield-icon-wrapper">
-        <div class="shield-icon-bg" id="shieldGlowBg"></div>
-        <div class="shield-icon-inner">
-          <span class="material-symbols-outlined" id="shieldIconSymbol">shield</span>
+    <!-- EDUCATION VIEW (shown first time) -->
+    <div id="shieldEducation">
+      <div class="shield-header">
+        <h2>Your Phone Shield</h2>
+      </div>
+
+      <div class="edu-hero">
+        <div class="edu-icon-wrapper">
+          <div class="edu-icon-bg"></div>
+          <div class="edu-icon-inner">
+            <span class="material-symbols-outlined">warning</span>
+          </div>
+        </div>
+        <h3 class="edu-title">Did you know?</h3>
+        <p class="edu-subtitle">Your phone might be allowing scam apps to install without you realizing it.</p>
+      </div>
+
+      <div class="edu-steps">
+        <div class="edu-step">
+          <div class="edu-step-num">1</div>
+          <div class="edu-step-content">
+            <div class="edu-step-icon"><span class="material-symbols-outlined">chat</span></div>
+            <div>
+              <div class="edu-step-title">Scammer sends a file</div>
+              <div class="edu-step-desc">They send a dangerous APK file disguised as a "bank update" or "trading app" via WhatsApp or Telegram.</div>
+            </div>
+          </div>
+        </div>
+        <div class="edu-step-arrow"><span class="material-symbols-outlined">arrow_downward</span></div>
+        <div class="edu-step">
+          <div class="edu-step-num">2</div>
+          <div class="edu-step-content">
+            <div class="edu-step-icon"><span class="material-symbols-outlined">download</span></div>
+            <div>
+              <div class="edu-step-title">Your phone installs it</div>
+              <div class="edu-step-desc">If "Install unknown apps" is ON for WhatsApp, your phone allows the scam app to be installed — no warning.</div>
+            </div>
+          </div>
+        </div>
+        <div class="edu-step-arrow"><span class="material-symbols-outlined">arrow_downward</span></div>
+        <div class="edu-step">
+          <div class="edu-step-num">3</div>
+          <div class="edu-step-content">
+            <div class="edu-step-icon"><span class="material-symbols-outlined">credit_card_off</span></div>
+            <div>
+              <div class="edu-step-title">Money gone</div>
+              <div class="edu-step-desc">The scam app steals your banking login, OTP codes, or takes control of your phone. Victims lose thousands.</div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="shield-score" id="shieldScore" aria-label="Security score">72%</div>
-      <div class="shield-score-label" id="shieldScoreLabel">5 of 7 items secured</div>
+
+      <div class="edu-stat-card">
+        <span class="material-symbols-outlined" aria-hidden="true">trending_up</span>
+        <div>
+          <div class="edu-stat-number">RM 2.7 billion</div>
+          <div class="edu-stat-label">lost to scams in Malaysia in 2025</div>
+        </div>
+      </div>
+
+      <div class="edu-bottom">
+        <p class="edu-cta-text">Let's check if your phone is vulnerable.</p>
+        <button class="edu-scan-btn" id="btnStartShieldScan">
+          <span class="material-symbols-outlined" aria-hidden="true">radar</span>
+          Scan My Phone
+        </button>
+        <p class="edu-reassure">Takes 3 seconds. No data leaves your phone.</p>
+      </div>
     </div>
 
-    <div class="shield-section-title">Messaging Apps</div>
-    <div id="cards-messaging"></div>
+    <!-- SCAN RESULTS VIEW (shown after scan) -->
+    <div id="shieldResults" style="display:none;">
+      <div class="shield-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <h2>Your Phone Shield</h2>
+        <button class="btn-text-why" id="btnWhyThisMatters" aria-label="Why this matters">
+          <span class="material-symbols-outlined" aria-hidden="true">help</span> Why?
+        </button>
+      </div>
 
-    <div class="shield-section-title">Browsers</div>
-    <div id="cards-browsers"></div>
+      <div class="shield-hero">
+        <div class="shield-icon-wrapper">
+          <div class="shield-icon-bg" id="shieldGlowBg"></div>
+          <div class="shield-icon-inner">
+            <span class="material-symbols-outlined" id="shieldIconSymbol">shield</span>
+          </div>
+        </div>
+        <div class="shield-score" id="shieldScore" aria-label="Security score">72%</div>
+        <div class="shield-score-label" id="shieldScoreLabel">5 of 7 items secured</div>
+      </div>
 
-    <div class="shield-section-title">File Managers</div>
-    <div id="cards-files"></div>
+      <div class="shield-section-title">Messaging Apps</div>
+      <div id="cards-messaging"></div>
 
-    <div class="shield-section-title">Protection Status</div>
-    <div id="cards-protection"></div>
+      <div class="shield-section-title">Browsers</div>
+      <div id="cards-browsers"></div>
 
-    <div class="recheck-container">
-      <button class="btn-recheck" id="btnRecheck">
-        <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
-        Recheck All
-      </button>
+      <div class="shield-section-title">File Managers</div>
+      <div id="cards-files"></div>
+
+      <div class="shield-section-title">Protection Status</div>
+      <div id="cards-protection"></div>
+
+      <div class="recheck-container">
+        <button class="btn-recheck" id="btnRecheck">
+          <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+          Recheck All
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1922,13 +2211,13 @@ button:focus-visible {
 
   <!-- Bottom Navigation -->
   <nav class="bottom-nav" id="bottomNav" aria-label="Main navigation">
-    <button class="nav-item active" data-screen="screen-check" aria-label="Check links" aria-current="page">
-      <span class="material-symbols-outlined">search</span>
-      <span class="nav-label">Check</span>
-    </button>
-    <button class="nav-item" data-screen="screen-shield" aria-label="Phone shield">
+    <button class="nav-item active" data-screen="screen-shield" aria-label="Phone shield" aria-current="page">
       <span class="material-symbols-outlined">shield</span>
       <span class="nav-label">Shield</span>
+    </button>
+    <button class="nav-item" data-screen="screen-check" aria-label="Check links">
+      <span class="material-symbols-outlined">search</span>
+      <span class="nav-label">Check</span>
     </button>
     <button class="nav-item" data-screen="screen-alerts" aria-label="Scam alerts">
       <span class="material-symbols-outlined">notifications</span>
@@ -1944,17 +2233,18 @@ button:focus-visible {
 <script>
 // ========== APP DATA ==========
 const apps = [
-  { id: 'whatsapp', name: 'WhatsApp', abbr: 'WA', color: '#25D366', category: 'messaging', status: 'needs-review', desc: 'Can receive and install APK files', riskText: 'WhatsApp can be used to send you dangerous APK files. If "Install unknown apps" is enabled, these files could be installed on your phone.' },
-  { id: 'telegram', name: 'Telegram', abbr: 'TG', color: '#0088cc', category: 'messaging', status: 'needs-review', desc: 'Can receive and install APK files', riskText: 'Telegram can be used to send you dangerous APK files. If "Install unknown apps" is enabled, these files could be installed on your phone.' },
-  { id: 'chrome', name: 'Chrome', abbr: 'CR', color: '#4285F4', category: 'browsers', status: 'needs-review', desc: 'Common source for APK downloads', riskText: 'Chrome can be used to download dangerous APK files from the internet. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-  { id: 'firefox', name: 'Firefox', abbr: 'FF', color: '#FF7139', category: 'browsers', status: 'secured', desc: 'Install permission disabled', riskText: 'Firefox can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-  { id: 'uc-browser', name: 'UC Browser', abbr: 'UC', color: '#F58220', category: 'browsers', status: 'needs-review', desc: 'Can download and install APK files', riskText: 'UC Browser can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-  { id: 'files-google', name: 'Files by Google', abbr: 'FG', color: '#34a853', category: 'files', status: 'secured', desc: 'Install permission disabled', riskText: 'Files by Google can open APK files stored on your device. If "Install unknown apps" is enabled, those files could be installed.' },
-  { id: 'playprotect', name: 'Play Protect', abbr: null, color: '#34a853', category: 'protection', status: 'secured', desc: 'Active and up to date', riskText: '' },
+  { id: 'whatsapp', name: 'WhatsApp', abbr: 'WA', color: '#25D366', category: 'messaging', status: 'needs-review', desc: 'Can receive and install APK files', riskText: 'WhatsApp can be used to send you dangerous APK files. If "Install unknown apps" is enabled, these files could be installed on your phone.', whyText: 'Scammers send APK files via WhatsApp disguised as "bank updates" or "security apps". If WhatsApp is allowed to install apps, <strong>tapping the file installs it directly</strong> — no Play Store safety check. Disabling this means WhatsApp can still receive files, but cannot install them.' },
+  { id: 'telegram', name: 'Telegram', abbr: 'TG', color: '#0088cc', category: 'messaging', status: 'needs-review', desc: 'Can receive and install APK files', riskText: 'Telegram can be used to send you dangerous APK files. If "Install unknown apps" is enabled, these files could be installed on your phone.', whyText: 'Telegram groups are a top channel for scam APK distribution. Scammers create fake "investment" or "trading" groups and share APK files. <strong>If Telegram can install apps, one tap is all it takes.</strong> Disabling this blocks that path.' },
+  { id: 'chrome', name: 'Chrome', abbr: 'CR', color: '#4285F4', category: 'browsers', status: 'needs-review', desc: 'Common source for APK downloads', riskText: 'Chrome can be used to download dangerous APK files from the internet. If "Install unknown apps" is enabled, those files could be installed on your phone.', whyText: 'Scam websites trick users into downloading APK files through Chrome. Fake "virus warning" popups or "update required" pages lead to malicious downloads. <strong>If Chrome can install apps, the downloaded APK installs immediately.</strong> Disabling this adds a safety barrier.' },
+  { id: 'firefox', name: 'Firefox', abbr: 'FF', color: '#FF7139', category: 'browsers', status: 'secured', desc: 'Install permission disabled', riskText: 'Firefox can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.', whyText: 'Same risk as Chrome — any browser that can install apps is a potential scam entry point. This one is already secured.' },
+  { id: 'uc-browser', name: 'UC Browser', abbr: 'UC', color: '#F58220', category: 'browsers', status: 'needs-review', desc: 'Can download and install APK files', riskText: 'UC Browser can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.', whyText: 'UC Browser is popular in SE Asia and is a common target for scam redirects. <strong>Malicious ads within UC Browser can trigger APK downloads.</strong> Disabling install permission prevents these from being installed.' },
+  { id: 'files-google', name: 'Files by Google', abbr: 'FG', color: '#34a853', category: 'files', status: 'secured', desc: 'Install permission disabled', riskText: 'Files by Google can open APK files stored on your device. If "Install unknown apps" is enabled, those files could be installed.', whyText: 'File managers can open APK files saved on your device. If install permission is enabled, tapping any APK file installs it. This one is already secured.' },
+  { id: 'playprotect', name: 'Play Protect', abbr: null, color: '#34a853', category: 'protection', status: 'secured', desc: 'Active and up to date', riskText: '', whyText: 'Google Play Protect scans your device for harmful apps. Keeping it enabled adds an extra layer of protection against scam apps.' },
 ];
 
 let currentFixApp = null;
-let currentScreen = 'screen-check';
+let currentScreen = 'screen-shield';
+let shieldScanned = false;
 let onboardingStep = 0;
 
 // ========== EXAMPLE LINK VERDICTS ==========
@@ -2029,21 +2319,35 @@ function renderCards() {
       actionHtml = '<button class="fix-btn" data-fix="' + app.id + '">Fix</button>';
     }
 
+    const whyHtml = app.whyText ? '<div class="app-card-why">' + app.whyText + '</div>' : '';
+
     card.innerHTML =
       '<div class="app-card-icon" style="background:' + app.color + ';">' + iconContent + '</div>' +
       '<div class="app-card-body">' +
         '<div class="app-card-name">' + app.name + '</div>' +
         '<div class="app-card-desc">' + descText + '</div>' +
+        whyHtml +
       '</div>' +
       '<div class="app-card-right">' + badgeHtml + actionHtml + '</div>';
 
-    if (app.status === 'needs-review') {
-      card.setAttribute('tabindex', '0');
-      card.setAttribute('role', 'button');
-      card.setAttribute('aria-label', app.name + ': Needs Review — tap to fix');
-      card.addEventListener('click', () => openFix(app.id));
-      addKeyboardActivation(card);
-    }
+    // Tap card to expand "why" explanation, or fix if needs-review
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.fix-btn')) return;
+      if (app.status === 'needs-review') {
+        // Toggle expanded state to show "why"
+        const wasExpanded = card.classList.contains('expanded');
+        card.classList.toggle('expanded');
+        // Don't auto-open fix flow on first tap — let user read "why" first
+      } else {
+        card.classList.toggle('expanded');
+      }
+    });
+
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', app.name + ': ' + (app.status === 'secured' ? 'Secured' : app.status === 'needs-review' ? 'Needs Review' : 'Not installed') + ' — tap for details');
+    addKeyboardActivation(card);
+
     const fixBtn = card.querySelector('.fix-btn');
     if (fixBtn) {
       fixBtn.addEventListener('click', (e) => { e.stopPropagation(); openFix(app.id); });
@@ -2421,7 +2725,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       const screenId = btn.dataset.screen;
       showScreen(screenId);
-      if (screenId === 'screen-shield') {
+      if (screenId === 'screen-shield' && shieldScanned) {
         setTimeout(updateShield, 100);
       }
     });
@@ -2466,6 +2770,33 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
     addKeyboardActivation(card);
+  });
+
+  // Shield education → scan flow
+  document.getElementById('btnStartShieldScan').addEventListener('click', () => {
+    shieldScanned = true;
+    // Show scan overlay
+    const scanOv = document.getElementById('scanOverlay');
+    if (scanOv) {
+      scanOv.classList.add('show');
+      setTimeout(() => {
+        scanOv.classList.remove('show');
+        document.getElementById('shieldEducation').style.display = 'none';
+        document.getElementById('shieldResults').style.display = 'block';
+        updateShield();
+      }, 1800);
+    } else {
+      document.getElementById('shieldEducation').style.display = 'none';
+      document.getElementById('shieldResults').style.display = 'block';
+      updateShield();
+    }
+  });
+
+  // "Why?" button in shield results — show education again
+  document.getElementById('btnWhyThisMatters').addEventListener('click', () => {
+    document.getElementById('shieldResults').style.display = 'none';
+    document.getElementById('shieldEducation').style.display = 'block';
+    document.getElementById('screen-shield').scrollTop = 0;
   });
 
   // Shield / Fix flow
