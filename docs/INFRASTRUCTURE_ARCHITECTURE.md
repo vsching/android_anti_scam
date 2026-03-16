@@ -273,7 +273,7 @@ CREATE INDEX idx_pending_unprocessed ON pending_discoveries(processed, created_a
 | Daily 3:30am MYT | `scrape_semakmule.py` | Scrapling: scrape SemakMule for new flagged numbers |
 | Daily 4am MYT | `scrape_scam_news.py` | Scrapling: scrape MY/SG news sites for scam articles |
 | Daily 4:30am MYT | `process_and_merge.py` | Deduplicate, merge all sources, generate verdicts |
-| Daily 5am MYT | `push_to_cloudflare.py` | Bulk upload processed data to Cloudflare KV via API |
+| Daily 5am MYT | `push_to_cloudflare.py` | Upload SQLite + Bloom filter + delta to R2; update KV allowlist + new discoveries only |
 | Daily 5:30am MYT | `update_alerts.py` | Insert new scam alerts into D1 |
 | Hourly | `verify_active_scams.py` | Check if reported scam URLs are still active |
 | Weekly Mon 9am | `generate_weekly_report.py` | Aggregate stats for "Scam of the Week" push notification |
