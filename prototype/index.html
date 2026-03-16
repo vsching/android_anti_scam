@@ -2,152 +2,1025 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Safe Anot? — Protect Your Phone</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Safe Anot? — Scam Protection for MY/SG</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
 <style>
 :root {
-  --primary: #1a73e8;
-  --primary-light: #e8f0fe;
-  --primary-dark: #1557b0;
-  --green: #34a853;
-  --green-light: #e6f4ea;
-  --red: #ea4335;
-  --red-light: #fce8e6;
-  --orange: #f9ab00;
-  --orange-light: #fef7e0;
-  --gray: #9aa0a6;
-  --gray-light: #f1f3f4;
-  --text-primary: #202124;
-  --text-secondary: #5f6368;
-  --surface: #ffffff;
-  --background: #f8f9fa;
+  --bg: #0D1117;
+  --bg-card: #161B22;
+  --bg-card-hover: #1C2129;
+  --bg-elevated: #1E2430;
+  --blue: #58A6FF;
+  --blue-dim: rgba(88,166,255,0.15);
+  --purple: #BC8CFF;
+  --green: #3FB950;
+  --green-dim: rgba(63,185,80,0.12);
+  --green-glow: rgba(63,185,80,0.3);
+  --red: #F85149;
+  --red-dim: rgba(248,81,73,0.12);
+  --red-glow: rgba(248,81,73,0.3);
+  --orange: #D29922;
+  --orange-dim: rgba(210,153,34,0.12);
+  --orange-glow: rgba(210,153,34,0.3);
+  --text-primary: #F0F6FC;
+  --text-secondary: #8B949E;
+  --text-tertiary: #7D8590;
+  --border: rgba(240,246,252,0.06);
+  --border-subtle: rgba(240,246,252,0.04);
   --radius: 16px;
   --radius-sm: 12px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06);
-  --shadow-lg: 0 4px 16px rgba(0,0,0,0.12), 0 8px 32px rgba(0,0,0,0.08);
+  --radius-xs: 8px;
+  --gradient-accent: linear-gradient(135deg, #58A6FF 0%, #BC8CFF 100%);
+  --gradient-red: linear-gradient(135deg, #F85149 0%, #DA3633 100%);
+  --gradient-green: linear-gradient(135deg, #3FB950 0%, #238636 100%);
+  --gradient-orange: linear-gradient(135deg, #D29922 0%, #BB8009 100%);
+  --nav-height: 72px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'Roboto', sans-serif;
-  background: #e8eaed;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0A0E14;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   color: var(--text-primary);
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Focus visible styles for keyboard navigation */
 *:focus-visible {
-  outline: 3px solid var(--primary);
+  outline: 2px solid var(--blue);
   outline-offset: 2px;
   border-radius: 4px;
 }
 button:focus-visible {
-  outline: 3px solid var(--primary);
+  outline: 2px solid var(--blue);
   outline-offset: 2px;
 }
 
+/* Phone frame */
 .phone-frame {
   width: 375px;
   height: 812px;
-  background: var(--background);
-  border-radius: 40px;
-  box-shadow: 0 0 0 8px #1a1a2e, 0 0 0 10px #3a3a5c, var(--shadow-lg), 0 20px 60px rgba(0,0,0,0.3);
+  background: var(--bg);
+  border-radius: 44px;
+  box-shadow:
+    0 0 0 3px #1C2129,
+    0 0 0 6px #0D1117,
+    0 0 80px rgba(88,166,255,0.06),
+    0 20px 60px rgba(0,0,0,0.6);
   overflow: hidden;
   position: relative;
 }
 
 /* Status bar */
 .status-bar {
-  height: 44px;
-  background: var(--surface);
+  height: 50px;
+  background: var(--bg);
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 28px 8px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--text-primary);
   position: relative;
   z-index: 10;
 }
-.status-bar .time { font-weight: 600; }
 .status-bar .icons { display: flex; gap: 4px; align-items: center; }
-.status-bar .icons .material-symbols-outlined { font-size: 18px; }
+.status-bar .icons .material-symbols-outlined { font-size: 17px; }
 
 /* Screens */
 .screen {
   position: absolute;
-  top: 44px;
+  top: 50px;
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--background);
+  background: var(--bg);
   overflow-y: auto;
   overflow-x: hidden;
   opacity: 0;
-  transform: translateX(30px);
+  transform: translateY(8px);
   pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.35s ease, transform 0.35s ease;
   -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--nav-height) + 16px + env(safe-area-inset-bottom, 0px));
 }
 .screen.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.screen::-webkit-scrollbar { width: 0; }
+
+/* Bottom Navigation */
+.bottom-nav {
+  position: absolute;
+  bottom: 12px;
+  left: 16px;
+  right: 16px;
+  height: 60px;
+  background: rgba(22,27,34,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 20;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-item .material-symbols-outlined { font-size: 24px; transition: all 0.25s ease; }
+.nav-item.active {
+  color: var(--blue);
+  background: var(--blue-dim);
+}
+.nav-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+.nav-item span.nav-label { display: block; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* ========== ONBOARDING OVERLAY ========== */
+.onboarding-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.4s ease;
+}
+.onboarding-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.onboarding-slides {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.onboarding-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+  text-align: center;
+  opacity: 0;
+  transform: translateX(40px);
+  transition: all 0.4s ease;
+  pointer-events: none;
+}
+.onboarding-slide.active {
   opacity: 1;
   transform: translateX(0);
   pointer-events: auto;
 }
-.screen.slide-out-left {
+.onboarding-slide.exit-left {
   opacity: 0;
-  transform: translateX(-30px);
+  transform: translateX(-40px);
 }
-.screen::-webkit-scrollbar { width: 0; }
+.onboarding-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+  position: relative;
+}
+.onboarding-icon::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 36px;
+  background: inherit;
+  opacity: 0.2;
+  filter: blur(16px);
+}
+.onboarding-icon .material-symbols-outlined { font-size: 52px; color: white; position: relative; z-index: 1; }
+.onboarding-slide h2 {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+.onboarding-slide p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 280px;
+}
+.onboarding-footer {
+  padding: 24px 32px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.onboarding-dots {
+  display: flex;
+  gap: 8px;
+}
+.onboarding-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--text-tertiary);
+  transition: all 0.3s ease;
+}
+.onboarding-dot.active {
+  width: 24px;
+  background: var(--blue);
+}
+.onboarding-next {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--gradient-accent);
+  color: white;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(88,166,255,0.3);
+}
+.onboarding-next:active { transform: scale(0.97); }
+.onboarding-skip {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 16px;
+}
+.onboarding-skip:hover { color: var(--text-secondary); }
 
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .screen,
-  .score-ring-progress,
-  .toast,
-  .scan-overlay,
-  .success-overlay,
-  .toggle,
-  .toggle::after,
-  .accordion-content,
-  .accordion-header .material-symbols-outlined,
-  .btn,
-  .app-card,
-  .fix-btn,
-  .icon-btn {
-    transition: none !important;
-    animation: none !important;
-  }
-  .scan-spinner {
-    animation: spin 2s linear infinite !important;
-  }
+/* ========== SCREEN 1: CHECK (Hero) ========== */
+.check-header {
+  padding: 16px 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--gradient-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.logo-icon .material-symbols-outlined { font-size: 20px; color: white; }
+.logo-text {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.greeting {
+  padding: 20px 20px 0;
+  font-size: 15px;
+  color: var(--text-secondary);
 }
 
-/* Top App Bar */
-.top-bar {
-  background: var(--surface);
-  padding: 12px 16px;
+/* Hero Link Checker */
+.hero-section {
+  padding: 24px 20px;
+}
+.hero-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  line-height: 1.15;
+  margin-bottom: 20px;
+}
+.hero-title span {
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.link-input-area {
+  position: relative;
+  margin-bottom: 16px;
+}
+.link-input {
+  width: 100%;
+  padding: 18px 20px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.link-input::placeholder { color: var(--text-tertiary); }
+.link-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(88,166,255,0.15), 0 0 20px rgba(88,166,255,0.1);
+}
+
+.btn-check-now {
+  width: 100%;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--gradient-accent);
+  color: white;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 24px rgba(88,166,255,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: -0.2px;
+}
+.btn-check-now:hover { box-shadow: 0 6px 32px rgba(88,166,255,0.35); }
+.btn-check-now:active { transform: scale(0.97); }
+.btn-check-now .material-symbols-outlined { font-size: 22px; }
+
+.share-hint {
+  text-align: center;
+  padding: 12px 0 4px;
+  font-size: 14px;
+  color: var(--text-tertiary);
+}
+.share-hint strong { color: var(--text-secondary); }
+
+.domain-count {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  padding-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.domain-count .material-symbols-outlined { font-size: 14px; }
+
+/* Recent Checks */
+.recent-section {
+  padding: 8px 20px 16px;
+}
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.verdict-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 10px;
   display: flex;
   align-items: center;
   gap: 12px;
+  border: 1px solid var(--border);
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+.verdict-card:active { transform: scale(0.98); }
+.verdict-card.danger {
+  border-color: rgba(248,81,73,0.2);
+  box-shadow: inset 0 0 20px rgba(248,81,73,0.04);
+}
+.verdict-card.safe {
+  border-color: rgba(63,185,80,0.2);
+  box-shadow: inset 0 0 20px rgba(63,185,80,0.04);
+}
+.verdict-card.suspicious {
+  border-color: rgba(210,153,34,0.2);
+  box-shadow: inset 0 0 20px rgba(210,153,34,0.04);
+}
+
+.verdict-dot {
+  width: 10px;
+  height: 10px;
+  min-width: 10px;
+  border-radius: 50%;
+}
+.verdict-dot.red { background: var(--red); box-shadow: 0 0 8px var(--red-glow); }
+.verdict-dot.green { background: var(--green); box-shadow: 0 0 8px var(--green-glow); }
+.verdict-dot.orange { background: var(--orange); box-shadow: 0 0 8px var(--orange-glow); }
+
+.verdict-info { flex: 1; min-width: 0; }
+.verdict-domain {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.verdict-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+.verdict-badge.red { color: var(--red); }
+.verdict-badge.green { color: var(--green); }
+.verdict-badge.orange { color: var(--orange); }
+
+.verdict-reason {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-top: 1px;
+}
+
+.verdict-share {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  border: none;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.verdict-share:hover { background: var(--blue-dim); color: var(--blue); }
+.verdict-share .material-symbols-outlined { font-size: 18px; }
+
+/* ========== SCREEN 2: SHIELD ========== */
+.shield-header {
+  padding: 20px 20px 0;
+}
+.shield-header h2 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.shield-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 20px 20px;
+  position: relative;
+}
+.shield-icon-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin-bottom: 16px;
+}
+.shield-icon-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  animation: shieldGlow 3s ease-in-out infinite;
+}
+@keyframes shieldGlow {
+  0%, 100% { box-shadow: 0 0 30px var(--orange-glow), 0 0 60px rgba(210,153,34,0.1); }
+  50% { box-shadow: 0 0 40px var(--orange-glow), 0 0 80px rgba(210,153,34,0.15); }
+}
+.shield-icon-bg.score-green { animation-name: shieldGlowGreen; }
+@keyframes shieldGlowGreen {
+  0%, 100% { box-shadow: 0 0 30px var(--green-glow), 0 0 60px rgba(63,185,80,0.1); }
+  50% { box-shadow: 0 0 40px var(--green-glow), 0 0 80px rgba(63,185,80,0.15); }
+}
+.shield-icon-bg.score-red { animation-name: shieldGlowRed; }
+@keyframes shieldGlowRed {
+  0%, 100% { box-shadow: 0 0 30px var(--red-glow), 0 0 60px rgba(248,81,73,0.1); }
+  50% { box-shadow: 0 0 40px var(--red-glow), 0 0 80px rgba(248,81,73,0.15); }
+}
+.shield-icon-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+.shield-icon-inner .material-symbols-outlined {
+  font-size: 48px;
+  color: var(--orange);
+  font-variation-settings: 'FILL' 1;
+}
+
+.shield-score {
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -2px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.shield-score-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.shield-section-title {
+  padding: 20px 20px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.app-card {
+  background: var(--bg-card);
+  margin: 0 16px 8px;
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.app-card[data-status="needs-review"] {
+  border-left: 3px solid var(--red);
+  cursor: pointer;
+}
+.app-card[data-status="needs-review"]:hover { background: var(--bg-card-hover); }
+.app-card[data-status="needs-review"]:active { transform: scale(0.98); }
+.app-card[data-status="secured"] {
+  border-left: 3px solid var(--green);
+}
+.app-card[data-status="not-installed"] {
+  border-left: 3px solid var(--text-tertiary);
+  opacity: 0.5;
+}
+
+.app-card-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: white;
+}
+.app-card-body { flex: 1; min-width: 0; }
+.app-card-name { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.app-card-desc { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+.app-card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: fit-content; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.badge-red { background: var(--red-dim); color: var(--red); }
+.badge-green { background: var(--green-dim); color: var(--green); }
+.badge-gray { background: rgba(72,79,88,0.3); color: var(--text-tertiary); }
+
+.fix-btn {
+  background: var(--red-dim);
+  color: var(--red);
+  border: none;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.fix-btn:hover { background: var(--red); color: white; }
+
+.recheck-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px 16px;
+}
+.btn-recheck {
+  padding: 12px 24px;
+  border-radius: 100px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--blue);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+.btn-recheck:hover { background: var(--blue-dim); }
+.btn-recheck .material-symbols-outlined { font-size: 18px; }
+
+/* ========== SCREEN 3: ALERTS ========== */
+.alerts-header {
+  padding: 20px 20px 0;
+}
+.alerts-header h2 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.alerts-subheader {
+  padding: 16px 20px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.alert-card {
+  background: var(--bg-card);
+  margin: 0 16px 10px;
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.alert-card:active { transform: scale(0.98); }
+.alert-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.alert-severity {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.alert-severity.high { background: var(--red-dim); }
+.alert-severity.high .material-symbols-outlined { color: var(--red); font-size: 20px; }
+.alert-severity.medium { background: var(--orange-dim); }
+.alert-severity.medium .material-symbols-outlined { color: var(--orange); font-size: 20px; }
+
+.alert-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+.alert-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+.alert-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-tertiary); }
+.alert-reports {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--red);
+  font-weight: 600;
+}
+.alert-reports .material-symbols-outlined { font-size: 14px; }
+.alert-expand {
+  display: none;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.alert-card.expanded .alert-expand { display: block; }
+
+/* ========== SCREEN 4: PROFILE ========== */
+.profile-header {
+  padding: 20px 20px 0;
+}
+.profile-header h2 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.stats-card {
+  margin: 16px 16px 12px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px;
+  border: 1px solid var(--border);
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.stat-item { text-align: center; }
+.stat-number {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--blue);
+}
+.stat-label {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.guardian-card {
+  margin: 0 16px 12px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px;
+  border: 1px solid var(--border);
+}
+.guardian-emoji { font-size: 28px; margin-bottom: 10px; }
+.guardian-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.guardian-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+.btn-guardian {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--gradient-accent);
+  color: white;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+  box-shadow: 0 4px 16px rgba(88,166,255,0.2);
+}
+.btn-guardian:active { transform: scale(0.97); }
+
+.settings-card {
+  margin: 12px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.settings-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  padding: 16px 16px 8px;
+}
+.settings-row {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row-label { font-size: 15px; color: var(--text-primary); }
+
+.toggle-btn {
+  width: 48px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--text-tertiary);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+  border: none;
+  padding: 0;
+}
+.toggle-btn[aria-checked="true"] { background: var(--green); }
+.toggle-btn::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: white;
+  top: 3px;
+  left: 3px;
+  transition: left 0.3s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.toggle-btn[aria-checked="true"]::after { left: 23px; }
+
+/* Fix flow toggle — dangerous state is ON (red) */
+.toggle-btn-danger {
+  width: 48px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--red);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+  border: none;
+  padding: 0;
+}
+.toggle-btn-danger[aria-checked="false"] { background: var(--text-tertiary); }
+.toggle-btn-danger::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: white;
+  top: 3px;
+  left: 23px;
+  transition: left 0.3s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.toggle-btn-danger[aria-checked="false"]::after { left: 3px; }
+
+.settings-select {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+/* Accordion */
+.accordion-item {
+  border-bottom: 1px solid var(--border-subtle);
+}
+.accordion-item:last-child { border-bottom: none; }
+.accordion-btn {
+  width: 100%;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  text-align: left;
+  color: var(--text-primary);
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+}
+.accordion-btn:hover { background: var(--bg-card-hover); }
+.accordion-btn .accordion-label { flex: 1; padding-right: 8px; }
+.accordion-btn .material-symbols-outlined {
+  font-size: 20px;
+  color: var(--text-tertiary);
+  transition: transform 0.3s;
+}
+.accordion-item.open .accordion-btn .material-symbols-outlined {
+  transform: rotate(180deg);
+}
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.accordion-content p {
+  padding: 0 16px 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.share-app-btn {
+  margin: 12px 16px;
+  width: calc(100% - 32px);
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--gradient-accent);
+  color: white;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+  box-shadow: 0 4px 20px rgba(88,166,255,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.share-app-btn:active { transform: scale(0.97); }
+.share-app-btn .material-symbols-outlined { font-size: 20px; }
+
+.about-section {
+  padding: 20px;
+  text-align: center;
+}
+.about-section .version { font-size: 13px; color: var(--text-tertiary); }
+.about-section .made-with { font-size: 13px; color: var(--text-tertiary); margin-top: 4px; }
+
+/* ========== FIX FLOW SCREEN ========== */
+#screen-fix { padding-bottom: 24px; }
+.fix-top-bar {
+  padding: 12px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   position: sticky;
   top: 0;
   z-index: 5;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  background: var(--bg);
 }
-.top-bar h1 {
-  font-size: 20px;
-  font-weight: 500;
+.fix-top-bar h2 {
+  font-size: 18px;
+  font-weight: 700;
   flex: 1;
 }
 .icon-btn {
@@ -164,193 +1037,335 @@ button:focus-visible {
   color: var(--text-primary);
   transition: background 0.2s;
 }
-.icon-btn:hover { background: var(--gray-light); }
+.icon-btn:hover { background: var(--bg-card); }
 
-/* Buttons */
-.btn {
-  display: inline-flex;
+.risk-card {
+  background: var(--red-dim);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin: 8px 16px 16px;
+  display: flex;
+  gap: 12px;
+  border: 1px solid rgba(248,81,73,0.15);
+}
+.risk-card .material-symbols-outlined { font-size: 24px; color: var(--red); min-width: 24px; }
+.risk-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+
+.steps-section { padding: 0 16px; }
+.steps-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+}
+.step {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+  align-items: flex-start;
+}
+.step-num {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 50%;
+  background: var(--gradient-accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+.step-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  padding-top: 3px;
+}
+.step-text strong { color: var(--text-primary); }
+
+.settings-mock {
+  margin: 12px 16px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.settings-mock-header {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.settings-mock-header .material-symbols-outlined { font-size: 18px; }
+.settings-mock-row {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.settings-mock-label { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+.settings-mock-sublabel { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+.fix-hint {
+  margin: 0 16px 12px;
+  padding: 10px 14px;
+  background: var(--orange-dim);
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  color: var(--orange);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(210,153,34,0.15);
+}
+.fix-hint .material-symbols-outlined { font-size: 18px; }
+.fix-hint.hidden { display: none; }
+
+.fix-buttons {
+  padding: 8px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+.btn-fix-primary {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  background: var(--gradient-accent);
+  color: white;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px 28px;
-  border-radius: 100px;
+}
+.btn-fix-primary:active { transform: scale(0.97); }
+.btn-fix-outlined {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--blue);
   font-family: inherit;
-  font-size: 16px;
-  font-weight: 500;
-  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1.5px solid var(--blue);
   cursor: pointer;
   transition: all 0.2s;
-  text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
-.btn-primary {
-  background: var(--primary);
-  color: white;
-  box-shadow: 0 1px 3px rgba(26,115,232,0.3);
-}
-.btn-primary:hover { background: var(--primary-dark); box-shadow: 0 2px 8px rgba(26,115,232,0.4); }
-.btn-primary:active { transform: scale(0.97); }
-.btn-primary:disabled {
-  background: #bdc1c6;
-  box-shadow: none;
+.btn-fix-outlined:hover { background: var(--blue-dim); }
+.btn-fix-outlined:disabled {
+  color: var(--text-tertiary);
+  border-color: var(--text-tertiary);
   cursor: not-allowed;
 }
-.btn-outlined {
-  background: transparent;
-  color: var(--primary);
-  border: 1.5px solid var(--primary);
-}
-.btn-outlined:hover { background: var(--primary-light); }
-.btn-outlined:active { transform: scale(0.97); }
-.btn-outlined:disabled {
-  color: #bdc1c6;
-  border-color: #bdc1c6;
-  cursor: not-allowed;
-}
-.btn-text {
+.btn-fix-outlined:disabled:hover { background: transparent; }
+.btn-fix-outlined .material-symbols-outlined,
+.btn-fix-primary .material-symbols-outlined { font-size: 20px; }
+.btn-text-skip {
   background: none;
   border: none;
-  color: var(--text-secondary);
-  font-size: 14px;
-  padding: 8px 16px;
-  cursor: pointer;
+  color: var(--text-tertiary);
   font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 8px 16px;
 }
-.btn-text:hover { color: var(--primary); }
-.btn-full { width: 100%; }
+.btn-text-skip:hover { color: var(--text-secondary); }
 
-/* Cards */
-.card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 16px;
-  margin: 0 16px 12px;
-  box-shadow: var(--shadow);
-}
-
-/* Badges */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 100px;
-  font-size: 12px;
-  font-weight: 500;
-}
-.badge-red { background: var(--red-light); color: var(--red); }
-.badge-green { background: var(--green-light); color: var(--green); }
-.badge-gray { background: var(--gray-light); color: var(--gray); }
-.badge-orange { background: var(--orange-light); color: var(--orange); }
-
-/* Toast — aria-live region */
-.toast {
+/* ========== VERDICT OVERLAY ========== */
+.verdict-overlay {
   position: absolute;
-  bottom: 32px;
-  left: 16px;
-  right: 16px;
-  background: #323232;
-  color: white;
-  padding: 14px 20px;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  z-index: 100;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
   opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.3s ease;
   pointer-events: none;
-  text-align: center;
+  transition: opacity 0.4s ease;
 }
-.toast.show {
+.verdict-overlay.show {
   opacity: 1;
-  transform: translateY(0);
+  pointer-events: auto;
 }
+.verdict-overlay-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(13,17,23,0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.verdict-glow {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+}
+.verdict-glow.red { background: var(--red); }
+.verdict-glow.green { background: var(--green); }
+.verdict-glow.orange { background: var(--orange); }
 
-/* ========== SCREEN 1: ONBOARDING ========== */
-#screen-onboarding {
-  background: linear-gradient(180deg, #e8f0fe 0%, var(--background) 50%);
+.verdict-content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 32px 24px 24px;
+  justify-content: center;
+  padding: 40px 28px;
   text-align: center;
 }
-.onboarding-shield {
+.verdict-shield {
   width: 88px;
   height: 88px;
-  background: linear-gradient(135deg, var(--primary), #4285f4);
-  border-radius: 24px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 20px rgba(26,115,232,0.3);
+  margin-bottom: 24px;
+  animation: verdictPop 0.5s ease;
 }
-.onboarding-shield .material-symbols-outlined {
-  font-size: 48px;
-  color: white;
+@keyframes verdictPop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
 }
-.onboarding-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 6px;
+.verdict-shield.red { background: var(--red-dim); border: 2px solid var(--red); }
+.verdict-shield.green { background: var(--green-dim); border: 2px solid var(--green); }
+.verdict-shield.orange { background: var(--orange-dim); border: 2px solid var(--orange); }
+.verdict-shield .material-symbols-outlined { font-size: 44px; }
+.verdict-shield.red .material-symbols-outlined { color: var(--red); }
+.verdict-shield.green .material-symbols-outlined { color: var(--green); }
+.verdict-shield.orange .material-symbols-outlined { color: var(--orange); }
+
+.verdict-label {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 8px;
 }
-.onboarding-tagline {
+.verdict-label.red { color: var(--red); }
+.verdict-label.green { color: var(--green); }
+.verdict-label.orange { color: var(--orange); }
+
+.verdict-desc {
   font-size: 16px;
-  color: var(--primary);
-  font-weight: 500;
-  margin-bottom: 16px;
-}
-.onboarding-desc {
-  font-size: 15px;
   color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 28px;
-  max-width: 320px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  max-width: 300px;
 }
-.features {
+.verdict-detail {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+}
+.verdict-detail strong { color: var(--text-secondary); }
+
+.verdict-warning {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: var(--red-dim);
+  border-radius: var(--radius-xs);
+  border: 1px solid rgba(248,81,73,0.2);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--red);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.verdict-warning .material-symbols-outlined { font-size: 18px; }
+
+.verdict-actions {
+  position: relative;
+  z-index: 1;
+  padding: 0 28px 40px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  width: 100%;
-  margin-bottom: 32px;
-}
-.feature-item {
-  display: flex;
+  gap: 10px;
   align-items: center;
-  gap: 14px;
-  text-align: left;
-  padding: 12px 16px;
-  background: var(--surface);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
-.feature-icon {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  border-radius: 12px;
-  background: var(--primary-light);
+.btn-verdict-primary {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  color: white;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
 }
-.feature-icon .material-symbols-outlined {
-  font-size: 24px;
-  color: var(--primary);
-}
-.feature-text {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-primary);
-}
+.btn-verdict-primary:active { transform: scale(0.97); }
+.btn-verdict-primary.red { background: var(--gradient-red); box-shadow: 0 4px 16px var(--red-glow); }
+.btn-verdict-primary.green { background: var(--gradient-green); box-shadow: 0 4px 16px var(--green-glow); }
+.btn-verdict-primary.orange { background: var(--gradient-orange); box-shadow: 0 4px 16px var(--orange-glow); }
 
-/* Scan animation */
+.btn-verdict-outlined {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-verdict-outlined:hover { background: var(--bg-card); }
+.btn-verdict-close {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 16px;
+  margin-top: 4px;
+}
+.btn-verdict-close:hover { color: var(--text-secondary); }
+
+/* ========== SCAN & SUCCESS OVERLAYS ========== */
 .scan-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255,255,255,0.95);
+  background: rgba(13,17,23,0.96);
+  backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -361,404 +1376,35 @@ button:focus-visible {
   transition: opacity 0.3s;
 }
 .scan-overlay.show { opacity: 1; pointer-events: auto; }
-.scan-spinner {
-  width: 64px;
-  height: 64px;
-  border: 4px solid var(--primary-light);
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+.scan-shield {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 20px;
+  animation: scanPulse 1.5s ease-in-out infinite;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes scanPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.7; }
+}
+.scan-shield .material-symbols-outlined {
+  font-size: 56px;
+  color: var(--blue);
+  font-variation-settings: 'FILL' 1;
+}
 .scan-text {
   font-size: 16px;
   color: var(--text-secondary);
-  font-weight: 500;
-}
-
-/* ========== SCREEN 2: DASHBOARD ========== */
-#screen-dashboard { padding-bottom: 24px; }
-
-.score-section {
-  background: var(--surface);
-  padding: 28px 16px 24px;
-  text-align: center;
-  margin-bottom: 8px;
-}
-.score-ring-container {
-  position: relative;
-  width: 160px;
-  height: 160px;
-  margin: 0 auto 16px;
-}
-.score-ring-container svg {
-  width: 160px;
-  height: 160px;
-  transform: rotate(-90deg);
-}
-.score-ring-bg {
-  fill: none;
-  stroke: var(--gray-light);
-  stroke-width: 10;
-}
-.score-ring-progress {
-  fill: none;
-  stroke-width: 10;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.8s ease, stroke 0.5s ease;
-}
-.score-value {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-}
-.score-number {
-  font-size: 40px;
-  font-weight: 700;
-  line-height: 1;
-}
-.score-percent {
-  font-size: 18px;
-  font-weight: 400;
-  color: var(--text-secondary);
-}
-.score-label {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-top: 2px;
-}
-.score-subtitle {
-  font-size: 15px;
-  color: var(--text-secondary);
-}
-
-.section-header {
-  padding: 20px 16px 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-}
-
-.app-card {
-  background: var(--surface);
-  margin: 0 16px 10px;
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  border-left: 4px solid transparent;
-  -webkit-tap-highlight-color: transparent;
-}
-/* Only needs-review cards are interactive */
-.app-card[data-status="needs-review"] {
-  border-left-color: var(--red);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.app-card[data-status="needs-review"]:hover { background: #fef7f6; }
-.app-card[data-status="needs-review"]:active { transform: scale(0.98); }
-.app-card[data-status="secured"] {
-  border-left-color: var(--green);
-}
-.app-card[data-status="not-installed"] {
-  border-left-color: var(--gray);
-  opacity: 0.7;
-}
-
-.app-card-icon {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: white;
-}
-.app-card-body { flex: 1; min-width: 0; }
-.app-card-name { font-size: 16px; font-weight: 500; }
-.app-card-desc { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
-.app-card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: fit-content; }
-.fix-btn {
-  background: var(--red-light);
-  color: var(--red);
-  border: none;
-  padding: 6px 14px;
-  border-radius: 100px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s;
-}
-.fix-btn:hover { background: var(--red); color: white; }
-
-.recheck-container {
-  display: flex;
-  justify-content: center;
-  padding: 16px;
-}
-
-/* ========== SCREEN 3: FIX FLOW ========== */
-#screen-fix { padding-bottom: 24px; }
-
-.risk-card {
-  background: var(--red-light);
-  border-radius: var(--radius-sm);
-  padding: 16px;
-  margin: 16px;
-  display: flex;
-  gap: 12px;
-}
-.risk-card .material-symbols-outlined {
-  font-size: 28px;
-  color: var(--red);
-  min-width: 28px;
-}
-.risk-card p {
-  font-size: 15px;
-  color: var(--text-primary);
-  line-height: 1.5;
-}
-
-.steps-section {
-  padding: 8px 16px 0;
-}
-.steps-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.step {
-  display: flex;
-  gap: 14px;
-  margin-bottom: 16px;
-  align-items: flex-start;
-}
-.step-num {
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  border-radius: 50%;
-  background: var(--primary);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
   font-weight: 600;
 }
-.step-text {
-  font-size: 16px;
-  color: var(--text-primary);
-  padding-top: 4px;
-}
 
-.settings-mock {
-  margin: 8px 16px 20px;
-  background: var(--surface);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-.settings-mock-header {
-  background: #37474f;
-  color: white;
-  padding: 12px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.settings-mock-header .material-symbols-outlined { font-size: 20px; }
-.settings-mock-row {
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.settings-mock-label { font-size: 15px; font-weight: 500; }
-.settings-mock-sublabel { font-size: 13px; color: var(--text-secondary); }
-
-/* Toggle switch — semantic button */
-.toggle-btn {
-  width: 48px;
-  height: 28px;
-  border-radius: 14px;
-  background: var(--red);
-  position: relative;
-  cursor: pointer;
-  transition: background 0.3s;
-  border: none;
-  padding: 0;
-}
-.toggle-btn[aria-checked="false"] { background: #bdc1c6; }
-.toggle-btn::after {
-  content: '';
-  position: absolute;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: white;
-  top: 3px;
-  left: 23px;
-  transition: left 0.3s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-.toggle-btn[aria-checked="false"]::after { left: 3px; }
-
-/* Confirmation hint in fix flow */
-.fix-hint {
-  margin: 0 16px 8px;
-  padding: 10px 14px;
-  background: var(--orange-light);
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  color: #b06000;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.fix-hint .material-symbols-outlined { font-size: 20px; color: var(--orange); }
-.fix-hint.hidden { display: none; }
-
-.fix-buttons {
-  padding: 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: center;
-}
-
-/* ========== SCREEN 4: SETTINGS ========== */
-#screen-settings { padding-bottom: 24px; }
-
-.settings-card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  margin: 12px 16px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-.settings-card-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  padding: 16px 16px 8px;
-}
-.settings-row {
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--gray-light);
-}
-.settings-row:last-child { border-bottom: none; }
-.settings-row-label { font-size: 16px; }
-
-.settings-select {
-  padding: 8px 12px;
-  border: 1.5px solid #dadce0;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 14px;
-  color: var(--text-primary);
-  background: var(--surface);
-}
-
-.privacy-note {
-  display: flex;
-  gap: 12px;
-  padding: 16px;
-  align-items: flex-start;
-}
-.privacy-note .material-symbols-outlined {
-  font-size: 24px;
-  color: var(--green);
-  min-width: 24px;
-}
-.privacy-note p {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-.accordion-item {
-  border-bottom: 1px solid var(--gray-light);
-}
-.accordion-item:last-child { border-bottom: none; }
-.accordion-btn {
-  width: 100%;
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: background 0.2s;
-  background: none;
-  border: none;
-  font-family: inherit;
-  font-size: 15px;
-  text-align: left;
-  color: var(--text-primary);
-}
-.accordion-btn:hover { background: var(--gray-light); }
-.accordion-btn .accordion-label { flex: 1; padding-right: 8px; }
-.accordion-btn .material-symbols-outlined {
-  font-size: 22px;
-  color: var(--text-secondary);
-  transition: transform 0.3s;
-}
-.accordion-item.open .accordion-btn .material-symbols-outlined {
-  transform: rotate(180deg);
-}
-.accordion-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-}
-.accordion-content p {
-  padding: 0 16px 14px;
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-.about-section {
-  padding: 16px;
-  text-align: center;
-}
-.about-section .version {
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-.about-section .made-with {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-top: 4px;
-}
-
-/* Success animation overlay */
 .success-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255,255,255,0.95);
+  background: rgba(13,17,23,0.96);
+  backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -779,26 +1425,43 @@ button:focus-visible {
   justify-content: center;
   margin-bottom: 16px;
   animation: popIn 0.4s ease;
+  box-shadow: 0 0 40px var(--green-glow);
 }
 @keyframes popIn {
   0% { transform: scale(0); }
   60% { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
-.success-check .material-symbols-outlined {
-  font-size: 44px;
-  color: white;
-}
-.success-text {
-  font-size: 18px;
+.success-check .material-symbols-outlined { font-size: 44px; color: white; }
+.success-text { font-size: 18px; font-weight: 700; color: var(--green); }
+
+/* Toast */
+.toast {
+  position: absolute;
+  bottom: 88px;
+  left: 24px;
+  right: 24px;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  padding: 14px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
   font-weight: 500;
-  color: var(--green);
+  z-index: 100;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+  text-align: center;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
 }
+.toast.show { opacity: 1; transform: translateY(0); }
 
 /* Mobile responsive */
 @media (max-width: 420px) {
   body {
-    background: var(--background);
+    background: var(--bg);
     align-items: flex-start;
   }
   .phone-frame {
@@ -816,7 +1479,7 @@ button:focus-visible {
 <div class="phone-frame">
   <!-- Status Bar -->
   <div class="status-bar" aria-hidden="true">
-    <span class="time">9:41</span>
+    <span>9:41</span>
     <div class="icons">
       <span class="material-symbols-outlined">signal_cellular_alt</span>
       <span class="material-symbols-outlined">wifi</span>
@@ -824,9 +1487,47 @@ button:focus-visible {
     </div>
   </div>
 
+  <!-- Onboarding Overlay -->
+  <div class="onboarding-overlay" id="onboardingOverlay">
+    <div class="onboarding-slides">
+      <div class="onboarding-slide active" data-slide="0">
+        <div class="onboarding-icon" style="background: var(--gradient-accent);">
+          <span class="material-symbols-outlined">shield</span>
+        </div>
+        <h2>Welcome to Safe Anot?</h2>
+        <p>Your scam protection companion for Malaysia and Singapore</p>
+      </div>
+      <div class="onboarding-slide" data-slide="1">
+        <div class="onboarding-icon" style="background: linear-gradient(135deg, #3FB950, #238636);">
+          <span class="material-symbols-outlined">link</span>
+        </div>
+        <h2>Check Any Link</h2>
+        <p>Paste any suspicious link and get an instant verdict. Safe anot? We'll tell you in seconds.</p>
+      </div>
+      <div class="onboarding-slide" data-slide="2">
+        <div class="onboarding-icon" style="background: linear-gradient(135deg, #BC8CFF, #8957E5);">
+          <span class="material-symbols-outlined">family_restroom</span>
+        </div>
+        <h2>Protect Your Family</h2>
+        <p>Guard your parents from scam apps and get alerts when their phone security changes.</p>
+      </div>
+    </div>
+    <div class="onboarding-footer">
+      <div class="onboarding-dots" aria-hidden="true">
+        <div class="onboarding-dot active" data-dot="0"></div>
+        <div class="onboarding-dot" data-dot="1"></div>
+        <div class="onboarding-dot" data-dot="2"></div>
+      </div>
+      <button class="onboarding-next" id="btnOnboardingNext">Next</button>
+      <button class="onboarding-skip" id="btnOnboardingSkip">Skip</button>
+    </div>
+  </div>
+
   <!-- Scan Overlay -->
   <div class="scan-overlay" id="scanOverlay" role="status" aria-live="polite">
-    <div class="scan-spinner" aria-hidden="true"></div>
+    <div class="scan-shield" aria-hidden="true">
+      <span class="material-symbols-outlined">shield</span>
+    </div>
     <div class="scan-text">Scanning your device...</div>
   </div>
 
@@ -838,95 +1539,328 @@ button:focus-visible {
     <div class="success-text">Secured!</div>
   </div>
 
-  <!-- Toast — live region for screen readers -->
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-  <!-- ========== SCREEN 1: ONBOARDING ========== -->
-  <div class="screen active" id="screen-onboarding">
-    <div class="onboarding-shield" aria-hidden="true">
-      <span class="material-symbols-outlined">shield</span>
-    </div>
-    <h1 class="onboarding-title">Safe Anot?</h1>
-    <p class="onboarding-tagline">Check first before you click</p>
-    <p class="onboarding-desc">Scammers trick people into installing dangerous apps via WhatsApp, Telegram, and other messaging apps. Safe Anot? checks your phone's security settings and guides you to fix them.</p>
-    <div class="features">
-      <div class="feature-item">
-        <div class="feature-icon" aria-hidden="true">
-          <span class="material-symbols-outlined">search</span>
-        </div>
-        <span class="feature-text">Detect risky installer sources</span>
-      </div>
-      <div class="feature-item">
-        <div class="feature-icon" aria-hidden="true">
-          <span class="material-symbols-outlined">checklist</span>
-        </div>
-        <span class="feature-text">Step-by-step security guide</span>
-      </div>
-      <div class="feature-item">
-        <div class="feature-icon" aria-hidden="true">
-          <span class="material-symbols-outlined">notifications</span>
-        </div>
-        <span class="feature-text">Periodic safety reminders</span>
-      </div>
-    </div>
-    <button class="btn btn-primary btn-full" id="btnStartScan">
-      <span class="material-symbols-outlined" aria-hidden="true">security</span>
-      Start Security Check
-    </button>
+  <!-- Verdict Overlay -->
+  <div class="verdict-overlay" id="verdictOverlay" role="dialog" aria-modal="true" aria-label="Link check result">
+    <div class="verdict-overlay-bg"></div>
+    <div class="verdict-glow" id="verdictGlow"></div>
+    <div class="verdict-content" id="verdictContent"></div>
+    <div class="verdict-actions" id="verdictActions"></div>
   </div>
 
-  <!-- ========== SCREEN 2: DASHBOARD ========== -->
-  <div class="screen" id="screen-dashboard">
-    <div class="top-bar">
-      <span class="material-symbols-outlined" style="color:var(--primary);font-size:28px;" aria-hidden="true">shield</span>
-      <h1>Safe Anot?</h1>
-      <button class="icon-btn" id="btnSettings" aria-label="Open settings">
-        <span class="material-symbols-outlined" aria-hidden="true">settings</span>
-      </button>
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ========== SCREEN 1: CHECK ========== -->
+  <div class="screen active" id="screen-check">
+    <div class="check-header">
+      <div class="logo">
+        <div class="logo-icon" aria-hidden="true">
+          <span class="material-symbols-outlined">shield</span>
+        </div>
+        <span class="logo-text">Safe Anot?</span>
+      </div>
     </div>
 
-    <div class="score-section">
-      <div class="score-ring-container" role="img" aria-label="Security score">
-        <svg viewBox="0 0 160 160" aria-hidden="true">
-          <circle class="score-ring-bg" cx="80" cy="80" r="65"/>
-          <circle class="score-ring-progress" id="scoreRing" cx="80" cy="80" r="65"
-            stroke-dasharray="408.4" stroke-dashoffset="408.4"/>
-        </svg>
-        <div class="score-value">
-          <span class="score-number" id="scoreNumber">0</span><span class="score-percent">%</span>
-          <div class="score-label">Your Security Score</div>
+    <div class="greeting" aria-label="Greeting">Hey, stay safe out there <span aria-hidden="true">&#128075;</span></div>
+
+    <div class="hero-section">
+      <h1 class="hero-title">
+        <span>Safe anot</span><br>this link?
+      </h1>
+
+      <div class="link-input-area">
+        <label for="linkInput" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Enter a suspicious URL to check</label>
+        <input type="url" class="link-input" id="linkInput" placeholder="Paste any suspicious link here..." autocomplete="off" spellcheck="false">
+      </div>
+
+      <button class="btn-check-now" id="btnCheckNow">
+        <span class="material-symbols-outlined" aria-hidden="true">search</span>
+        CHECK NOW
+      </button>
+
+      <div class="share-hint">Or <strong>share a link from WhatsApp</strong> to check instantly</div>
+      <div class="domain-count">
+        <span class="material-symbols-outlined" aria-hidden="true">database</span>
+        We check against 500,000+ known scam domains
+      </div>
+    </div>
+
+    <div class="recent-section">
+      <div class="section-title">Recent Checks</div>
+
+      <div class="verdict-card danger" role="button" tabindex="0" aria-label="maybank-secure-update.xyz: Dangerous">
+        <div class="verdict-dot red" aria-hidden="true"></div>
+        <div class="verdict-info">
+          <div class="verdict-domain">maybank-secure-update.xyz</div>
+          <div class="verdict-badge red">DANGEROUS</div>
+          <div class="verdict-reason">Fake banking domain</div>
+        </div>
+        <button class="verdict-share" aria-label="Share warning about maybank-secure-update.xyz">
+          <span class="material-symbols-outlined">share</span>
+        </button>
+      </div>
+
+      <div class="verdict-card safe" role="button" tabindex="0" aria-label="shopee.com.my: Safe">
+        <div class="verdict-dot green" aria-hidden="true"></div>
+        <div class="verdict-info">
+          <div class="verdict-domain">shopee.com.my</div>
+          <div class="verdict-badge green">SAFE</div>
+          <div class="verdict-reason">Official Shopee domain</div>
+        </div>
+        <button class="verdict-share" aria-label="Share result for shopee.com.my">
+          <span class="material-symbols-outlined">share</span>
+        </button>
+      </div>
+
+      <div class="verdict-card suspicious" role="button" tabindex="0" aria-label="bit.ly/kl-investment: Suspicious">
+        <div class="verdict-dot orange" aria-hidden="true"></div>
+        <div class="verdict-info">
+          <div class="verdict-domain">bit.ly/kl-investment</div>
+          <div class="verdict-badge orange">SUSPICIOUS</div>
+          <div class="verdict-reason">URL shortener detected</div>
+        </div>
+        <button class="verdict-share" aria-label="Share warning about bit.ly/kl-investment">
+          <span class="material-symbols-outlined">share</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN 2: SHIELD ========== -->
+  <div class="screen" id="screen-shield">
+    <div class="shield-header">
+      <h2>Your Phone Shield</h2>
+    </div>
+
+    <div class="shield-hero">
+      <div class="shield-icon-wrapper">
+        <div class="shield-icon-bg" id="shieldGlowBg"></div>
+        <div class="shield-icon-inner">
+          <span class="material-symbols-outlined" id="shieldIconSymbol">shield</span>
         </div>
       </div>
-      <p class="score-subtitle" id="scoreSubtitle" aria-live="polite">0 of 0 items secured</p>
+      <div class="shield-score" id="shieldScore" aria-label="Security score">72%</div>
+      <div class="shield-score-label" id="shieldScoreLabel">5 of 7 items secured</div>
     </div>
 
-    <div class="section-header">Messaging Apps</div>
+    <div class="shield-section-title">Messaging Apps</div>
     <div id="cards-messaging"></div>
 
-    <div class="section-header">Browsers</div>
+    <div class="shield-section-title">Browsers</div>
     <div id="cards-browsers"></div>
 
-    <div class="section-header">File Managers</div>
+    <div class="shield-section-title">File Managers</div>
     <div id="cards-files"></div>
 
-    <div class="section-header">Protection Status</div>
+    <div class="shield-section-title">Protection Status</div>
     <div id="cards-protection"></div>
 
     <div class="recheck-container">
-      <button class="btn btn-outlined" id="btnRecheck">
+      <button class="btn-recheck" id="btnRecheck">
         <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
         Recheck All
       </button>
     </div>
   </div>
 
-  <!-- ========== SCREEN 3: FIX FLOW ========== -->
+  <!-- ========== SCREEN 3: ALERTS ========== -->
+  <div class="screen" id="screen-alerts">
+    <div class="alerts-header">
+      <h2>Scam Alerts</h2>
+    </div>
+
+    <div class="alerts-subheader">This Week in Scams</div>
+
+    <div class="alert-card" role="button" tabindex="0" aria-expanded="false">
+      <div class="alert-card-top">
+        <div class="alert-severity high" aria-label="High severity">
+          <span class="material-symbols-outlined">phishing</span>
+        </div>
+        <div>
+          <div class="alert-title">Fake Maybank Login Pages Spreading on WhatsApp</div>
+        </div>
+      </div>
+      <div class="alert-meta">
+        <span>2 days ago</span>
+        <span class="dot"></span>
+        <span class="alert-reports"><span class="material-symbols-outlined">warning</span> 237 reports in Selangor</span>
+      </div>
+      <div class="alert-expand">Scammers are distributing fake Maybank2u login pages via WhatsApp. These pages look identical to the real thing but steal your credentials. Always type maybank2u.com.my directly into your browser.</div>
+    </div>
+
+    <div class="alert-card" role="button" tabindex="0" aria-expanded="false">
+      <div class="alert-card-top">
+        <div class="alert-severity high" aria-label="High severity">
+          <span class="material-symbols-outlined">bug_report</span>
+        </div>
+        <div>
+          <div class="alert-title">Fake "LHDN Tax Refund" SMS Targeting KL Residents</div>
+        </div>
+      </div>
+      <div class="alert-meta">
+        <span>3 days ago</span>
+        <span class="dot"></span>
+        <span class="alert-reports"><span class="material-symbols-outlined">warning</span> 182 reports in KL</span>
+      </div>
+      <div class="alert-expand">SMS messages claiming you have a tax refund from LHDN are fake. They link to phishing pages that steal your banking info. LHDN never sends refund links via SMS.</div>
+    </div>
+
+    <div class="alert-card" role="button" tabindex="0" aria-expanded="false">
+      <div class="alert-card-top">
+        <div class="alert-severity medium" aria-label="Medium severity">
+          <span class="material-symbols-outlined">shopping_cart</span>
+        </div>
+        <div>
+          <div class="alert-title">Fake Shopee "Lucky Draw" Links on Facebook</div>
+        </div>
+      </div>
+      <div class="alert-meta">
+        <span>5 days ago</span>
+        <span class="dot"></span>
+        <span class="alert-reports"><span class="material-symbols-outlined">warning</span> 94 reports in Penang</span>
+      </div>
+      <div class="alert-expand">Ads on Facebook promising Shopee lucky draw prizes are scams. They lead to fake sites that collect your personal data. Shopee only runs promotions within their official app.</div>
+    </div>
+
+    <div class="alert-card" role="button" tabindex="0" aria-expanded="false">
+      <div class="alert-card-top">
+        <div class="alert-severity high" aria-label="High severity">
+          <span class="material-symbols-outlined">smartphone</span>
+        </div>
+        <div>
+          <div class="alert-title">Malicious APK Disguised as "TNG eWallet Update"</div>
+        </div>
+      </div>
+      <div class="alert-meta">
+        <span>1 week ago</span>
+        <span class="dot"></span>
+        <span class="alert-reports"><span class="material-symbols-outlined">warning</span> 156 reports in Johor</span>
+      </div>
+      <div class="alert-expand">A fake APK file is being shared on Telegram claiming to be a TNG eWallet update. It installs malware that steals your OTP codes. Only update apps through Google Play Store.</div>
+    </div>
+  </div>
+
+  <!-- ========== SCREEN 4: PROFILE ========== -->
+  <div class="screen" id="screen-profile">
+    <div class="profile-header">
+      <h2>My Safe Anot?</h2>
+    </div>
+
+    <div class="stats-card">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number">12</div>
+          <div class="stat-label">Links Checked</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" style="color: var(--red);">3</div>
+          <div class="stat-label">Scams Caught</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="profileScore">72%</div>
+          <div class="stat-label">Security Score</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" style="color: var(--green); font-size: 18px; padding-top: 6px;">Mar 2026</div>
+          <div class="stat-label">Protected Since</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guardian-card">
+      <div class="guardian-emoji" aria-hidden="true">&#128104;&#8205;&#128105;&#8205;&#128103;</div>
+      <div class="guardian-title">Family Guardian</div>
+      <div class="guardian-desc">Protect your parents — get alerts when their phone security changes</div>
+      <button class="btn-guardian" id="btnGuardian">Set Up Guardian</button>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-card-title">Reminders</div>
+      <div class="settings-row">
+        <label class="settings-row-label" for="reminderToggle">Weekly reminders</label>
+        <button class="toggle-btn" id="reminderToggle" role="switch" aria-checked="true" aria-label="Weekly reminders"></button>
+      </div>
+      <div class="settings-row">
+        <label class="settings-row-label" for="reminderDay">Reminder day</label>
+        <select class="settings-select" id="reminderDay">
+          <option selected>Monday</option>
+          <option>Tuesday</option>
+          <option>Wednesday</option>
+          <option>Thursday</option>
+          <option>Friday</option>
+          <option>Saturday</option>
+          <option>Sunday</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-card-title">Appearance</div>
+      <div class="settings-row" style="flex-wrap: wrap;">
+        <label class="settings-row-label">Dark mode</label>
+        <button class="toggle-btn" id="darkModeToggle" role="switch" aria-checked="true" aria-label="Dark mode" disabled style="opacity: 0.7; cursor: default;"></button>
+        <div style="width: 100%; font-size: 13px; color: var(--text-secondary); margin-top: 4px;">Dark mode is always on in this version</div>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-card-title">Anti-Scam Tips</div>
+      <div class="accordion-item">
+        <button class="accordion-btn" aria-expanded="false">
+          <span class="accordion-label">Never install APKs from WhatsApp or Telegram</span>
+          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+        </button>
+        <div class="accordion-content" role="region">
+          <p>Scammers send APK files through messaging apps disguised as legitimate apps, updates, or tools. Never download and install APK files received through these channels.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" aria-expanded="false">
+          <span class="accordion-label">Only install apps from Google Play Store</span>
+          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+        </button>
+        <div class="accordion-content" role="region">
+          <p>The Google Play Store screens apps for malware and malicious behavior. Installing apps from other sources bypasses these safety checks.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" aria-expanded="false">
+          <span class="accordion-label">Keep Google Play Protect enabled</span>
+          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+        </button>
+        <div class="accordion-content" role="region">
+          <p>Google Play Protect continuously scans your device for potentially harmful apps. It should always be enabled for maximum protection.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" aria-expanded="false">
+          <span class="accordion-label">If someone asks you to install an APK, it's a scam</span>
+          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+        </button>
+        <div class="accordion-content" role="region">
+          <p>Legitimate companies never ask you to sideload an APK. If someone sends you an APK file and asks you to install it, treat it as a scam.</p>
+        </div>
+      </div>
+    </div>
+
+    <button class="share-app-btn" id="btnShareApp">
+      <span class="material-symbols-outlined" aria-hidden="true">share</span>
+      Share Safe Anot? with Friends
+    </button>
+
+    <div class="about-section">
+      <div class="version">Version 1.0.0</div>
+      <div class="made-with">Made with &#10084;&#65039; to fight scams in MY/SG</div>
+    </div>
+  </div>
+
+  <!-- ========== FIX FLOW SCREEN ========== -->
   <div class="screen" id="screen-fix">
-    <div class="top-bar">
-      <button class="icon-btn" id="btnFixBack" aria-label="Back to dashboard">
+    <div class="fix-top-bar">
+      <button class="icon-btn" id="btnFixBack" aria-label="Back to Shield">
         <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
       </button>
-      <h1 id="fix-title">Fix WhatsApp</h1>
+      <h2 id="fix-title">Fix WhatsApp</h2>
     </div>
 
     <div class="risk-card">
@@ -950,7 +1884,7 @@ button:focus-visible {
       </div>
       <div class="step">
         <div class="step-num" aria-hidden="true">4</div>
-        <div class="step-text">Come back here and tap <strong>"I've Done It"</strong></div>
+        <div class="step-text">Come back and tap <strong>"I've Done It"</strong></div>
       </div>
     </div>
 
@@ -964,7 +1898,7 @@ button:focus-visible {
           <div class="settings-mock-label">Allow from this source</div>
           <div class="settings-mock-sublabel" id="mock-sublabel">Currently enabled — turn this OFF</div>
         </div>
-        <button class="toggle-btn" id="mockToggle" role="switch" aria-checked="true" aria-label="Allow from this source"></button>
+        <button class="toggle-btn-danger" id="mockToggle" role="switch" aria-checked="true" aria-label="Allow from this source"></button>
       </div>
     </div>
 
@@ -974,139 +1908,90 @@ button:focus-visible {
     </div>
 
     <div class="fix-buttons">
-      <button class="btn btn-primary btn-full" id="btnOpenSettings">
+      <button class="btn-fix-primary" id="btnOpenSettings">
         <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
         Open Settings
       </button>
-      <button class="btn btn-outlined btn-full" id="btnMarkFixed" disabled>
+      <button class="btn-fix-outlined" id="btnMarkFixed" disabled>
         <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
         I've Done It
       </button>
-      <button class="btn-text" id="btnSkip">Skip for now</button>
+      <button class="btn-text-skip" id="btnSkip">Skip for now</button>
     </div>
   </div>
 
-  <!-- ========== SCREEN 4: SETTINGS ========== -->
-  <div class="screen" id="screen-settings">
-    <div class="top-bar">
-      <button class="icon-btn" id="btnSettingsBack" aria-label="Back to dashboard">
-        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-      </button>
-      <h1>Settings</h1>
-    </div>
-
-    <div class="settings-card">
-      <div class="settings-card-title">Reminders</div>
-      <div class="settings-row">
-        <label class="settings-row-label" for="reminderToggle">Weekly security reminders</label>
-        <button class="toggle-btn" id="reminderToggle" role="switch" aria-checked="true" aria-label="Weekly security reminders"></button>
-      </div>
-      <div class="settings-row">
-        <label class="settings-row-label" for="reminderDay">Reminder day</label>
-        <select class="settings-select" id="reminderDay">
-          <option selected>Monday</option>
-          <option>Tuesday</option>
-          <option>Wednesday</option>
-          <option>Thursday</option>
-          <option>Friday</option>
-          <option>Saturday</option>
-          <option>Sunday</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="settings-card">
-      <div class="settings-card-title">Privacy</div>
-      <div class="privacy-note">
-        <span class="material-symbols-outlined" aria-hidden="true">lock</span>
-        <p>Safe Anot? does not collect any personal data. All security checks run locally on your device.</p>
-      </div>
-    </div>
-
-    <div class="settings-card">
-      <div class="settings-card-title">Anti-Scam Tips</div>
-      <div class="accordion-item">
-        <button class="accordion-btn" aria-expanded="false">
-          <span class="accordion-label">Never install APKs from WhatsApp or Telegram</span>
-          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
-        </button>
-        <div class="accordion-content" role="region">
-          <p>Scammers send APK files through messaging apps disguised as legitimate apps, updates, or tools. Never download and install APK files received through these channels.</p>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <button class="accordion-btn" aria-expanded="false">
-          <span class="accordion-label">Only install apps from Google Play Store</span>
-          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
-        </button>
-        <div class="accordion-content" role="region">
-          <p>The Google Play Store screens apps for malware and malicious behavior. Installing apps from other sources bypasses these safety checks and puts your device at risk.</p>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <button class="accordion-btn" aria-expanded="false">
-          <span class="accordion-label">Keep Google Play Protect enabled</span>
-          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
-        </button>
-        <div class="accordion-content" role="region">
-          <p>Google Play Protect continuously scans your device for potentially harmful apps. It should always be enabled for maximum protection.</p>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <button class="accordion-btn" aria-expanded="false">
-          <span class="accordion-label">If someone asks you to install an APK, it's likely a scam</span>
-          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
-        </button>
-        <div class="accordion-content" role="region">
-          <p>Legitimate companies and services will never ask you to sideload an APK. If someone — even a trusted contact — sends you an APK file and asks you to install it, treat it as a scam.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="settings-card">
-      <div class="settings-card-title">About</div>
-      <div class="about-section">
-        <div class="version">Version 1.0.0</div>
-        <div class="made-with">Made with &#10084;&#65039; to fight scams</div>
-      </div>
-    </div>
-  </div>
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav" id="bottomNav" aria-label="Main navigation">
+    <button class="nav-item active" data-screen="screen-check" aria-label="Check links" aria-current="page">
+      <span class="material-symbols-outlined">search</span>
+      <span class="nav-label">Check</span>
+    </button>
+    <button class="nav-item" data-screen="screen-shield" aria-label="Phone shield">
+      <span class="material-symbols-outlined">shield</span>
+      <span class="nav-label">Shield</span>
+    </button>
+    <button class="nav-item" data-screen="screen-alerts" aria-label="Scam alerts">
+      <span class="material-symbols-outlined">notifications</span>
+      <span class="nav-label">Alerts</span>
+    </button>
+    <button class="nav-item" data-screen="screen-profile" aria-label="Profile and settings">
+      <span class="material-symbols-outlined">person</span>
+      <span class="nav-label">Profile</span>
+    </button>
+  </nav>
 </div>
 
 <script>
 // ========== APP DATA ==========
 const apps = [
-  // Messaging Apps
   { id: 'whatsapp', name: 'WhatsApp', abbr: 'WA', color: '#25D366', category: 'messaging', status: 'needs-review', desc: 'Can receive and install APK files', riskText: 'WhatsApp can be used to send you dangerous APK files. If "Install unknown apps" is enabled, these files could be installed on your phone.' },
-  { id: 'whatsapp-biz', name: 'WhatsApp Business', abbr: 'WB', color: '#25D366', category: 'messaging', status: 'not-installed', desc: 'Not detected on this device', riskText: 'WhatsApp Business can be used to send you dangerous APK files. If "Install unknown apps" is enabled, these files could be installed on your phone.' },
   { id: 'telegram', name: 'Telegram', abbr: 'TG', color: '#0088cc', category: 'messaging', status: 'needs-review', desc: 'Can receive and install APK files', riskText: 'Telegram can be used to send you dangerous APK files. If "Install unknown apps" is enabled, these files could be installed on your phone.' },
-
-  // Browsers
   { id: 'chrome', name: 'Chrome', abbr: 'CR', color: '#4285F4', category: 'browsers', status: 'needs-review', desc: 'Common source for APK downloads', riskText: 'Chrome can be used to download dangerous APK files from the internet. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-  { id: 'samsung-internet', name: 'Samsung Internet', abbr: 'SI', color: '#6e4bbd', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Samsung Internet can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-  { id: 'edge', name: 'Microsoft Edge', abbr: 'ED', color: '#0078D7', category: 'browsers', status: 'secured', desc: 'Install permission disabled', riskText: 'Microsoft Edge can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-  { id: 'firefox', name: 'Firefox', abbr: 'FF', color: '#FF7139', category: 'browsers', status: 'needs-review', desc: 'Can download and install APK files', riskText: 'Firefox can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-  { id: 'opera', name: 'Opera', abbr: 'OP', color: '#FF1B2D', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Opera can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-  { id: 'opera-mini', name: 'Opera Mini', abbr: 'OM', color: '#FF1B2D', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Opera Mini can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-  { id: 'brave', name: 'Brave', abbr: 'BR', color: '#FB542B', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Brave can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
+  { id: 'firefox', name: 'Firefox', abbr: 'FF', color: '#FF7139', category: 'browsers', status: 'secured', desc: 'Install permission disabled', riskText: 'Firefox can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
   { id: 'uc-browser', name: 'UC Browser', abbr: 'UC', color: '#F58220', category: 'browsers', status: 'needs-review', desc: 'Can download and install APK files', riskText: 'UC Browser can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-  { id: 'duckduckgo', name: 'DuckDuckGo', abbr: 'DD', color: '#DE5833', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'DuckDuckGo browser can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-  { id: 'vivaldi', name: 'Vivaldi', abbr: 'VI', color: '#EF3939', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Vivaldi can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-  { id: 'mi-browser', name: 'Mi Browser', abbr: 'MI', color: '#FF6900', category: 'browsers', status: 'needs-review', desc: 'Pre-installed browser — can download APKs', riskText: 'Mi Browser can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-  { id: 'vivo-browser', name: 'Vivo Browser', abbr: 'VV', color: '#415FFF', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Vivo Browser can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-  { id: 'oppo-browser', name: 'OPPO Browser', abbr: 'OB', color: '#1BA784', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'OPPO Browser can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-  { id: 'huawei-browser', name: 'Huawei Browser', abbr: 'HW', color: '#CF0A2C', category: 'browsers', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Huawei Browser can be used to download dangerous APK files. If "Install unknown apps" is enabled, those files could be installed on your phone.' },
-
-  // File Managers
   { id: 'files-google', name: 'Files by Google', abbr: 'FG', color: '#34a853', category: 'files', status: 'secured', desc: 'Install permission disabled', riskText: 'Files by Google can open APK files stored on your device. If "Install unknown apps" is enabled, those files could be installed.' },
-  { id: 'mi-file-manager', name: 'Mi File Manager', abbr: 'MF', color: '#FF6900', category: 'files', status: 'not-installed', desc: 'Not detected on this device', riskText: 'Mi File Manager can open APK files stored on your device. If "Install unknown apps" is enabled, those files could be installed.' },
-
-  // Protection
-  { id: 'playprotect', name: 'Google Play Protect', abbr: null, color: '#34a853', category: 'protection', status: 'secured', desc: 'Active and up to date', riskText: '' },
+  { id: 'playprotect', name: 'Play Protect', abbr: null, color: '#34a853', category: 'protection', status: 'secured', desc: 'Active and up to date', riskText: '' },
 ];
 
 let currentFixApp = null;
-let currentScreen = 'screen-onboarding';
+let currentScreen = 'screen-check';
+let onboardingStep = 0;
+
+// ========== EXAMPLE LINK VERDICTS ==========
+const exampleVerdicts = {
+  'maybank-secure-update.xyz': {
+    type: 'danger',
+    label: 'DANGEROUS',
+    desc: 'This domain impersonates Maybank',
+    detail: 'Real Maybank: maybank2u.com.my',
+    warning: 'Do NOT enter any passwords',
+    icon: 'gpp_bad'
+  },
+  'shopee.com.my': {
+    type: 'safe',
+    label: 'SAFE',
+    desc: 'Official verified domain',
+    detail: 'This is the real Shopee Malaysia website',
+    icon: 'verified_user'
+  },
+  'bit.ly/kl-investment': {
+    type: 'suspicious',
+    label: 'SUSPICIOUS',
+    desc: 'Proceed with caution',
+    detail: 'URL shorteners can hide the real destination. This link may redirect to an unknown site.',
+    icon: 'help'
+  }
+};
+
+// Default verdict for any typed URL
+const defaultVerdict = {
+  type: 'danger',
+  label: 'DANGEROUS',
+  desc: 'This domain was flagged as suspicious',
+  detail: 'We could not verify this domain as legitimate',
+  warning: 'Do NOT enter personal info on this site',
+  icon: 'gpp_bad'
+};
 
 // ========== RENDER CARDS ==========
 function renderCards() {
@@ -1116,7 +2001,6 @@ function renderCards() {
     files: document.getElementById('cards-files'),
     protection: document.getElementById('cards-protection'),
   };
-
   Object.values(containers).forEach(c => c.innerHTML = '');
 
   apps.forEach(app => {
@@ -1129,143 +2013,207 @@ function renderCards() {
     card.dataset.app = app.id;
 
     const iconContent = app.id === 'playprotect'
-      ? '<span class="material-symbols-outlined" style="font-size:22px;color:white;">verified_user</span>'
+      ? '<span class="material-symbols-outlined" style="font-size:20px;color:white;font-variation-settings:\'FILL\' 1;">verified_user</span>'
       : app.abbr;
 
-    const descText = app.status === 'secured' ? 'Install permission disabled'
-      : app.status === 'not-installed' ? 'Not detected on this device'
+    const descText = app.status === 'secured' ? (app.id === 'playprotect' ? 'Active and up to date' : 'Install permission disabled')
       : app.desc;
 
     let badgeHtml, actionHtml = '';
     if (app.status === 'secured') {
-      badgeHtml = '<span class="badge badge-green"><span class="material-symbols-outlined" style="font-size:14px;" aria-hidden="true">check</span> Secured</span>';
+      badgeHtml = '<span class="badge badge-green"><span class="material-symbols-outlined" style="font-size:12px;" aria-hidden="true">check</span> Secured</span>';
     } else if (app.status === 'not-installed') {
       badgeHtml = '<span class="badge badge-gray">Not Installed</span>';
     } else {
       badgeHtml = '<span class="badge badge-red">Needs Review</span>';
-      actionHtml = `<button class="fix-btn" data-fix="${app.id}">Fix Now</button>`;
+      actionHtml = '<button class="fix-btn" data-fix="' + app.id + '">Fix</button>';
     }
 
-    card.innerHTML = `
-      <div class="app-card-icon" style="background:${app.color};">${iconContent}</div>
-      <div class="app-card-body">
-        <div class="app-card-name">${app.name}</div>
-        <div class="app-card-desc">${descText}</div>
-      </div>
-      <div class="app-card-right">
-        ${badgeHtml}
-        ${actionHtml}
-      </div>
-    `;
+    card.innerHTML =
+      '<div class="app-card-icon" style="background:' + app.color + ';">' + iconContent + '</div>' +
+      '<div class="app-card-body">' +
+        '<div class="app-card-name">' + app.name + '</div>' +
+        '<div class="app-card-desc">' + descText + '</div>' +
+      '</div>' +
+      '<div class="app-card-right">' + badgeHtml + actionHtml + '</div>';
 
-    // Only make needs-review cards clickable
     if (app.status === 'needs-review') {
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-label', app.name + ': Needs Review — tap to fix');
       card.addEventListener('click', () => openFix(app.id));
+      addKeyboardActivation(card);
     }
-
-    // Fix button stops propagation
     const fixBtn = card.querySelector('.fix-btn');
     if (fixBtn) {
-      fixBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openFix(app.id);
-      });
+      fixBtn.addEventListener('click', (e) => { e.stopPropagation(); openFix(app.id); });
     }
-
     container.appendChild(card);
   });
 }
 
 // ========== SCORE ==========
-function getInstalledApps() {
-  return apps.filter(a => a.status !== 'not-installed');
-}
-
-function getSecuredCount() {
-  return apps.filter(a => a.status === 'secured').length;
-}
-
-function getTotalAuditableCount() {
-  return getInstalledApps().length;
-}
-
+function getInstalledApps() { return apps.filter(a => a.status !== 'not-installed'); }
+function getSecuredCount() { return apps.filter(a => a.status === 'secured').length; }
+function getTotalAuditableCount() { return getInstalledApps().length; }
 function getScorePercent() {
   const total = getTotalAuditableCount();
   if (total === 0) return 100;
   return Math.round((getSecuredCount() / total) * 100);
 }
 
-function getScoreColor(pct) {
-  if (pct < 50) return 'var(--red)';
-  if (pct < 80) return 'var(--orange)';
-  return 'var(--green)';
-}
-
-function updateDashboard() {
+function updateShield() {
   const pct = getScorePercent();
   const secured = getSecuredCount();
   const total = getTotalAuditableCount();
-  const circumference = 2 * Math.PI * 65;
-  const offset = circumference - (pct / 100) * circumference;
-  const color = getScoreColor(pct);
 
-  const ring = document.getElementById('scoreRing');
-  ring.style.strokeDasharray = circumference;
-  ring.style.strokeDashoffset = offset;
-  ring.style.stroke = color;
+  const scoreEl = document.getElementById('shieldScore');
+  const labelEl = document.getElementById('shieldScoreLabel');
+  const glowBg = document.getElementById('shieldGlowBg');
+  const iconSym = document.getElementById('shieldIconSymbol');
+  const profileScore = document.getElementById('profileScore');
 
-  const num = document.getElementById('scoreNumber');
-  num.style.color = color;
-  animateNumber(num, parseInt(num.textContent) || 0, pct, 600);
+  scoreEl.textContent = pct + '%';
+  labelEl.textContent = secured + ' of ' + total + ' items secured';
 
-  document.getElementById('scoreSubtitle').textContent = `${secured} of ${total} installed items secured`;
+  // Update colors
+  let color;
+  if (pct >= 80) { color = 'var(--green)'; glowBg.className = 'shield-icon-bg score-green'; }
+  else if (pct >= 50) { color = 'var(--orange)'; glowBg.className = 'shield-icon-bg'; }
+  else { color = 'var(--red)'; glowBg.className = 'shield-icon-bg score-red'; }
+
+  scoreEl.style.color = color;
+  iconSym.style.color = color;
+  if (profileScore) profileScore.style.color = color;
+  if (profileScore) profileScore.textContent = pct + '%';
 
   renderCards();
 }
 
-function animateNumber(el, from, to, duration) {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    el.textContent = to;
-    return;
-  }
-  const start = performance.now();
-  function update(now) {
-    const progress = Math.min((now - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
-    el.textContent = Math.round(from + (to - from) * eased);
-    if (progress < 1) requestAnimationFrame(update);
-  }
-  requestAnimationFrame(update);
-}
-
 // ========== NAVIGATION ==========
 function showScreen(id) {
-  const current = document.querySelector('.screen.active');
-  if (current) {
-    current.classList.remove('active');
-    current.classList.add('slide-out-left');
-    setTimeout(() => current.classList.remove('slide-out-left'), 300);
-  }
-  setTimeout(() => {
-    const target = document.getElementById(id);
+  const screens = document.querySelectorAll('.screen');
+  screens.forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(id);
+  if (target) {
     target.scrollTop = 0;
     target.classList.add('active');
-    // Move focus to first heading for screen readers
-    const heading = target.querySelector('h1');
-    if (heading) heading.focus();
-  }, 50);
+  }
   currentScreen = id;
+
+  // Update nav
+  if (!id.startsWith('screen-fix')) {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      n.classList.toggle('active', n.dataset.screen === id);
+      n.setAttribute('aria-current', n.dataset.screen === id ? 'page' : 'false');
+    });
+  }
 }
 
-// ========== SCAN ==========
-function startScan() {
+// ========== ONBOARDING ==========
+function advanceOnboarding() {
+  const slides = document.querySelectorAll('.onboarding-slide');
+  const dots = document.querySelectorAll('.onboarding-dot');
+  const nextBtn = document.getElementById('btnOnboardingNext');
+
+  if (onboardingStep < 2) {
+    slides[onboardingStep].classList.remove('active');
+    slides[onboardingStep].classList.add('exit-left');
+    onboardingStep++;
+    slides[onboardingStep].classList.add('active');
+    dots.forEach((d, i) => d.classList.toggle('active', i === onboardingStep));
+    if (onboardingStep === 2) {
+      nextBtn.textContent = 'Get Started';
+      document.getElementById('btnOnboardingSkip').style.display = 'none';
+    }
+  } else {
+    closeOnboarding();
+  }
+}
+
+function closeOnboarding() {
+  document.getElementById('onboardingOverlay').classList.add('hidden');
+}
+
+// ========== LINK CHECK ==========
+function checkLink() {
+  const input = document.getElementById('linkInput');
+  let url = input.value.trim();
+  if (!url) {
+    showToast('Paste a link to check first');
+    input.focus();
+    return;
+  }
+
+  // Show scanning
   const overlay = document.getElementById('scanOverlay');
+  document.querySelector('#scanOverlay .scan-text').textContent = 'Checking link...';
   overlay.classList.add('show');
+
   setTimeout(() => {
     overlay.classList.remove('show');
-    showScreen('screen-dashboard');
-    setTimeout(updateDashboard, 100);
-  }, 2000);
+    document.querySelector('#scanOverlay .scan-text').textContent = 'Scanning your device...';
+
+    // Find verdict
+    let verdict = null;
+    for (const [domain, v] of Object.entries(exampleVerdicts)) {
+      if (url.includes(domain)) { verdict = v; break; }
+    }
+    if (!verdict) verdict = defaultVerdict;
+
+    showVerdict(url, verdict);
+  }, 1500);
+}
+
+function showVerdict(url, verdict) {
+  const overlay = document.getElementById('verdictOverlay');
+  const glow = document.getElementById('verdictGlow');
+  const content = document.getElementById('verdictContent');
+  const actions = document.getElementById('verdictActions');
+
+  glow.className = 'verdict-glow ' + verdict.type;
+
+  let html =
+    '<div class="verdict-shield ' + (verdict.type === 'danger' ? 'red' : verdict.type === 'safe' ? 'green' : 'orange') + '">' +
+      '<span class="material-symbols-outlined" style="font-variation-settings:\'FILL\' 1;">' + verdict.icon + '</span>' +
+    '</div>' +
+    '<div class="verdict-label ' + (verdict.type === 'danger' ? 'red' : verdict.type === 'safe' ? 'green' : 'orange') + '">' + verdict.label + '</div>' +
+    '<div class="verdict-desc">' + verdict.desc + '</div>';
+
+  if (verdict.detail) {
+    html += '<div class="verdict-detail">' + verdict.detail + '</div>';
+  }
+  if (verdict.warning) {
+    html += '<div class="verdict-warning"><span class="material-symbols-outlined">warning</span> ' + verdict.warning + '</div>';
+  }
+
+  content.innerHTML = html;
+
+  let actionsHtml = '';
+  if (verdict.type === 'danger') {
+    actionsHtml =
+      '<button class="btn-verdict-primary red"><span class="material-symbols-outlined">share</span> Share Warning</button>' +
+      '<button class="btn-verdict-outlined"><span class="material-symbols-outlined">flag</span> Report</button>';
+  } else if (verdict.type === 'safe') {
+    actionsHtml = '<button class="btn-verdict-primary green">OK, Got It</button>';
+  } else {
+    actionsHtml =
+      '<button class="btn-verdict-primary orange"><span class="material-symbols-outlined">share</span> Share Warning</button>' +
+      '<button class="btn-verdict-outlined">OK</button>';
+  }
+  actionsHtml += '<button class="btn-verdict-close">Close</button>';
+
+  actions.innerHTML = actionsHtml;
+  overlay.classList.add('show');
+}
+
+function closeVerdict() {
+  document.getElementById('verdictOverlay').classList.remove('show');
+}
+
+function shareVerdict() {
+  showToast('Shared to WhatsApp');
+  setTimeout(closeVerdict, 300);
 }
 
 // ========== FIX FLOW ==========
@@ -1274,16 +2222,13 @@ function openFix(appId) {
   if (!app || app.status !== 'needs-review') return;
 
   currentFixApp = appId;
-  document.getElementById('fix-title').textContent = `Fix ${app.name}`;
+  document.getElementById('fix-title').textContent = 'Fix ' + app.name;
   document.getElementById('fix-risk-text').textContent = app.riskText;
 
-  // Reset mock toggle to ON (dangerous state)
   const toggle = document.getElementById('mockToggle');
   toggle.setAttribute('aria-checked', 'true');
-  document.getElementById('mock-sublabel').textContent = 'Currently enabled — turn this OFF';
+  document.getElementById('mock-sublabel').textContent = 'Currently enabled \u2014 turn this OFF';
   document.getElementById('mock-sublabel').style.color = '';
-
-  // Disable confirm button, show hint
   document.getElementById('btnMarkFixed').disabled = true;
   document.getElementById('fixHint').classList.remove('hidden');
 
@@ -1300,14 +2245,12 @@ function toggleMock() {
   const hint = document.getElementById('fixHint');
 
   if (isOn) {
-    // Turned OFF — safe
-    sublabel.textContent = 'Disabled — this is the safe setting';
+    sublabel.textContent = 'Disabled \u2014 this is the safe setting';
     sublabel.style.color = 'var(--green)';
     confirmBtn.disabled = false;
     hint.classList.add('hidden');
   } else {
-    // Turned ON — dangerous
-    sublabel.textContent = 'Currently enabled — turn this OFF';
+    sublabel.textContent = 'Currently enabled \u2014 turn this OFF';
     sublabel.style.color = '';
     confirmBtn.disabled = true;
     hint.classList.remove('hidden');
@@ -1316,14 +2259,11 @@ function toggleMock() {
 
 function markFixed() {
   if (!currentFixApp) return;
-
-  // Only allow if toggle is in safe position
   const toggle = document.getElementById('mockToggle');
   if (toggle.getAttribute('aria-checked') === 'true') {
     showToast('Please turn off the toggle first');
     return;
   }
-
   const app = apps.find(a => a.id === currentFixApp);
   if (app) app.status = 'secured';
 
@@ -1331,20 +2271,20 @@ function markFixed() {
   overlay.classList.add('show');
   setTimeout(() => {
     overlay.classList.remove('show');
-    showScreen('screen-dashboard');
-    setTimeout(updateDashboard, 100);
+    showScreen('screen-shield');
+    setTimeout(updateShield, 100);
   }, 1200);
 }
 
 // ========== RECHECK ==========
 function recheckAll() {
   const overlay = document.getElementById('scanOverlay');
-  document.querySelector('#scanOverlay .scan-text').textContent = 'Rechecking security settings...';
+  document.querySelector('#scanOverlay .scan-text').textContent = 'Rechecking security...';
   overlay.classList.add('show');
   setTimeout(() => {
     overlay.classList.remove('show');
     document.querySelector('#scanOverlay .scan-text').textContent = 'Scanning your device...';
-    updateDashboard();
+    updateShield();
     showToast('Security check complete');
   }, 1500);
 }
@@ -1363,7 +2303,6 @@ function toggleAccordion(btn) {
   const content = item.querySelector('.accordion-content');
   const isOpen = item.classList.contains('open');
 
-  // Close all
   document.querySelectorAll('.accordion-item.open').forEach(i => {
     i.classList.remove('open');
     i.querySelector('.accordion-content').style.maxHeight = '0';
@@ -1377,41 +2316,186 @@ function toggleAccordion(btn) {
   }
 }
 
-// ========== EVENT LISTENERS (no inline handlers) ==========
+// ========== FOCUS TRAP FOR VERDICT OVERLAY (Issue 2) ==========
+let previousFocusElement = null;
+
+function trapFocusInDialog(dialogEl) {
+  const focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+  const focusableElements = dialogEl.querySelectorAll(focusableSelector);
+  if (focusableElements.length === 0) return;
+  const firstFocusable = focusableElements[0];
+  const lastFocusable = focusableElements[focusableElements.length - 1];
+
+  // Focus first actionable button
+  firstFocusable.focus();
+
+  dialogEl._trapHandler = function(e) {
+    if (e.key === 'Tab') {
+      if (e.shiftKey) {
+        if (document.activeElement === firstFocusable) {
+          e.preventDefault();
+          lastFocusable.focus();
+        }
+      } else {
+        if (document.activeElement === lastFocusable) {
+          e.preventDefault();
+          firstFocusable.focus();
+        }
+      }
+    }
+    if (e.key === 'Escape') {
+      closeVerdict();
+    }
+  };
+  dialogEl.addEventListener('keydown', dialogEl._trapHandler);
+}
+
+function releaseFocusTrap(dialogEl) {
+  if (dialogEl._trapHandler) {
+    dialogEl.removeEventListener('keydown', dialogEl._trapHandler);
+    dialogEl._trapHandler = null;
+  }
+}
+
+// Override showVerdict to manage focus (Issue 2)
+const _origShowVerdict = showVerdict;
+showVerdict = function(url, verdict) {
+  previousFocusElement = document.activeElement;
+  _origShowVerdict(url, verdict);
+
+  // Attach event handlers to dynamically created buttons via addEventListener (Issue 8)
+  const actions = document.getElementById('verdictActions');
+  const actionButtons = actions.querySelectorAll('button');
+  actionButtons.forEach(btn => {
+    const text = btn.textContent.trim();
+    if (text.includes('Share Warning')) {
+      btn.addEventListener('click', () => shareVerdict());
+    } else if (text === 'Report') {
+      btn.addEventListener('click', () => { showToast('Reported. Thank you!'); closeVerdict(); });
+    } else if (text === 'OK, Got It' || text === 'OK') {
+      btn.addEventListener('click', () => closeVerdict());
+    } else if (text === 'Close') {
+      btn.addEventListener('click', () => closeVerdict());
+    }
+  });
+
+  // Trap focus within the dialog
+  const overlay = document.getElementById('verdictOverlay');
+  setTimeout(() => trapFocusInDialog(overlay), 100);
+};
+
+// Override closeVerdict to restore focus (Issue 2)
+const _origCloseVerdict = closeVerdict;
+closeVerdict = function() {
+  const overlay = document.getElementById('verdictOverlay');
+  releaseFocusTrap(overlay);
+  _origCloseVerdict();
+  // Restore focus to CHECK NOW button
+  const checkBtn = document.getElementById('btnCheckNow');
+  if (previousFocusElement) {
+    previousFocusElement.focus();
+    previousFocusElement = null;
+  } else if (checkBtn) {
+    checkBtn.focus();
+  }
+};
+
+// ========== KEYBOARD SUPPORT HELPER (Issue 1) ==========
+function addKeyboardActivation(element) {
+  element.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      element.click();
+    }
+  });
+}
+
+// ========== EVENT LISTENERS ==========
 document.addEventListener('DOMContentLoaded', () => {
   // Onboarding
-  document.getElementById('btnStartScan').addEventListener('click', startScan);
+  document.getElementById('btnOnboardingNext').addEventListener('click', advanceOnboarding);
+  document.getElementById('btnOnboardingSkip').addEventListener('click', closeOnboarding);
 
-  // Dashboard
-  document.getElementById('btnSettings').addEventListener('click', () => showScreen('screen-settings'));
+  // Bottom nav
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const screenId = btn.dataset.screen;
+      showScreen(screenId);
+      if (screenId === 'screen-shield') {
+        setTimeout(updateShield, 100);
+      }
+    });
+  });
+
+  // Check screen
+  document.getElementById('btnCheckNow').addEventListener('click', checkLink);
+  document.getElementById('linkInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') checkLink();
+  });
+
+  // Recent checks — share buttons
+  document.querySelectorAll('.verdict-share').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showToast('Shared to WhatsApp');
+    });
+  });
+
+  // Recent checks — tap to show verdict + keyboard support (Issue 1)
+  document.querySelectorAll('.verdict-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.verdict-share')) return;
+      const domain = card.querySelector('.verdict-domain').textContent;
+      const verdict = exampleVerdicts[domain] || defaultVerdict;
+      showVerdict(domain, verdict);
+    });
+    addKeyboardActivation(card);
+  });
+
+  // Alert cards expand + keyboard support (Issue 1)
+  document.querySelectorAll('.alert-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const wasExpanded = card.classList.contains('expanded');
+      document.querySelectorAll('.alert-card.expanded').forEach(c => {
+        c.classList.remove('expanded');
+        c.setAttribute('aria-expanded', 'false');
+      });
+      if (!wasExpanded) {
+        card.classList.add('expanded');
+        card.setAttribute('aria-expanded', 'true');
+      }
+    });
+    addKeyboardActivation(card);
+  });
+
+  // Shield / Fix flow
   document.getElementById('btnRecheck').addEventListener('click', recheckAll);
-
-  // Fix flow
   document.getElementById('mockToggle').addEventListener('click', toggleMock);
   document.getElementById('btnOpenSettings').addEventListener('click', () => showToast('Opening Android Settings...'));
   document.getElementById('btnMarkFixed').addEventListener('click', markFixed);
-  document.getElementById('btnSkip').addEventListener('click', () => showScreen('screen-dashboard'));
-  document.getElementById('btnFixBack').addEventListener('click', () => showScreen('screen-dashboard'));
+  document.getElementById('btnSkip').addEventListener('click', () => { showScreen('screen-shield'); setTimeout(updateShield, 100); });
+  document.getElementById('btnFixBack').addEventListener('click', () => { showScreen('screen-shield'); setTimeout(updateShield, 100); });
 
-  // Settings
-  document.getElementById('btnSettingsBack').addEventListener('click', () => showScreen('screen-dashboard'));
+  // Profile
   document.getElementById('reminderToggle').addEventListener('click', function() {
     const isOn = this.getAttribute('aria-checked') === 'true';
     this.setAttribute('aria-checked', isOn ? 'false' : 'true');
   });
+  // Dark mode toggle is now disabled (Issue 5) — no click handler needed
+  document.getElementById('btnGuardian').addEventListener('click', () => showToast('Coming soon!'));
+  document.getElementById('btnShareApp').addEventListener('click', () => showToast('Share link copied!'));
 
-  // Accordion buttons
+  // Accordion
   document.querySelectorAll('.accordion-btn').forEach(btn => {
     btn.addEventListener('click', () => toggleAccordion(btn));
   });
 
-  // Make headings focusable for screen navigation
-  document.querySelectorAll('.top-bar h1, .onboarding-title').forEach(h => {
-    h.setAttribute('tabindex', '-1');
-  });
+  // Make headings focusable
+  document.querySelectorAll('h1, h2').forEach(h => h.setAttribute('tabindex', '-1'));
 
   // Initial render
   renderCards();
+  updateShield();
 });
 </script>
 </body>
