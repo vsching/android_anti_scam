@@ -77,15 +77,23 @@ def _validate_anti_poisoning(
             )
 
     # Gate (b): reject if any single source contributes >80% of new domains
-    # Only applies when there are multiple successful sources
+    # Compare each source's unique contribution against total unique (deduplicated) count
+    # to avoid false positives from source overlap
     successful_results = [r for r in results if r.success and r.domains]
     if len(successful_results) > 1 and total_domains > 0:
-        for result in successful_results:
-            source_pct = (len(result.domains) / total_domains) * 100
+        # Calculate each source's unique contribution (not in any other source)
+        all_source_domains = [set(r.domains) for r in successful_results]
+        for i, result in enumerate(successful_results):
+            other_domains = set()
+            for j, domains in enumerate(all_source_domains):
+                if i != j:
+                    other_domains |= domains
+            unique_count = len(set(result.domains) - other_domains)
+            source_pct = (unique_count / total_domains) * 100
             if source_pct > MAX_SINGLE_SOURCE_PERCENT:
                 warnings.append(
                     f"Source '{result.source}' contributes {source_pct:.1f}% "
-                    f"of total domains ({len(result.domains)}/{total_domains}). "
+                    f"unique domains ({unique_count}/{total_domains}). "
                     f"Anomaly detected."
                 )
 

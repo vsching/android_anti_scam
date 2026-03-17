@@ -21,7 +21,7 @@ def fetch_pending_discoveries(d1_client: D1Client) -> list[dict[str, Any]]:
     Returns list of dicts with at least: domain, verdict, reason, check_count.
     """
     sql = """
-        SELECT domain, verdict, reason, check_count, confidence,
+        SELECT domain, verdict, reason, check_count,
                created_at, last_seen_at
         FROM pending_discoveries
         WHERE processed = 0

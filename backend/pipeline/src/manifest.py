@@ -80,18 +80,26 @@ def generate_latest_json(manifest: dict[str, Any]) -> dict[str, Any]:
     """Generate the latest.json content from a manifest.
 
     This is the metadata file that the Worker reads to serve /api/data/latest.
+    Keys MUST match the Worker's LatestManifest interface:
+      full_key, delta_key, bloom_key, full_size_kb, delta_size_kb,
+      bloom_size_kb, sqlite_size_kb, domain_count, build_timestamp, version
     """
+    artifacts = manifest.get("artifacts", {})
+
     latest: dict[str, Any] = {
         "version": manifest["version"],
         "build_timestamp": manifest["build_timestamp"],
         "domain_count": manifest["domain_count"],
+        # Worker expects these exact keys for R2 object lookup
+        "full_key": artifacts.get("sqlite", {}).get("filename", ""),
+        "delta_key": artifacts.get("delta_json", {}).get("filename", ""),
+        "bloom_key": artifacts.get("bloom", {}).get("filename", ""),
+        # Worker expects these exact size keys
+        "full_size_kb": artifacts.get("full_json", {}).get("size_kb", 0),
+        "delta_size_kb": artifacts.get("delta_json", {}).get("size_kb", 0),
+        "bloom_size_kb": artifacts.get("bloom", {}).get("size_kb", 0),
+        "sqlite_size_kb": artifacts.get("sqlite", {}).get("size_kb", 0),
     }
-
-    for artifact_type in ("full_json", "delta_json", "sqlite", "bloom"):
-        artifact = manifest.get("artifacts", {}).get(artifact_type)
-        if artifact:
-            latest[f"{artifact_type}_size_kb"] = artifact["size_kb"]
-            latest[f"{artifact_type}_filename"] = artifact["filename"]
 
     if "bloom_params" in manifest:
         latest["bloom_params"] = manifest["bloom_params"]

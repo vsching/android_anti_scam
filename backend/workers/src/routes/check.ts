@@ -103,15 +103,18 @@ export async function handleCheck(
     });
   }
 
-  // 5. Check KV allowlist
-  const kvValue = await env.VERDICTS.get(domain);
+  // 5. Check KV — try allowlist prefix first, then bare domain (for discoveries)
+  const kvAllowlist = await env.VERDICTS.get(`allowlist:${domain}`);
+  const kvDiscovery = kvAllowlist === null ? await env.VERDICTS.get(domain) : null;
+  const kvValue = kvAllowlist ?? kvDiscovery;
   if (kvValue !== null) {
+    const parsed = (() => { try { return JSON.parse(kvValue); } catch { return null; } })();
     const kvResult: CheckResponse = {
       domain,
-      verdict: 'safe',
-      reason: 'Domain found in verified allowlist',
-      confidence: 1.0,
-      details: { check_type: 'allowlist', source: 'kv' },
+      verdict: parsed?.verdict ?? 'safe',
+      reason: parsed?.reason ?? 'Domain found in verified allowlist',
+      confidence: parsed?.confidence ?? 1.0,
+      details: { check_type: kvAllowlist ? 'allowlist' : 'discovery', source: 'kv' },
     };
 
     const response = jsonResponse(kvResult, 200);

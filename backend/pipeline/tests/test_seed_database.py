@@ -302,17 +302,22 @@ class TestAntiPoisoningValidation:
         assert _validate_anti_poisoning(results, 60, 100, False) is True
 
     def test_fail_on_single_source_domination(self):
+        # Use unique domains per source — source "a" has 90 unique domains not in "b"
+        a_domains = [f"a-{i}.com" for i in range(90)]
+        b_domains = [f"b-{i}.com" for i in range(10)]
         results = [
-            FetchResult(source="a", domains=["d1.com"] * 90),
-            FetchResult(source="b", domains=["d2.com"] * 10),
+            FetchResult(source="a", domains=a_domains),
+            FetchResult(source="b", domains=b_domains),
         ]
-        # Source "a" has 90% of 100 total (multiple sources present)
+        # Source "a" has 90% unique contribution of 100 total
         assert _validate_anti_poisoning(results, 100, None, False) is False
 
     def test_pass_with_balanced_sources(self):
+        a_domains = [f"a-{i}.com" for i in range(50)]
+        b_domains = [f"b-{i}.com" for i in range(50)]
         results = [
-            FetchResult(source="a", domains=["d1.com"] * 50),
-            FetchResult(source="b", domains=["d2.com"] * 50),
+            FetchResult(source="a", domains=a_domains),
+            FetchResult(source="b", domains=b_domains),
         ]
         assert _validate_anti_poisoning(results, 100, None, False) is True
 
