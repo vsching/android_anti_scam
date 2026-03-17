@@ -1,0 +1,19 @@
+{
+  "name": "@safeanot/workers",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Safe Anot? Cloudflare Workers API backend",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.5.0",
+    "@cloudflare/workers-types": "^4.20240314.0",
+    "typescript": "^5.4.0",
+    "vitest": "^2.1.0",
+    "wrangler": "^3.91.0"
+  }
+}

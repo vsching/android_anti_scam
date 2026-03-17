@@ -1,0 +1,40 @@
+# Safe Anot? API — Cloudflare Worker configuration
+name = "safeanot-api"
+main = "src/index.ts"
+compatibility_date = "2024-03-01"
+
+[vars]
+ENVIRONMENT = "production"
+
+# KV — allowlist + new domain discoveries only (NOT bulk domain store)
+[[kv_namespaces]]
+binding = "VERDICTS"
+id = "PLACEHOLDER_KV_NAMESPACE_ID"
+preview_id = "PLACEHOLDER_KV_PREVIEW_NAMESPACE_ID"
+
+# R2 — bulk scam database (SQLite, Bloom filter, delta files)
+[[r2_buckets]]
+binding = "DATA_BUCKET"
+bucket_name = "safeanot-data"
+preview_bucket_name = "safeanot-data-preview"
+
+# D1 — reports, alerts, guardian pairings, pending discoveries
+[[d1_databases]]
+binding = "DB"
+database_name = "safeanot-db"
+database_id = "PLACEHOLDER_D1_DATABASE_ID"
+
+# Rate limiting — handled by Cloudflare's built-in infrastructure
+# 100 req/min per IP for /api/check
+[[unsafe.bindings]]
+name = "RATE_LIMITER_CHECK"
+type = "ratelimit"
+namespace_id = "0"
+simple = { limit = 100, period = 60 }
+
+# 10 req/min per IP for /api/report
+[[unsafe.bindings]]
+name = "RATE_LIMITER_REPORT"
+type = "ratelimit"
+namespace_id = "1"
+simple = { limit = 10, period = 60 }
