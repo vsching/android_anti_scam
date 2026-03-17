@@ -64,18 +64,24 @@
 
 **Endpoints:**
 
+**Note on KV usage:** KV stores ONLY allowlist + new domain discoveries (NOT the bulk 500K domain database — that lives in R2 + device SQLite). KV is also used to cache small API response payloads (alerts, guardian status, metadata) with short TTLs. These cached responses are tiny (< 10KB each) and do not constitute bulk domain storage.
+
 | Endpoint | Method | Purpose | Data Source | Cache Strategy |
 |----------|--------|---------|-------------|----------------|
-| `/api/check` | POST | Check if a URL/domain is safe | KV lookup → heuristic fallback (D1 NOT used) | Cache API → KV → heuristic |
-| `/api/check/batch` | POST | Check multiple URLs at once (burst mode) | KV batch lookup → heuristic fallback | Same as above |
-| `/api/report` | POST | Submit a scam report from user | Write to D1 | No cache needed |
-| `/api/alerts` | GET | Get trending scam alerts | D1 query, cached in KV | KV cache, 15-min TTL |
-| `/api/alerts/latest` | GET | Get latest alert (for push notification content) | KV | 5-min TTL |
+| `/api/check` | POST | Check if a URL/domain is safe | KV (allowlist + discoveries only) → heuristic fallback | Cache API → KV → heuristic. D1 NOT used. |
+| `/api/check/batch` | POST | Check multiple URLs at once (burst mode) | Same as /api/check | Same as above |
+| `/api/report` | POST | Submit a scam report from user | Write to D1 | No cache |
+| `/api/alerts` | GET | Get trending scam alerts | D1 query, response cached in KV | KV response cache, 15-min TTL |
+| `/api/alerts/latest` | GET | Get latest alert (for push content) | KV response cache | 5-min TTL |
 | `/api/guardian/pair` | POST | Create guardian pairing | D1 | No cache |
 | `/api/guardian/heartbeat` | POST | Parent's app sends security status | D1 + trigger FCM if needed | No cache |
-| `/api/guardian/status` | GET | Guardian checks parent's status | D1, cached in KV | KV cache, 5-min TTL |
-| `/api/score/share` | POST | Generate shareable score card data | D1 | KV cache by score ID |
-| `/api/challenge` | GET | Get quiz questions | KV (static data) | Long TTL |
+| `/api/guardian/status` | GET | Guardian checks parent's status | D1, response cached in KV | KV response cache, 5-min TTL |
+| `/api/score/share` | POST | Generate shareable score card data | D1 | KV response cache by score ID |
+| `/api/challenge` | GET | Get quiz questions | KV (static data, small) | Long TTL |
+| `/api/data/latest` | GET | Get database version metadata | R2 manifest, cached in KV | KV response cache, 1-hour TTL |
+| `/api/data/full` | GET | Stream full SQLite database | R2 (Worker streams directly) | No cache (large file) |
+| `/api/data/delta` | GET | Stream delta file since date | R2 (Worker streams directly) | No cache (large file) |
+| `/api/data/bloom` | GET | Stream Bloom filter binary | R2 (Worker streams directly) | No cache (large file) |
 
 **Request flow for link checker (hot path):**
 
@@ -304,7 +310,7 @@ The scam domain database changes once per day. Paying for a KV read on every sin
 
 | Data | Storage | Why |
 |------|---------|-----|
-| Bulk scam DB (500K+ domains) | **R2** (versioned files, free egress) + **device SQLite** | Apps download directly from R2. Free. |
+| Bulk scam DB (500K+ domains) | **R2** (versioned files) + **device SQLite** | Apps download via Worker-streamed R2 endpoints (`/api/data/*`). R2 egress is free. |
 | Hot lookups for unknown domains | **KV** (small number of new discoveries) | Only domains NOT in the bulk DB |
 | Reports, alerts, guardian pairings | **D1** (relational data) | Low-volume writes, read-replicated |
 | Heuristic results (ephemeral) | **Workers Cache API** (per edge city) | Free, auto-evicts |
@@ -317,10 +323,11 @@ The scam domain database changes once per day. Paying for a KV read on every sin
 
 ```
 App opens (once daily, on WiFi):
-  → GET safeanot-data.r2.dev/domains/latest-delta.json (~50-200KB)
+  → GET /api/data/latest → check if new version available
+  → GET /api/data/delta?since=YYYY-MM-DD → Worker streams delta from R2 (~50-200KB)
   → Merge delta into local Room/SQLite database
+  → GET /api/data/bloom → Worker streams Bloom filter from R2 (~100KB)
   → App now has 500K+ domains locally
-  → Also downloads bloom filter (~100KB) for fast negative lookups
 
 User checks a link:
   → Room query: SELECT verdict FROM domains WHERE domain = ?
@@ -336,10 +343,11 @@ User checks a link:
 - Bloom filter for fast negative lookups (~100KB for 500K domains, <1% false positive)
 - Local result cache (recent checks cached in memory/Room)
 
-**R2 cost:**
+**R2 cost (via Worker-streamed endpoints):**
 - Storage: free (first 10GB)
 - Egress: **$0** (R2 has zero egress fees — Cloudflare's key advantage)
-- 100K users downloading 200KB daily = ~20GB/month egress = still $0
+- Worker streams R2 objects to app via `/api/data/*` endpoints (no direct R2 access needed)
+- 100K users downloading 200KB daily = ~20GB/month streamed through Workers = still $0 R2 egress
 
 #### Layer 2: Cloudflare Workers Cache API (FREE, handles viral spikes)
 
