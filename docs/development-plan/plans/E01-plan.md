@@ -98,7 +98,7 @@
 - Security headers on all responses
 - CI/CD: GitHub Actions workflow deploys to Cloudflare on push to main
 - Logging redaction policy documented: never log full URLs, phone numbers, or message text
-- Pipeline scaffold with `requirements.txt` and README
+- Pipeline scaffold with `pyproject.toml` and README
 - Workers project lives in `/backend/workers/`, pipeline in `/backend/pipeline/`
 
 ---
@@ -120,11 +120,15 @@
 
 4. File: `/backend/workers/src/data/seed-alerts.ts`
    Action: Create
-   Details: Keep the app-visible seed dataset aligned with the SQL seed payload to avoid divergence.
+   Details: Generated from `0002_seed_alerts.sql` — this is the derived artifact, NOT a manually maintained duplicate. Add a build/test script or vitest assertion that verifies TS seed data matches SQL seed data. The SQL migration is the single source of truth for alert seeds.
 
 5. File: `/backend/workers/src/lib/retention.ts`
    Action: Create
-   Details: Scheduled function (Cron Trigger) to delete reports older than 90 days and pending_discoveries older than 30 days. Configured as a Workers scheduled handler.
+   Details: Scheduled function (Cron Trigger) to delete reports older than 90 days and pending_discoveries older than 30 days. Configured as a Workers scheduled handler. Export a `scheduled()` handler that is wired in `src/index.ts`.
+
+5b. File: `/backend/workers/wrangler.toml`
+    Action: Modify
+    Details: Add `[triggers]` section with `crons = ["0 3 * * *"]` (daily at 3am UTC) to wire the retention scheduled handler. Without this, the retention function will never execute.
 
 6. File: `/backend/workers/test/d1-migrations.test.ts`
    Action: Create
@@ -151,6 +155,7 @@
 - Schema matches INFRASTRUCTURE_ARCHITECTURE.md (corrected version)
 - Seed data: 5 initial alerts
 - Retention function: scheduled to delete reports older than 90 days
+- Cron trigger configured in `wrangler.toml` `[triggers]` section (daily at 3am UTC)
 - Note: use least-privilege Cloudflare API tokens (separate read-only for Workers, write for pipeline)
 
 ---
@@ -164,7 +169,7 @@
 
 2. File: `/backend/pipeline/seed_database.py`
    Action: Create
-   Details: Implement orchestration for feed download, normalization, deduplication, versioned artifact generation (JSON, SQLite, Bloom filter, manifest), R2 upload, KV allowlist seeding, `latest.json` manifest update, and pending_discoveries processing.
+   Details: Implement orchestration for feed download, normalization, deduplication, versioned artifact generation (JSON, SQLite, Bloom filter, manifest), R2 upload, KV allowlist seeding, `latest.json` manifest update, and pending_discoveries processing. Include anti-poisoning validation gates before publishing: (a) reject if total domain count drops >50% vs previous run (source compromise), (b) reject if any single source contributes >80% of new domains (anomaly), (c) validate domain format (no IPs, no localhost, valid TLD), (d) log warnings and abort publish if thresholds breached — require `--force` flag to override.
 
 3. File: `/backend/pipeline/src/sources.py`
    Action: Create
@@ -322,7 +327,11 @@
 
 7. File: `/backend/workers/wrangler.toml`
    Action: Modify
-   Details: Document expected rate limiting rules as comments in wrangler.toml: 100 req/min per IP for `/api/check`, 10 req/min for `/api/report`. Actual rate limiting is provisioned via Cloudflare Rate Limiting Rulesets (dashboard or API/Terraform), NOT wrangler.toml config. Worker returns 429 when Cloudflare enforces the limit. No application-level counters, no KV, no in-memory tracking.
+   Details: Document expected rate limiting rules as comments in wrangler.toml: 100 req/min per IP for `/api/check`, 10 req/min for `/api/report`. Worker returns 429 when Cloudflare enforces the limit. No application-level counters, no KV, no in-memory tracking.
+
+7b. File: `/infra/rate-limiting.sh`
+    Action: Create
+    Details: Shell script using Cloudflare API to provision Rate Limiting Rulesets for the zone. Configurable via env vars (`CF_ZONE_ID`, `CF_API_TOKEN`). Rules: 100 req/min per IP on `/api/check`, 10 req/min per IP on `/api/report`. Script is idempotent (updates existing rules if present). Include a `--dry-run` flag. CI step in deploy-workers.yml should call this after deploy.
 
 8. File: `/backend/workers/src/lib/discovery.ts`
    Action: Create
@@ -446,6 +455,7 @@
 | `/backend/workers/src/lib/cache.ts` | Create/Modify | E01-003, E01-004, E01-006 |
 | `/backend/workers/src/lib/inflight.ts` | Create | E01-003 |
 | `/backend/workers/wrangler.toml` | Modify (rate limiting comments) | E01-003 |
+| `/infra/rate-limiting.sh` | Create | E01-003 |
 | `/backend/workers/src/lib/discovery.ts` | Create | E01-003 |
 | `/backend/workers/test/check.test.ts` | Create | E01-003 |
 | `/backend/workers/src/routes/alerts.ts` | Create | E01-004 |
@@ -467,3 +477,4 @@
 | Round | Date | Findings | Fixed | Notes |
 |-------|------|----------|-------|-------|
 | R1 | 2026-03-17 | 7 (3 HIGH, 3 MEDIUM, 1 LOW) | 6 fixed, 1 dismissed | Rate limiting → Ruleset IaC; UPSERT for pending_discoveries; modernize headers; add missing tests; de-dup Python deps; clarify TECHNICAL_REQUIREMENTS v1 scope. KV caching finding dismissed — spec already allows tiny response caches (lines 121-122 of INFRASTRUCTURE_ARCHITECTURE.md). |
+| R2 | 2026-03-17 | 6 (1 HIGH recurring, 4 MEDIUM, 1 LOW) | 6 fixed | Synced epic source doc with R1 fixes; fixed acceptance criteria requirements.txt → pyproject.toml; added cron trigger wiring for retention; added rate-limiting IaC script + CI step; added anti-poisoning validation gates; consolidated alert seed to SQL-as-source-of-truth. |

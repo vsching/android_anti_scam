@@ -23,12 +23,29 @@ Plan Review (pre-build)
 | 6 | MEDIUM | Duplicate Python deps (requirements.txt + pyproject.toml) | other | Fixed: requirements.txt marked as remove/generate-only, pyproject.toml is single source |
 | 7 | LOW | Deprecated X-XSS-Protection, missing CSP/Permissions-Policy | other | Fixed: removed X-XSS-Protection, added Permissions-Policy, noted CSP for E06 |
 
+### Round 2 — 2026-03-17
+**Status:** Complete
+**Findings:** 6 issues found (1 HIGH recurring, 4 MEDIUM, 1 LOW)
+**Fixed:** 6 issues fixed
+**Themes:** propagation-gap x2 (RECURRING), classification-gap x2, fail-open x1, other x1
+
+**Details:**
+
+| # | Severity | Finding | Theme | Resolution |
+|---|----------|---------|-------|------------|
+| 1 | HIGH (RECURRING) | Epic source doc not synced with R1 fixes (rate limiting, requirements.txt, headers) | propagation-gap | Fixed: synced E01-backend-api-scam-database.md with all R1 corrections |
+| 2 | MEDIUM (RECURRING) | Acceptance criteria still says requirements.txt | propagation-gap | Fixed: changed to pyproject.toml in both plan and epic source |
+| 3 | MEDIUM | Retention cron has no wrangler.toml trigger config — will never run | classification-gap | Fixed: added wrangler.toml [triggers] crons task + acceptance criterion |
+| 4 | MEDIUM | Rate limiting IaC has no concrete deliverable — not reproducible | classification-gap | Fixed: added /infra/rate-limiting.sh script task with idempotent API provisioning + CI step |
+| 5 | MEDIUM | Feed ingestion missing anti-poisoning validation gates | fail-open | Fixed: added validation gates (50% drop rejection, 80% single-source anomaly, domain format checks, --force override) |
+| 6 | LOW | Alert seed data duplicated in SQL and TS — drift risk | other | Fixed: SQL migration is single source of truth, TS file is derived + verified by test assertion |
+
 ## Recurring Issue Tracker
 
 | Theme | Rounds Hit | Total Findings | Status |
 |-------|-----------|----------------|--------|
-| propagation-gap | R1 | 2 | RESOLVED |
-| classification-gap | R1 | 1 | RESOLVED |
-| fail-open | R1 | 1 | RESOLVED |
+| propagation-gap | R1, R2 | 4 | PATTERN |
+| classification-gap | R1, R2 | 3 | PATTERN |
+| fail-open | R1, R2 | 2 | PATTERN |
 | test-gap | R1 | 1 | RESOLVED |
-| other | R1 | 2 | RESOLVED |
+| other | R1, R2 | 3 | PATTERN |

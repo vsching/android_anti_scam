@@ -23,7 +23,7 @@ Set up the Cloudflare Workers backend API, seed the scam domain database in R2 (
 - Cloudflare KV (allowlist + new domain discoveries only — NOT bulk domain store)
 - Cloudflare R2 (bulk scam database, SQLite exports, Bloom filters)
 - Cloudflare D1 (reports, alerts, guardian pairings, pending discoveries)
-- Cloudflare Rate Limiting (built-in rules via wrangler.toml)
+- Cloudflare Rate Limiting (built-in Rulesets via dashboard/API/Terraform — NOT wrangler.toml)
 - Wrangler CLI for deployment
 
 ---
@@ -38,13 +38,13 @@ Set up the Cloudflare Workers project with Wrangler, TypeScript, local developme
 - `wrangler dev` runs locally and serves a hello-world Worker
 - TypeScript configured with strict mode
 - KV, R2, and D1 bindings declared in `wrangler.toml`
-- Cloudflare rate limiting rules configured in `wrangler.toml`
+- Cloudflare rate limiting rules provisioned via Rulesets IaC (documented as comments in `wrangler.toml`)
 - `.dev.vars` for local secrets (Firebase key placeholder)
 - `.env.example` documenting all required secrets
 - CORS middleware allowing safeanot.com origin + app requests
-- Security headers middleware (X-Content-Type-Options, X-Frame-Options, etc.)
+- Security headers middleware (X-Content-Type-Options, X-Frame-Options, Permissions-Policy, etc.)
 - CI/CD: GitHub Actions workflow deploys to Cloudflare on push to main
-- Pipeline scaffold with `requirements.txt` and README
+- Pipeline scaffold with `pyproject.toml` and README
 - Logging redaction policy: never log full URLs checked, phone numbers, or message text
 - Project lives in `/backend/workers/` (Workers) and `/backend/pipeline/` (Python pipeline)
 
