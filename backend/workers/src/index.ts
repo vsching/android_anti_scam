@@ -9,11 +9,27 @@ import { handlePreflight, addCorsHeaders } from './middleware/cors';
 import { addSecurityHeaders } from './middleware/security-headers';
 import { handleRetention } from './lib/retention';
 import { handleAlerts } from './routes/alerts';
+import { handleCheck } from './routes/check';
+import {
+  handleDataLatest,
+  handleDataFull,
+  handleDataDelta,
+  handleDataBloom,
+} from './routes/data';
 
 const router = new Router();
 
 // Scam alerts feed
 router.get('/api/alerts', handleAlerts);
+
+// Link checker
+router.post('/api/check', handleCheck);
+
+// Data download endpoints (R2 artifacts)
+router.get('/api/data/latest', handleDataLatest);
+router.get('/api/data/full', handleDataFull);
+router.get('/api/data/delta', handleDataDelta);
+router.get('/api/data/bloom', handleDataBloom);
 
 // Health / version endpoint
 router.get('/', (_request, _env, _params) => {

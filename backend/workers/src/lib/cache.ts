@@ -4,6 +4,9 @@
 /** Default cache TTL in seconds (15 minutes). */
 export const DEFAULT_CACHE_TTL = 900;
 
+/** Metadata cache TTL in seconds (1 hour) — for latest version / size metadata. */
+export const METADATA_CACHE_TTL = 3600;
+
 /** Metadata stored alongside cached values in KV. */
 interface CacheMetadata {
   cachedAt: number; // epoch ms
