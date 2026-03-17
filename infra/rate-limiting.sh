@@ -51,7 +51,7 @@ api_call() {
   if [[ "$DRY_RUN" == "true" ]]; then
     echo "[DRY RUN] ${method} ${url}"
     if [[ -n "$data" ]]; then
-      echo "  Body: ${data}" | head -c 500
+      printf "  Body: %.500s" "$data"
       echo ""
     fi
     return 0

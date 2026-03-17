@@ -132,9 +132,7 @@ async function streamR2Object(
     return jsonResponse({ error: 'Object not found' }, 404);
   }
 
-  const body = await object.arrayBuffer();
-
-  return new Response(body, {
+  return new Response(object.body, {
     status: 200,
     headers: {
       'Content-Type': contentType,

@@ -54,7 +54,7 @@ export async function handleCheck(
     return jsonResponse({ error: 'Failed to read request body' }, 400);
   }
 
-  if (bodyText.length > MAX_BODY_SIZE) {
+  if (new TextEncoder().encode(bodyText).length > MAX_BODY_SIZE) {
     return jsonResponse({ error: 'Payload too large' }, 413);
   }
 
@@ -167,12 +167,10 @@ export async function handleCheck(
     heuristicResult.verdict === 'suspicious' ||
     heuristicResult.verdict === 'dangerous'
   ) {
-    // Fire and forget — don't block the response
-    try {
-      await recordDiscovery(env.DB, domain, heuristicResult.verdict, heuristicResult.reason);
-    } catch {
+    // Fire and forget — don't block the response on D1 write
+    recordDiscovery(env.DB, domain, heuristicResult.verdict, heuristicResult.reason).catch(() => {
       // Silently swallow D1 write errors — verdict is still returned
-    }
+    });
   }
 
   // 10. Return verdict

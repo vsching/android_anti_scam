@@ -41,7 +41,11 @@ export async function cacheGet<T>(
     return null;
   }
 
-  return JSON.parse(value) as T;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return null;
+  }
 }
 
 /**
