@@ -43,16 +43,16 @@ object UrlNormalizer {
         // Strip path, query, fragment
         domain = domain.split("/", "?", "#").first()
 
-        // Strip port
-        val portIndex = domain.lastIndexOf(":")
-        if (portIndex != -1) {
-            domain = domain.substring(0, portIndex)
-        }
-
-        // Strip userinfo (user@host)
+        // Strip userinfo (user:pass@host) BEFORE port stripping
         val atIndex = domain.indexOf("@")
         if (atIndex != -1) {
             domain = domain.substring(atIndex + 1)
+        }
+
+        // Strip port (after userinfo so we don't confuse user:pass with host:port)
+        val portIndex = domain.lastIndexOf(":")
+        if (portIndex != -1) {
+            domain = domain.substring(0, portIndex)
         }
 
         // Strip "www." prefix

@@ -13,6 +13,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.safeanot.app.navigation.SafeAnotNavGraph
 import com.safeanot.app.ui.theme.SafeAnotTheme
@@ -21,8 +24,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    /** URL extracted from an incoming intent, consumed by the nav graph once. */
-    var pendingUrl: String? = null
+    /** URL extracted from an incoming intent — backed by Compose state for recomposition. */
+    var pendingUrl by mutableStateOf<String?>(null)
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
