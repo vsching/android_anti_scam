@@ -330,7 +330,7 @@ App opens (once daily, on WiFi):
   → GET /api/data/latest → check if new version available
   → GET /api/data/delta?since=YYYY-MM-DD → Worker streams delta from R2 (~50-200KB)
   → Merge delta into local Room/SQLite database
-  → GET /api/data/bloom → Worker streams Bloom filter from R2 (~100KB)
+  → GET /api/data/bloom → Worker streams Bloom filter from R2 (~600KB uncompressed, ~200-300KB compressed)
   → App now has 500K+ domains locally
 
 User checks a link:
@@ -344,7 +344,7 @@ User checks a link:
 **Components:**
 - Bundled SQLite in APK (snapshot at build time, ~10-15MB — needs benchmarking)
 - Daily delta download from R2 (only new/changed domains since last sync)
-- Bloom filter for fast negative lookups (~100KB for 500K domains, <1% false positive)
+- Bloom filter for fast negative lookups (~600KB uncompressed, ~200-300KB compressed for 500K domains, <1% false positive)
 - Local result cache (recent checks cached in memory/Room)
 
 **R2 cost (via Worker-streamed endpoints):**

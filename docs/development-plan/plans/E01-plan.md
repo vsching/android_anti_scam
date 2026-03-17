@@ -33,7 +33,7 @@
 
 5. File: `/backend/workers/.env.example`
    Action: Create
-   Details: Document all required secrets and environment variables with descriptions. Include: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `R2_BUCKET_NAME`, `KV_NAMESPACE_ID`, `D1_DATABASE_ID`, `FIREBASE_PROJECT_ID`, `FIREBASE_PRIVATE_KEY`. Add comments noting which are read-only vs write tokens.
+   Details: Document Worker-specific runtime environment variables only. Include: `R2_BUCKET_NAME`, `KV_NAMESPACE_ID`, `D1_DATABASE_ID`, `FIREBASE_PROJECT_ID`, `FIREBASE_PRIVATE_KEY`. Do NOT include `CLOUDFLARE_API_TOKEN` or `CLOUDFLARE_ACCOUNT_ID` — those are pipeline/deploy secrets and belong in `/backend/pipeline/.env.example` and CI secrets only. Add comments noting read-only scope for Worker bindings.
 
 6. File: `/backend/workers/.gitignore`
    Action: Create
@@ -189,11 +189,11 @@
 
 7. File: `/backend/pipeline/src/sqlite_exporter.py`
    Action: Create
-   Details: Export the deduplicated domain list to a SQLite file (`domains-full-YYYY-MM-DD.sqlite`). Schema: `CREATE TABLE domains (domain TEXT PRIMARY KEY, verdict TEXT, reason TEXT, source TEXT, confidence REAL)`. Add index on `domain` column. Include metadata table with version and build timestamp.
+   Details: Export the deduplicated domain list to a SQLite file (`domains-full-YYYY-MM-DD.sqlite`). Schema: `CREATE TABLE domains (domain TEXT PRIMARY KEY, verdict TEXT, reason TEXT, source TEXT, confidence REAL)`. No separate index on `domain` needed — PRIMARY KEY already creates one. Include metadata table with version and build timestamp.
 
 8. File: `/backend/pipeline/src/bloom_filter.py`
    Action: Create
-   Details: Generate a Bloom filter binary file (`bloom-YYYY-MM-DD.bin`) from the full domain list. Target: ~100KB for 500K domains with <1% false positive rate. Use MurmurHash3 for hashing. Include a header with filter parameters (size, hash count, version) so the Android app can deserialize correctly.
+   Details: Generate a Bloom filter binary file (`bloom-YYYY-MM-DD.bin`) from the full domain list. Target: ~600KB for 500K domains with <1% false positive rate (mathematically: ~1.2 bytes/element × 500K = ~600KB for 1% FPR with optimal hash count). Use MurmurHash3 for hashing. Include a header with filter parameters (size, hash count, version, domain count) so the Android app can deserialize correctly. Note: if compressed (gzip), effective transfer size will be ~200-300KB.
 
 9. File: `/backend/pipeline/src/manifest.py`
    Action: Create
@@ -209,7 +209,7 @@
 
 12. File: `/backend/pipeline/tests/test_seed_database.py`
     Action: Create
-    Details: Validate output schema, deduplication, allowlist seeding, minimum-source merge behavior, manifest artifact generation, and idempotent rerun behavior.
+    Details: Validate output schema, deduplication, allowlist seeding, minimum-source merge behavior, manifest artifact generation, and idempotent rerun behavior. Also test anti-poisoning gates: (a) >50% domain count drop aborts publish, (b) >80% single-source contribution aborts publish, (c) invalid domain format rejected, (d) `--force` flag overrides gates, (e) abort logs warnings and exits non-zero.
 
 13. File: `/backend/pipeline/tests/test_sqlite_exporter.py`
     Action: Create
@@ -217,7 +217,7 @@
 
 14. File: `/backend/pipeline/tests/test_bloom_filter.py`
     Action: Create
-    Details: Verify Bloom filter has expected false positive rate (<1%), correctly identifies all inserted domains (zero false negatives), file size is within expected range (~100KB for 500K domains), and header is parseable.
+    Details: Verify Bloom filter has expected false positive rate (<1%), correctly identifies all inserted domains (zero false negatives), file size is within expected range (~600KB for 500K domains), and header is parseable.
 
 15. File: `/backend/pipeline/tests/test_sources.py`
     Action: Create
@@ -288,7 +288,7 @@
 - `/backend/workers/test/data.test.ts` -- tests `/api/data/latest`, `/api/data/full`, `/api/data/delta`, and `/api/data/bloom` response behavior, streaming, and error handling
 
 ### Acceptance Criteria
-- GET `/api/data/latest` returns metadata: `{ "version": "2026-03-16", "full_size_kb": 12000, "delta_size_kb": 150, "bloom_size_kb": 100, "sqlite_size_kb": 15000 }`
+- GET `/api/data/latest` returns metadata: `{ "version": "2026-03-16", "full_size_kb": 12000, "delta_size_kb": 150, "bloom_size_kb": 600, "sqlite_size_kb": 15000 }`
 - GET `/api/data/full` streams full SQLite database directly from R2 via `env.R2_BUCKET.get(key)`
 - GET `/api/data/delta?since=2026-03-15` streams delta file from R2
 - GET `/api/data/bloom` streams Bloom filter binary from R2
@@ -358,7 +358,7 @@
   - Suspicious TLD (.xyz, .top, .buzz, .click, .loan, .win, .gq, .ml, .cf, .tk, .ga)
   - Bank-name pattern matching (maybank, cimb, rhb, etc. + random suffix)
   - URL shortener detection (bit.ly, tinyurl, etc.)
-- Results cached in Cache API (1-hour TTL) and KV (for confirmed discoveries)
+- Results cached in Cache API (1-hour TTL). KV is NOT written by `/api/check` — KV stores only allowlisted safe domains and pipeline-confirmed discoveries. Heuristic results are ephemeral (Cache API only). Pipeline promotes confirmed discoveries to KV during daily runs.
 - Miss coalescing: concurrent requests for the same unknown domain don't duplicate heuristic work
 - Rate limited: 100 req/min per IP via Cloudflare built-in rate limiting rules (no application-level counters)
 - Suspicious/dangerous unknowns written to D1 `pending_discoveries` for pipeline review
@@ -478,3 +478,4 @@
 |-------|------|----------|-------|-------|
 | R1 | 2026-03-17 | 7 (3 HIGH, 3 MEDIUM, 1 LOW) | 6 fixed, 1 dismissed | Rate limiting → Ruleset IaC; UPSERT for pending_discoveries; modernize headers; add missing tests; de-dup Python deps; clarify TECHNICAL_REQUIREMENTS v1 scope. KV caching finding dismissed — spec already allows tiny response caches (lines 121-122 of INFRASTRUCTURE_ARCHITECTURE.md). |
 | R2 | 2026-03-17 | 6 (1 HIGH recurring, 4 MEDIUM, 1 LOW) | 6 fixed | Synced epic source doc with R1 fixes; fixed acceptance criteria requirements.txt → pyproject.toml; added cron trigger wiring for retention; added rate-limiting IaC script + CI step; added anti-poisoning validation gates; consolidated alert seed to SQL-as-source-of-truth. |
+| R3 | 2026-03-17 | 5 (1 HIGH, 3 MEDIUM, 1 LOW) | 5 fixed | Bloom filter size corrected to ~600KB (math: 1.2 bytes × 500K = 600KB for <1% FPR); Worker .env.example scoped to runtime secrets only; KV write policy clarified (Cache API only for /api/check, pipeline writes to KV); anti-poisoning gate tests added; redundant SQLite index removed. |

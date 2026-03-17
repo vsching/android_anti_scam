@@ -96,7 +96,7 @@ Download open-source scam domain feeds, process them, and upload to R2 as versio
   - Deduplicates and normalizes domains (lowercase, strip protocol/path/www)
   - Generates `domains-full-YYYY-MM-DD.json` and `domains-delta-YYYY-MM-DD.json`
   - Generates `domains-full-YYYY-MM-DD.sqlite` (for app bundling and R2 download)
-  - Generates `bloom-YYYY-MM-DD.bin` (~100KB Bloom filter for 500K domains, <1% false positive rate)
+  - Generates `bloom-YYYY-MM-DD.bin` (~600KB Bloom filter for 500K domains, <1% false positive rate; ~200-300KB compressed)
   - Generates `manifest-YYYY-MM-DD.json` describing all artifacts, sizes, and checksums
   - Uploads all artifacts to R2 bucket `safeanot-data`
   - Updates `latest.json` manifest in R2
@@ -123,7 +123,7 @@ Download open-source scam domain feeds, process them, and upload to R2 as versio
 Serve the scam database files from R2 for the Android app to download daily. Worker streams R2 objects directly (no presigned URLs).
 
 **Acceptance Criteria:**
-- GET `/api/data/latest` returns metadata: `{ "version": "2026-03-16", "full_size_kb": 12000, "delta_size_kb": 150, "bloom_size_kb": 100, "sqlite_size_kb": 15000 }`
+- GET `/api/data/latest` returns metadata: `{ "version": "2026-03-16", "full_size_kb": 12000, "delta_size_kb": 150, "bloom_size_kb": 600, "sqlite_size_kb": 15000 }`
 - GET `/api/data/full` streams the full SQLite database directly from R2 via `env.R2_BUCKET.get(key)`
 - GET `/api/data/delta?since=2026-03-15` streams the delta file from R2
 - GET `/api/data/bloom` streams the Bloom filter from R2
@@ -157,7 +157,7 @@ The core domain-check endpoint. Receives a URL/domain, checks against KV (new di
   - Suspicious TLD (.xyz, .top, .buzz, .click, .loan, .win, .gq, .ml, .cf, .tk, .ga)
   - Bank-name pattern matching (maybank, cimb, rhb, etc. + random suffix)
   - URL shortener detection (bit.ly, tinyurl, etc.)
-- Results cached in Cache API (1-hour TTL) and KV (for confirmed discoveries)
+- Results cached in Cache API only (1-hour TTL). KV is NOT written by /api/check — only pipeline writes confirmed discoveries to KV
 - Miss coalescing: concurrent requests for the same unknown domain don't duplicate heuristic work
 - Rate limited: 100 req/min per IP via Cloudflare rate limiting rules
 - Suspicious unknown domains written to D1 `pending_discoveries` for pipeline review
