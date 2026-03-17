@@ -72,9 +72,17 @@ class AlertDetailViewModel @Inject constructor(
                             }
                             return@launch
                         }
-                    } catch (_: Exception) {
-                        // API fetch failed — show not found
+                    } catch (e: Exception) {
+                        // API fetch failed — show network error, not "not found"
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = "Unable to load alert. Check your connection.",
+                            )
+                        }
+                        return@launch
                     }
+                    // API succeeded but alert still not found — genuinely missing
                     _uiState.update {
                         it.copy(
                             isLoading = false,

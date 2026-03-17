@@ -17,7 +17,7 @@ interface AlertsDao {
     @Query("SELECT * FROM alerts ORDER BY created_at DESC")
     fun observeAlertsAll(): Flow<List<AlertEntity>>
 
-    @Query("SELECT * FROM alerts WHERE region = :region OR region = 'both' ORDER BY created_at DESC")
+    @Query("SELECT * FROM alerts WHERE region = :region OR LOWER(region) = 'both' ORDER BY created_at DESC")
     fun observeAlertsByRegion(region: String): Flow<List<AlertEntity>>
 
     @Query("SELECT * FROM alerts WHERE id = :id LIMIT 1")
@@ -29,7 +29,7 @@ interface AlertsDao {
     @Query("DELETE FROM alerts")
     suspend fun clearAll()
 
-    @Query("DELETE FROM alerts WHERE region = :region OR region = 'both'")
+    @Query("DELETE FROM alerts WHERE region = :region OR LOWER(region) = 'both'")
     suspend fun clearByRegion(region: String)
 
     @Transaction

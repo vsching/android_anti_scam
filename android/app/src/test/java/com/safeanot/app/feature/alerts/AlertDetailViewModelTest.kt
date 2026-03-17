@@ -5,6 +5,7 @@ import com.safeanot.app.domain.model.AlertRegion
 import com.safeanot.app.domain.model.AlertSeverity
 import com.safeanot.app.domain.model.ScamAlert
 import com.safeanot.app.domain.usecase.GetAlertByIdUseCase
+import com.safeanot.app.domain.usecase.RefreshAlertsUseCase
 import com.safeanot.app.domain.model.AlertRegionFilter
 import com.safeanot.app.domain.repository.AlertsRepository
 import kotlinx.coroutines.Dispatchers
@@ -44,6 +45,7 @@ class AlertDetailViewModelTest {
         val vm = AlertDetailViewModel(
             savedStateHandle = SavedStateHandle(mapOf("alertId" to "test-1")),
             getAlertByIdUseCase = GetAlertByIdUseCase(repo),
+            refreshAlertsUseCase = RefreshAlertsUseCase(repo),
         )
 
         assertFalse(vm.uiState.value.isLoading)
@@ -58,6 +60,7 @@ class AlertDetailViewModelTest {
         val vm = AlertDetailViewModel(
             savedStateHandle = SavedStateHandle(mapOf("alertId" to "test-2")),
             getAlertByIdUseCase = GetAlertByIdUseCase(repo),
+            refreshAlertsUseCase = RefreshAlertsUseCase(repo),
         )
 
         assertNotNull(vm.uiState.value.shareText)
@@ -71,6 +74,7 @@ class AlertDetailViewModelTest {
         val vm = AlertDetailViewModel(
             savedStateHandle = SavedStateHandle(mapOf("alertId" to "test-3")),
             getAlertByIdUseCase = GetAlertByIdUseCase(repo),
+            refreshAlertsUseCase = RefreshAlertsUseCase(repo),
         )
 
         assertTrue(vm.uiState.value.safetyTips.isNotEmpty())
@@ -82,6 +86,7 @@ class AlertDetailViewModelTest {
         val vm = AlertDetailViewModel(
             savedStateHandle = SavedStateHandle(mapOf("alertId" to "missing")),
             getAlertByIdUseCase = GetAlertByIdUseCase(repo),
+            refreshAlertsUseCase = RefreshAlertsUseCase(repo),
         )
 
         assertFalse(vm.uiState.value.isLoading)
