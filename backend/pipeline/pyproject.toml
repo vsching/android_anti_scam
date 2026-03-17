@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "safeanot-pipeline"
+version = "0.1.0"
+description = "Safe Anot? scam domain data pipeline"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.27.0",
+    "click>=8.1.0",
+    "python-dateutil>=2.9.0",
+    "boto3>=1.34.0",
+    "mmh3>=4.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "respx>=0.21.0",
+]
+
+[project.scripts]
+seed-database = "seed_database:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -8,8 +8,12 @@ import { Router } from './router';
 import { handlePreflight, addCorsHeaders } from './middleware/cors';
 import { addSecurityHeaders } from './middleware/security-headers';
 import { handleRetention } from './lib/retention';
+import { handleAlerts } from './routes/alerts';
 
 const router = new Router();
+
+// Scam alerts feed
+router.get('/api/alerts', handleAlerts);
 
 // Health / version endpoint
 router.get('/', (_request, _env, _params) => {
