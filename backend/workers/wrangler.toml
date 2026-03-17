@@ -2,6 +2,7 @@
 name = "safeanot-api"
 main = "src/index.ts"
 compatibility_date = "2024-03-01"
+compatibility_flags = ["nodejs_compat"]
 
 [vars]
 ENVIRONMENT = "production"
@@ -23,6 +24,11 @@ preview_bucket_name = "safeanot-data-preview"
 binding = "DB"
 database_name = "safeanot-db"
 database_id = "PLACEHOLDER_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
+# Cron triggers — retention handler runs daily at 3am UTC
+[triggers]
+crons = ["0 3 * * *"]
 
 # Rate limiting — handled by Cloudflare's built-in infrastructure
 # 100 req/min per IP for /api/check

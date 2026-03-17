@@ -7,6 +7,7 @@
 import { Router } from './router';
 import { handlePreflight, addCorsHeaders } from './middleware/cors';
 import { addSecurityHeaders } from './middleware/security-headers';
+import { handleRetention } from './lib/retention';
 
 const router = new Router();
 
@@ -26,6 +27,10 @@ router.get('/', (_request, _env, _params) => {
 });
 
 export default {
+  async scheduled(_event: ScheduledEvent, env: Env, _ctx: ExecutionContext): Promise<void> {
+    await handleRetention(env);
+  },
+
   async fetch(request: Request, env: Env): Promise<Response> {
     // Handle CORS preflight
     const preflight = handlePreflight(request);
