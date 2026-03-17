@@ -91,8 +91,12 @@ class AlertsViewModel @Inject constructor(
         }
     }
 
+    /** Active refresh job — cancelled on new refresh to prevent stale overwrites. */
+    private var refreshJob: Job? = null
+
     private fun refresh(filter: AlertRegionFilter, isInitial: Boolean) {
-        viewModelScope.launch {
+        refreshJob?.cancel()
+        refreshJob = viewModelScope.launch {
             try {
                 refreshAlertsUseCase(filter)
                 _uiState.update {

@@ -20,7 +20,7 @@ object AlertShareFormatter {
             appendLine()
             appendLine()
             appendLine("Stay safe! Check this alert on Safe Anot?:")
-            append("https://safeanot.com/alert/${alert.id}")
+            append("https://safeanot.com/alert/${android.net.Uri.encode(alert.id)}")
         }
     }
 }
