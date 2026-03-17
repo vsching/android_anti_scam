@@ -109,11 +109,16 @@ export async function handleCheck(
   const kvValue = kvAllowlist ?? kvDiscovery;
   if (kvValue !== null) {
     const parsed = (() => { try { return JSON.parse(kvValue); } catch { return null; } })();
+    // If we can't parse KV value, skip KV and fall through to heuristics
+    // rather than defaulting to 'safe' (fail-closed, not fail-open)
+    if (parsed === null || !parsed.verdict) {
+      // Fall through to heuristic engine
+    } else {
     const kvResult: CheckResponse = {
       domain,
-      verdict: parsed?.verdict ?? 'safe',
-      reason: parsed?.reason ?? 'Domain found in verified allowlist',
-      confidence: parsed?.confidence ?? 1.0,
+      verdict: parsed.verdict,
+      reason: parsed.reason ?? (kvAllowlist ? 'Domain found in verified allowlist' : 'Domain found in KV'),
+      confidence: parsed.confidence ?? 1.0,
       details: { check_type: kvAllowlist ? 'allowlist' : 'discovery', source: 'kv' },
     };
 
@@ -129,6 +134,7 @@ export async function handleCheck(
     await cache.put(cacheRequest, cacheResponse);
 
     return response;
+    }
   }
 
   // 6. Run heuristic engine with in-flight coalescing

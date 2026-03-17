@@ -219,10 +219,16 @@ def run_pipeline(
     with open(full_json_path, "w") as f:
         json.dump(domain_records, f, indent=2)
 
-    # Delta JSON (for initial seed, delta = full)
+    # Delta JSON — uses add/remove semantics matching Worker contract
+    # For initial seed (no previous version), all domains are "added"
     delta_json_path = os.path.join(output_dir, f"domains-delta-{version}.json")
+    delta_payload = {
+        "version": version,
+        "domains_added": [r["domain"] for r in domain_records],
+        "domains_removed": [],
+    }
     with open(delta_json_path, "w") as f:
-        json.dump(domain_records, f, indent=2)
+        json.dump(delta_payload, f, indent=2)
 
     # SQLite export
     sqlite_path = os.path.join(output_dir, f"domains-full-{version}.sqlite")

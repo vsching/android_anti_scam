@@ -34,6 +34,8 @@ export async function recordDiscovery(
        ON CONFLICT(domain) DO UPDATE SET
          check_count = check_count + 1,
          last_seen_at = CURRENT_TIMESTAMP,
+         processed = FALSE,
+         processed_at = NULL,
          verdict = CASE WHEN ? > (
            CASE pending_discoveries.verdict
              WHEN 'dangerous' THEN 3

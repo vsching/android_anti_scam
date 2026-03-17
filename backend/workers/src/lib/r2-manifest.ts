@@ -43,7 +43,15 @@ export async function getManifest(
   }
 
   const text = await obj.text();
-  const manifest = JSON.parse(text) as LatestManifest;
+  let manifest: LatestManifest;
+  try {
+    manifest = JSON.parse(text) as LatestManifest;
+  } catch {
+    return null;
+  }
+  if (!manifest.version || !manifest.full_key) {
+    return null;
+  }
 
   // Cache in KV for 1 hour
   await cachePut(kv, MANIFEST_CACHE_KEY, manifest, METADATA_CACHE_TTL);
@@ -62,7 +70,9 @@ export function isValidDate(dateStr: string): boolean {
     return false;
   }
   const d = new Date(dateStr + 'T00:00:00Z');
-  return !isNaN(d.getTime());
+  if (isNaN(d.getTime())) return false;
+  // Verify the date wasn't normalized (e.g. 2026-02-30 → 2026-03-02)
+  return d.toISOString().startsWith(dateStr);
 }
 
 /**
