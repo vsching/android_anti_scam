@@ -12,6 +12,7 @@ import com.safeanot.app.domain.usecase.GetDefaultAlertRegionUseCase
 import com.safeanot.app.domain.usecase.ObserveAlertsUseCase
 import com.safeanot.app.domain.usecase.RefreshAlertsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -73,8 +74,12 @@ class AlertsViewModel @Inject constructor(
         }
     }
 
+    /** Active observer job — cancelled when filter changes to avoid stale collectors. */
+    private var observeJob: Job? = null
+
     private fun observeAlerts(filter: AlertRegionFilter) {
-        viewModelScope.launch {
+        observeJob?.cancel()
+        observeJob = viewModelScope.launch {
             observeAlertsUseCase(filter).collect { alerts ->
                 _uiState.update {
                     it.copy(

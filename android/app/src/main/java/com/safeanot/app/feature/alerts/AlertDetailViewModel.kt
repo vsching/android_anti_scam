@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.safeanot.app.domain.model.AlertSeverity
 import com.safeanot.app.domain.model.ScamAlert
 import com.safeanot.app.domain.usecase.GetAlertByIdUseCase
+import com.safeanot.app.domain.usecase.RefreshAlertsUseCase
+import com.safeanot.app.domain.model.AlertRegionFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +31,7 @@ data class AlertDetailUiState(
 class AlertDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getAlertByIdUseCase: GetAlertByIdUseCase,
+    private val refreshAlertsUseCase: RefreshAlertsUseCase,
 ) : ViewModel() {
 
     private val alertId: String = savedStateHandle.get<String>("alertId") ?: ""
@@ -54,6 +57,24 @@ class AlertDetailViewModel @Inject constructor(
                         )
                     }
                 } else {
+                    // Not in cache — try fetching from API first (cold start / deep link)
+                    try {
+                        refreshAlertsUseCase(AlertRegionFilter.ALL)
+                        val retried = getAlertByIdUseCase(alertId)
+                        if (retried != null) {
+                            _uiState.update {
+                                it.copy(
+                                    alert = retried,
+                                    isLoading = false,
+                                    shareText = AlertShareFormatter.format(retried),
+                                    safetyTips = generateSafetyTips(retried),
+                                )
+                            }
+                            return@launch
+                        }
+                    } catch (_: Exception) {
+                        // API fetch failed — show not found
+                    }
                     _uiState.update {
                         it.copy(
                             isLoading = false,

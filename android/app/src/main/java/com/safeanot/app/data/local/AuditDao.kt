@@ -36,7 +36,7 @@ interface AuditDao {
     @Query("SELECT COUNT(*) FROM audit_items WHERE status = 'SECURED'")
     suspend fun getSecuredCount(): Int
 
-    @Query("SELECT COUNT(*) FROM audit_items WHERE detection_state = 'INSTALLED'")
+    @Query("SELECT COUNT(*) FROM audit_items WHERE detection_state IN ('INSTALLED', 'NOT_QUERYABLE')")
     suspend fun getInstalledDetectedCount(): Int
 
     @Query("SELECT COUNT(*) FROM audit_items WHERE status != 'NOT_INSTALLED'")
