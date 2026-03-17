@@ -11,6 +11,7 @@
 | Epic | Name | Status | Depends On | Issues |
 |------|------|--------|------------|--------|
 | E01 | Backend API + Scam Database | ☑ | — | 6 |
+| E01B | Pipeline Deployment + Data Seed | ☐ | E01 | 4 |
 | E02 | Link Checker Feature | ☑ | E01 | 5 |
 | E03 | Phone Shield Feature | ◐ | — | 5 |
 | E04 | Scam Alerts Feed | ◐ | E01 | 3 |
