@@ -18,6 +18,9 @@ interface AuditDao {
     @Query("SELECT * FROM audit_items ORDER BY category, app_name")
     fun getAll(): Flow<List<AuditItemEntity>>
 
+    @Query("SELECT * FROM audit_items ORDER BY category, app_name")
+    suspend fun getAllOnce(): List<AuditItemEntity>
+
     @Query("SELECT * FROM audit_items WHERE category = :category ORDER BY app_name")
     fun getByCategory(category: String): Flow<List<AuditItemEntity>>
 
@@ -27,8 +30,14 @@ interface AuditDao {
     @Query("UPDATE audit_items SET status = :status, last_checked = :timestamp WHERE id = :id")
     suspend fun updateStatus(id: Int, status: String, timestamp: Long = System.currentTimeMillis())
 
+    @Query("UPDATE audit_items SET status = :status, last_checked = :timestamp WHERE package_name = :packageName")
+    suspend fun updateStatusByPackageName(packageName: String, status: String, timestamp: Long = System.currentTimeMillis())
+
     @Query("SELECT COUNT(*) FROM audit_items WHERE status = 'SECURED'")
     suspend fun getSecuredCount(): Int
+
+    @Query("SELECT COUNT(*) FROM audit_items WHERE detection_state = 'INSTALLED'")
+    suspend fun getInstalledDetectedCount(): Int
 
     @Query("SELECT COUNT(*) FROM audit_items WHERE status != 'NOT_INSTALLED'")
     suspend fun getInstalledCount(): Int

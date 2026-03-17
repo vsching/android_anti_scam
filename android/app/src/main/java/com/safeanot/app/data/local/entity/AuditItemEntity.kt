@@ -24,6 +24,12 @@ data class AuditItemEntity(
     @ColumnInfo(name = "status")
     val status: String = "NEEDS_REVIEW",
 
+    @ColumnInfo(name = "risk_description")
+    val riskDescription: String = "",
+
+    @ColumnInfo(name = "detection_state")
+    val detectionState: String = "NOT_INSTALLED",
+
     @ColumnInfo(name = "last_checked")
     val lastChecked: Long = System.currentTimeMillis(),
 )

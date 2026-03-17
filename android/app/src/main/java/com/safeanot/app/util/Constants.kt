@@ -10,6 +10,7 @@ data class TrackedApp(
     val shortCode: String,
     val brandColor: String,
     val category: String,
+    val riskDescription: String,
 )
 
 object Constants {
@@ -24,33 +25,93 @@ object Constants {
     /** Default audit reminder interval in days. */
     const val DEFAULT_REMINDER_INTERVAL_DAYS = 7L
 
+    /** Allowed reminder interval options in days. */
+    val REMINDER_INTERVAL_OPTIONS = listOf(3, 7, 14, 30)
+
     object TrackedApps {
         val MESSAGING = listOf(
-            TrackedApp("com.whatsapp", "WhatsApp", "WA", "#25D366", "MESSAGING"),
-            TrackedApp("com.whatsapp.w4b", "WhatsApp Business", "WB", "#25D366", "MESSAGING"),
-            TrackedApp("org.telegram.messenger", "Telegram", "TG", "#0088cc", "MESSAGING"),
+            TrackedApp(
+                "com.whatsapp", "WhatsApp", "WA", "#25D366", "MESSAGING",
+                "WhatsApp can install APK files sent in chats. Scammers send malware disguised as useful apps.",
+            ),
+            TrackedApp(
+                "com.whatsapp.w4b", "WhatsApp Business", "WB", "#25D366", "MESSAGING",
+                "WhatsApp Business can install APK files sent in chats. Scammers send malware disguised as useful apps.",
+            ),
+            TrackedApp(
+                "org.telegram.messenger", "Telegram", "TG", "#0088cc", "MESSAGING",
+                "Telegram can install APK files from channels and chats. Scammers distribute malware through fake groups.",
+            ),
         )
 
         val BROWSERS = listOf(
-            TrackedApp("com.android.chrome", "Chrome", "CR", "#4285F4", "BROWSERS"),
-            TrackedApp("com.sec.android.app.sbrowser", "Samsung Internet", "SI", "#6E4BBD", "BROWSERS"),
-            TrackedApp("com.microsoft.emmx", "Microsoft Edge", "ED", "#0078D7", "BROWSERS"),
-            TrackedApp("org.mozilla.firefox", "Firefox", "FF", "#FF7139", "BROWSERS"),
-            TrackedApp("com.opera.browser", "Opera", "OP", "#FF1B2D", "BROWSERS"),
-            TrackedApp("com.opera.mini.native", "Opera Mini", "OM", "#FF1B2D", "BROWSERS"),
-            TrackedApp("com.brave.browser", "Brave", "BR", "#FB542B", "BROWSERS"),
-            TrackedApp("com.UCMobile.intl", "UC Browser", "UC", "#F58220", "BROWSERS"),
-            TrackedApp("com.duckduckgo.mobile.android", "DuckDuckGo", "DD", "#DE5833", "BROWSERS"),
-            TrackedApp("com.vivaldi.browser", "Vivaldi", "VI", "#EF3939", "BROWSERS"),
-            TrackedApp("com.mi.globalbrowser", "Mi Browser", "MI", "#FF6900", "BROWSERS"),
-            TrackedApp("com.vivo.browser", "Vivo Browser", "VV", "#415FFF", "BROWSERS"),
-            TrackedApp("com.heytap.browser", "OPPO Browser", "OB", "#1BA784", "BROWSERS"),
-            TrackedApp("com.huawei.browser", "Huawei Browser", "HW", "#CF0A2C", "BROWSERS"),
+            TrackedApp(
+                "com.android.chrome", "Chrome", "CR", "#4285F4", "BROWSERS",
+                "Chrome can install APK files downloaded from websites. Scam sites trick users into downloading malware.",
+            ),
+            TrackedApp(
+                "com.sec.android.app.sbrowser", "Samsung Internet", "SI", "#6E4BBD", "BROWSERS",
+                "Samsung Internet can install APK files downloaded from websites. Scam sites trick users into downloading malware.",
+            ),
+            TrackedApp(
+                "com.microsoft.emmx", "Microsoft Edge", "ED", "#0078D7", "BROWSERS",
+                "Microsoft Edge can install APK files downloaded from websites. Scam sites trick users into downloading malware.",
+            ),
+            TrackedApp(
+                "org.mozilla.firefox", "Firefox", "FF", "#FF7139", "BROWSERS",
+                "Firefox can install APK files downloaded from websites. Scam sites trick users into downloading malware.",
+            ),
+            TrackedApp(
+                "com.opera.browser", "Opera", "OP", "#FF1B2D", "BROWSERS",
+                "Opera can install APK files downloaded from websites. Scam sites trick users into downloading malware.",
+            ),
+            TrackedApp(
+                "com.opera.mini.native", "Opera Mini", "OM", "#FF1B2D", "BROWSERS",
+                "Opera Mini can install APK files downloaded from websites. Scam sites trick users into downloading malware.",
+            ),
+            TrackedApp(
+                "com.brave.browser", "Brave", "BR", "#FB542B", "BROWSERS",
+                "Brave can install APK files downloaded from websites. Scam sites trick users into downloading malware.",
+            ),
+            TrackedApp(
+                "com.UCMobile.intl", "UC Browser", "UC", "#F58220", "BROWSERS",
+                "UC Browser can install APK files downloaded from websites. Scam sites trick users into downloading malware.",
+            ),
+            TrackedApp(
+                "com.duckduckgo.mobile.android", "DuckDuckGo", "DD", "#DE5833", "BROWSERS",
+                "DuckDuckGo can install APK files downloaded from websites. Scam sites trick users into downloading malware.",
+            ),
+            TrackedApp(
+                "com.vivaldi.browser", "Vivaldi", "VI", "#EF3939", "BROWSERS",
+                "Vivaldi can install APK files downloaded from websites. Scam sites trick users into downloading malware.",
+            ),
+            TrackedApp(
+                "com.mi.globalbrowser", "Mi Browser", "MI", "#FF6900", "BROWSERS",
+                "Mi Browser can install APK files downloaded from websites. Scam sites trick users into downloading malware.",
+            ),
+            TrackedApp(
+                "com.vivo.browser", "Vivo Browser", "VV", "#415FFF", "BROWSERS",
+                "Vivo Browser can install APK files downloaded from websites. Scam sites trick users into downloading malware.",
+            ),
+            TrackedApp(
+                "com.heytap.browser", "OPPO Browser", "OB", "#1BA784", "BROWSERS",
+                "OPPO Browser can install APK files downloaded from websites. Scam sites trick users into downloading malware.",
+            ),
+            TrackedApp(
+                "com.huawei.browser", "Huawei Browser", "HW", "#CF0A2C", "BROWSERS",
+                "Huawei Browser can install APK files downloaded from websites. Scam sites trick users into downloading malware.",
+            ),
         )
 
         val FILES = listOf(
-            TrackedApp("com.google.android.apps.nbu.files", "Files by Google", "FG", "#34A853", "FILES"),
-            TrackedApp("com.mi.android.globalFileexplorer", "Mi File Manager", "MF", "#FF6900", "FILES"),
+            TrackedApp(
+                "com.google.android.apps.nbu.files", "Files by Google", "FG", "#34A853", "FILES",
+                "Files by Google can install APK files from storage. Malware APKs may be hidden among downloaded files.",
+            ),
+            TrackedApp(
+                "com.mi.android.globalFileexplorer", "Mi File Manager", "MF", "#FF6900", "FILES",
+                "Mi File Manager can install APK files from storage. Malware APKs may be hidden among downloaded files.",
+            ),
         )
 
         /** All tracked apps across all categories. */

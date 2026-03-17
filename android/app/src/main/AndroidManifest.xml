@@ -69,6 +69,17 @@
                     android:host="safeanot.com"
                     android:pathPrefix="/result" />
             </intent-filter>
+
+            <!-- Deep link: safeanot.com/alert/{alertId} (handled by Compose navDeepLink) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="safeanot.com"
+                    android:pathPrefix="/alert" />
+            </intent-filter>
         </activity>
 
         <!-- FileProvider for sharing verdict card images -->

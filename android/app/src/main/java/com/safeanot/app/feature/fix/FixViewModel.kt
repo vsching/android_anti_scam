@@ -21,10 +21,12 @@ import javax.inject.Inject
 data class FixUiState(
     val packageName: String = "",
     val appName: String = "",
+    val riskDescription: String = "",
     val itemId: Int = 0,
     val isCompleted: Boolean = false,
     val isSkipped: Boolean = false,
     val hasOpenedSettings: Boolean = false,
+    val showConfirmation: Boolean = false,
 )
 
 @HiltViewModel
@@ -34,10 +36,9 @@ class FixViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val packageName: String = savedStateHandle["packageName"] ?: ""
-    private val appName: String = savedStateHandle["appName"] ?: ""
 
     private val _uiState = MutableStateFlow(
-        FixUiState(packageName = packageName, appName = appName)
+        FixUiState(packageName = packageName)
     )
     val uiState: StateFlow<FixUiState> = _uiState.asStateFlow()
 
@@ -46,7 +47,11 @@ class FixViewModel @Inject constructor(
             val items = repository.getAllAuditItems().first()
             val item = items.find { it.packageName == packageName }
             if (item != null) {
-                _uiState.value = _uiState.value.copy(itemId = item.id)
+                _uiState.value = _uiState.value.copy(
+                    itemId = item.id,
+                    appName = item.appName,
+                    riskDescription = item.riskDescription,
+                )
             }
         }
     }
@@ -55,21 +60,32 @@ class FixViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(hasOpenedSettings = true)
     }
 
+    /** Called when user returns from settings to show confirmation prompt. */
+    fun onReturnedFromSettings() {
+        if (_uiState.value.hasOpenedSettings) {
+            _uiState.value = _uiState.value.copy(showConfirmation = true)
+        }
+    }
+
+    fun dismissConfirmation() {
+        _uiState.value = _uiState.value.copy(showConfirmation = false)
+    }
+
     fun markAsSecured() {
-        val id = _uiState.value.itemId
-        if (id > 0) {
+        val pkg = _uiState.value.packageName
+        if (pkg.isNotEmpty()) {
             viewModelScope.launch {
-                repository.updateItemStatus(id, AuditStatus.SECURED)
+                repository.updateItemStatusByPackage(pkg, AuditStatus.SECURED)
                 _uiState.value = _uiState.value.copy(isCompleted = true)
             }
         }
     }
 
     fun markAsSkipped() {
-        val id = _uiState.value.itemId
-        if (id > 0) {
+        val pkg = _uiState.value.packageName
+        if (pkg.isNotEmpty()) {
             viewModelScope.launch {
-                repository.updateItemStatus(id, AuditStatus.SKIPPED)
+                repository.updateItemStatusByPackage(pkg, AuditStatus.SKIPPED)
                 _uiState.value = _uiState.value.copy(isSkipped = true)
             }
         }

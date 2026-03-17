@@ -65,6 +65,9 @@ class MainActivity : ComponentActivity() {
                 val data = intent.data ?: return null
                 if (data.host == "safeanot.com" && data.path?.startsWith("/result") == true) {
                     data.getQueryParameter("domain")
+                } else if (data.host == "safeanot.com" && data.path?.startsWith("/alert") == true) {
+                    // Alert deep links are handled by Compose navDeepLink in SafeAnotNavGraph
+                    null
                 } else {
                     data.toString()
                 }

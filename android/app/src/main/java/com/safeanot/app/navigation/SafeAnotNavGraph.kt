@@ -31,6 +31,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
+import com.safeanot.app.feature.alerts.AlertDetailScreen
 import com.safeanot.app.feature.alerts.AlertsScreen
 import com.safeanot.app.feature.check.CheckScreen
 import com.safeanot.app.feature.check.CheckViewModel
@@ -74,8 +76,10 @@ fun SafeAnotNavGraph(pendingUrl: String? = null) {
         }
     }
 
-    // Hide bottom bar on the Fix flow
-    val showBottomBar = currentDestination?.route?.startsWith("fix/") != true
+    // Hide bottom bar on the Fix flow and Alert Detail
+    val showBottomBar = currentDestination?.route?.let { route ->
+        !route.startsWith("fix/") && !route.startsWith("alerts/")
+    } ?: true
 
     Scaffold(
         bottomBar = {
@@ -110,8 +114,8 @@ fun SafeAnotNavGraph(pendingUrl: String? = null) {
         ) {
             composable(Screen.Shield.route) {
                 ShieldScreen(
-                    onFixClick = { packageName, appName ->
-                        navController.navigate(Screen.Fix.createRoute(packageName, appName))
+                    onFixClick = { packageName, _ ->
+                        navController.navigate(Screen.Fix.createRoute(packageName))
                     }
                 )
             }
@@ -130,7 +134,11 @@ fun SafeAnotNavGraph(pendingUrl: String? = null) {
             }
 
             composable(Screen.Alerts.route) {
-                AlertsScreen()
+                AlertsScreen(
+                    onNavigateToDetail = { alertId ->
+                        navController.navigate(Screen.AlertDetail.createRoute(alertId))
+                    }
+                )
             }
 
             composable(Screen.Profile.route) {
@@ -141,10 +149,23 @@ fun SafeAnotNavGraph(pendingUrl: String? = null) {
                 route = Screen.Fix.route,
                 arguments = listOf(
                     navArgument("packageName") { type = NavType.StringType },
-                    navArgument("appName") { type = NavType.StringType },
                 )
             ) {
                 FixScreen(onNavigateBack = { navController.popBackStack() })
+            }
+
+            composable(
+                route = Screen.AlertDetail.route,
+                arguments = listOf(
+                    navArgument("alertId") { type = NavType.StringType },
+                ),
+                deepLinks = listOf(
+                    navDeepLink { uriPattern = "https://safeanot.com/alert/{alertId}" },
+                ),
+            ) {
+                AlertDetailScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
             }
         }
     }

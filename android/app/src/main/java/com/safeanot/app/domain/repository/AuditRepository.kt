@@ -3,6 +3,7 @@
  */
 package com.safeanot.app.domain.repository
 
+import com.safeanot.app.domain.model.AuditChangeSummary
 import com.safeanot.app.domain.model.AuditItem
 import com.safeanot.app.domain.model.AuditStatus
 import com.safeanot.app.domain.model.SecurityScore
@@ -22,8 +23,14 @@ interface AuditRepository {
     /** Run a full device audit, checking which tracked packages are installed. */
     suspend fun runAudit()
 
-    /** Update the status of a specific audit item. */
+    /** Run a full audit and return a summary of changes since the last audit. */
+    suspend fun runAuditAndDetectChanges(): AuditChangeSummary
+
+    /** Update the status of a specific audit item by ID. */
     suspend fun updateItemStatus(id: Int, status: AuditStatus)
+
+    /** Update the status of a specific audit item by package name. */
+    suspend fun updateItemStatusByPackage(packageName: String, status: AuditStatus)
 
     /** Recalculate and persist the security score. */
     suspend fun recalculateScore()

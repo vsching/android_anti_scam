@@ -14,7 +14,10 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.safeanot.app.data.local.ReminderConfigDao
 import com.safeanot.app.domain.repository.SyncRepository
+import com.safeanot.app.util.Constants
+import com.safeanot.app.worker.AuditReminderScheduler
 import com.safeanot.app.worker.DatabaseSyncWorker
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +35,12 @@ class SafeAnotApp : Application(), Configuration.Provider {
     @Inject
     lateinit var syncRepository: SyncRepository
 
+    @Inject
+    lateinit var reminderScheduler: AuditReminderScheduler
+
+    @Inject
+    lateinit var reminderConfigDao: ReminderConfigDao
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
@@ -40,6 +49,7 @@ class SafeAnotApp : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         scheduleDatabaseSync()
+        scheduleAuditReminders()
     }
 
     private fun scheduleDatabaseSync() {
@@ -78,6 +88,15 @@ class SafeAnotApp : Application(), Configuration.Provider {
                     immediateRequest,
                 )
             }
+        }
+    }
+
+    private fun scheduleAuditReminders() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val config = reminderConfigDao.getConfigOnce()
+            val enabled = config?.enabled ?: true
+            val intervalDays = config?.intervalDays ?: Constants.DEFAULT_REMINDER_INTERVAL_DAYS.toInt()
+            reminderScheduler.updateSchedule(enabled, intervalDays)
         }
     }
 }

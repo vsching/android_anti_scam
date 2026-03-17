@@ -1,82 +1,117 @@
 /**
  * ViewModel for the Scam Alerts feed screen.
- * Uses static data for v1; will integrate with a remote API in v2.
+ * Driven by AlertsRepository with region filtering, pull-to-refresh, and navigation events.
  */
 package com.safeanot.app.feature.alerts
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.safeanot.app.domain.model.AlertRegionFilter
+import com.safeanot.app.domain.model.ScamAlert
+import com.safeanot.app.domain.usecase.GetDefaultAlertRegionUseCase
+import com.safeanot.app.domain.usecase.ObserveAlertsUseCase
+import com.safeanot.app.domain.usecase.RefreshAlertsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-data class ScamAlert(
-    val id: Int,
-    val title: String,
-    val summary: String,
-    val details: String,
-    val severity: String, // "HIGH", "MEDIUM", "LOW"
-    val date: String,
-)
 
 data class AlertsUiState(
     val alerts: List<ScamAlert> = emptyList(),
-    val isLoading: Boolean = false,
+    val selectedFilter: AlertRegionFilter = AlertRegionFilter.ALL,
+    val isInitialLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
+    val errorMessage: String? = null,
+    val isEmpty: Boolean = false,
 )
 
-@HiltViewModel
-class AlertsViewModel @Inject constructor() : ViewModel() {
+sealed class AlertsNavigationEvent {
+    data class NavigateToDetail(val alertId: String) : AlertsNavigationEvent()
+}
 
-    private val _uiState = MutableStateFlow(
-        AlertsUiState(
-            alerts = staticAlerts,
-        )
-    )
+@HiltViewModel
+class AlertsViewModel @Inject constructor(
+    private val observeAlertsUseCase: ObserveAlertsUseCase,
+    private val refreshAlertsUseCase: RefreshAlertsUseCase,
+    private val getDefaultAlertRegionUseCase: GetDefaultAlertRegionUseCase,
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(AlertsUiState())
     val uiState: StateFlow<AlertsUiState> = _uiState.asStateFlow()
 
-    companion object {
-        private val staticAlerts = listOf(
-            ScamAlert(
-                id = 1,
-                title = "Fake Banking App APKs on WhatsApp",
-                summary = "Scammers are sending APK files disguised as banking apps via WhatsApp groups.",
-                details = "Multiple reports of APK files being shared in WhatsApp groups claiming to be official banking app updates for Maybank, CIMB, and Public Bank. These are malware designed to steal your banking credentials. Never install APK files from WhatsApp — always update apps through the Google Play Store.",
-                severity = "HIGH",
-                date = "2026-03-15",
-            ),
-            ScamAlert(
-                id = 2,
-                title = "Parcel Delivery SMS Scam Links",
-                summary = "SMS messages with fake parcel tracking links that download malware.",
-                details = "Scam SMS messages claiming to be from J&T Express, Pos Malaysia, or DHL with links to track parcels. The links redirect to APK downloads that install spyware on your device. Do not click links in unsolicited SMS messages. Check parcel tracking directly through the official courier app or website.",
-                severity = "HIGH",
-                date = "2026-03-12",
-            ),
-            ScamAlert(
-                id = 3,
-                title = "Telegram Investment Group Scams",
-                summary = "Fake investment groups on Telegram luring victims with promised returns.",
-                details = "Scam Telegram groups claiming guaranteed returns on cryptocurrency or stock trading. Victims are asked to download a 'trading platform' APK that is actually malware. Remember: if an investment sounds too good to be true, it probably is. Never download apps from Telegram groups.",
-                severity = "MEDIUM",
-                date = "2026-03-10",
-            ),
-            ScamAlert(
-                id = 4,
-                title = "Browser Pop-up 'Security Update' Scam",
-                summary = "Fake security warnings in browsers trick users into installing malware APKs.",
-                details = "When browsing certain websites, a pop-up appears claiming your phone has a virus and needs an urgent security update. The 'update' is actually a malicious APK. Your browser will never ask you to install an APK for security. Close the tab immediately if you see such pop-ups.",
-                severity = "MEDIUM",
-                date = "2026-03-08",
-            ),
-            ScamAlert(
-                id = 5,
-                title = "Play Protect: Enable Enhanced Scanning",
-                summary = "Google Play Protect can scan sideloaded apps — make sure it's enabled.",
-                details = "Google Play Protect includes a feature called 'Improve harmful app detection' that sends unknown apps to Google for analysis. This is especially important if you have ever sideloaded an APK. Go to Play Store > Profile > Play Protect > Settings and enable both scanning options.",
-                severity = "LOW",
-                date = "2026-03-05",
-            ),
-        )
+    private val _navigationEvents = Channel<AlertsNavigationEvent>(Channel.BUFFERED)
+    val navigationEvents = _navigationEvents.receiveAsFlow()
+
+    init {
+        val defaultFilter = getDefaultAlertRegionUseCase()
+        _uiState.update { it.copy(selectedFilter = defaultFilter) }
+        observeAlerts(defaultFilter)
+        refresh(defaultFilter, isInitial = true)
+    }
+
+    fun onFilterChanged(filter: AlertRegionFilter) {
+        if (filter == _uiState.value.selectedFilter) return
+        _uiState.update { it.copy(selectedFilter = filter, isInitialLoading = true, errorMessage = null) }
+        observeAlerts(filter)
+        refresh(filter, isInitial = true)
+    }
+
+    fun onRefresh() {
+        val filter = _uiState.value.selectedFilter
+        _uiState.update { it.copy(isRefreshing = true, errorMessage = null) }
+        refresh(filter, isInitial = false)
+    }
+
+    fun onAlertClick(alert: ScamAlert) {
+        viewModelScope.launch {
+            _navigationEvents.send(AlertsNavigationEvent.NavigateToDetail(alert.id))
+        }
+    }
+
+    private fun observeAlerts(filter: AlertRegionFilter) {
+        viewModelScope.launch {
+            observeAlertsUseCase(filter).collect { alerts ->
+                _uiState.update {
+                    it.copy(
+                        alerts = alerts,
+                        isEmpty = alerts.isEmpty() && !it.isInitialLoading,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun refresh(filter: AlertRegionFilter, isInitial: Boolean) {
+        viewModelScope.launch {
+            try {
+                refreshAlertsUseCase(filter)
+                _uiState.update {
+                    it.copy(
+                        isInitialLoading = false,
+                        isRefreshing = false,
+                        errorMessage = null,
+                        isEmpty = it.alerts.isEmpty(),
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isInitialLoading = false,
+                        isRefreshing = false,
+                        errorMessage = if (it.alerts.isEmpty()) {
+                            e.message ?: "Failed to load alerts"
+                        } else {
+                            null // Silently fail if we have cached data
+                        },
+                        isEmpty = it.alerts.isEmpty(),
+                    )
+                }
+            }
+        }
     }
 }

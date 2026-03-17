@@ -1,6 +1,6 @@
 /**
  * Composable card for displaying an individual app's audit status.
- * Shows app icon placeholder, name, status badge, fix button, and expandable "why" text.
+ * Shows app icon placeholder, name, risk description, status badge, and action buttons.
  */
 package com.safeanot.app.feature.shield.components
 
@@ -131,13 +131,20 @@ fun AppCard(
             // Expandable section
             AnimatedVisibility(visible = expanded) {
                 Column(modifier = Modifier.padding(top = 12.dp)) {
+                    // Show risk description if available, otherwise fall back to generic text
+                    val descriptionText = when (item.status) {
+                        AuditStatus.NEEDS_REVIEW -> item.riskDescription.ifEmpty {
+                            "This app can install APK files, which scammers may exploit to install malware on your device."
+                        }
+                        AuditStatus.SECURED -> "You have secured this app. Tap Re-check to verify."
+                        AuditStatus.NOT_INSTALLED -> "This app is not installed on your device."
+                        AuditStatus.SKIPPED -> item.riskDescription.ifEmpty {
+                            "You skipped this app. Consider fixing it for better security."
+                        }
+                    }
+
                     Text(
-                        text = when (item.status) {
-                            AuditStatus.NEEDS_REVIEW -> "This app can install APK files, which scammers may exploit to install malware on your device."
-                            AuditStatus.SECURED -> "You have secured this app. Tap Re-check to verify."
-                            AuditStatus.NOT_INSTALLED -> "This app is not installed on your device."
-                            AuditStatus.SKIPPED -> "You skipped this app. Consider fixing it for better security."
-                        },
+                        text = descriptionText,
                         style = MaterialTheme.typography.bodySmall,
                         color = TextSecondary,
                     )

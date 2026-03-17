@@ -3,6 +3,8 @@
  */
 package com.safeanot.app.navigation
 
+import android.net.Uri
+
 sealed class Screen(val route: String) {
     /** Main shield/audit dashboard screen. */
     data object Shield : Screen("shield")
@@ -16,9 +18,15 @@ sealed class Screen(val route: String) {
     /** User profile and settings screen. */
     data object Profile : Screen("profile")
 
-    /** Guided fix flow for a specific app. */
-    data object Fix : Screen("fix/{packageName}/{appName}") {
-        fun createRoute(packageName: String, appName: String): String =
-            "fix/$packageName/$appName"
+    /** Guided fix flow for a specific app, routed by package name. */
+    data object Fix : Screen("fix/{packageName}") {
+        fun createRoute(packageName: String): String =
+            "fix/$packageName"
+    }
+
+    /** Alert detail screen. */
+    data object AlertDetail : Screen("alerts/{alertId}") {
+        fun createRoute(alertId: String): String =
+            "alerts/${Uri.encode(alertId)}"
     }
 }

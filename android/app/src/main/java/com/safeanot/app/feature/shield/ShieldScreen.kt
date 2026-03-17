@@ -1,6 +1,7 @@
 /**
  * Main Shield screen showing the security score ring and audit item cards grouped by category.
- * This is the primary/first screen of the app — the phone audit dashboard.
+ * This is the primary/first screen of the app -- the phone audit dashboard.
+ * Supports pull-to-refresh and includes a Play Protect advisory card.
  */
 package com.safeanot.app.feature.shield
 
@@ -16,9 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -29,10 +31,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.safeanot.app.domain.model.AppCategory
 import com.safeanot.app.feature.shield.components.AppCard
+import com.safeanot.app.feature.shield.components.PlayProtectCard
 import com.safeanot.app.feature.shield.components.SecurityScoreRing
 import com.safeanot.app.ui.theme.BlueAccent
+import com.safeanot.app.ui.theme.RedAccent
 import com.safeanot.app.ui.theme.TextSecondary
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShieldScreen(
     onFixClick: (packageName: String, appName: String) -> Unit,
@@ -53,85 +58,97 @@ fun ShieldScreen(
         return
     }
 
-    LazyColumn(
+    PullToRefreshBox(
+        isRefreshing = uiState.isRefreshing,
+        onRefresh = { viewModel.onRefresh() },
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        // Header
-        item {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-            ) {
-                Text(
-                    text = "Safe Anot?",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Check first before you click.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary,
-                )
-            }
-        }
-
-        // Security Score
-        item {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-            ) {
-                SecurityScoreRing(
-                    scorePercent = score.scorePercent,
-                    securedCount = score.securedItems,
-                    totalCount = score.totalItems,
-                )
-            }
-        }
-
-        // Rescan button
-        item {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                TextButton(onClick = { viewModel.runScan() }) {
-                    Text("Rescan Device", color = BlueAccent)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            // Header
+            item {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                ) {
+                    Text(
+                        text = "Safe Anot?",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Check first before you click.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextSecondary,
+                    )
                 }
             }
-        }
 
-        // Grouped audit items by category
-        val groupedItems = auditItems.groupBy { it.category }
-        AppCategory.entries.forEach { category ->
-            val items = groupedItems[category] ?: return@forEach
-
+            // Security Score
             item {
-                Text(
-                    text = category.displayName,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(top = 8.dp),
-                )
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                ) {
+                    SecurityScoreRing(
+                        scorePercent = score.scorePercent,
+                        securedCount = score.securedItems,
+                        totalCount = score.totalItems,
+                        scoreBand = score.band,
+                    )
+                }
             }
 
-            items(items, key = { it.id }) { auditItem ->
-                AppCard(
-                    item = auditItem,
-                    onFixClick = onFixClick,
-                    onRecheckClick = { viewModel.runScan() },
-                )
+            // Error banner (non-blocking)
+            if (uiState.error != null) {
+                item {
+                    Text(
+                        text = uiState.error ?: "",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = RedAccent,
+                        modifier = Modifier.padding(vertical = 4.dp),
+                    )
+                }
             }
+
+            // Play Protect card
+            item {
+                PlayProtectCard()
+            }
+
+            // Grouped audit items by category
+            val groupedItems = auditItems.groupBy { it.category }
+            AppCategory.entries.forEach { category ->
+                val items = groupedItems[category] ?: return@forEach
+
+                item {
+                    Text(
+                        text = category.displayName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+
+                items(items, key = { it.id }) { auditItem ->
+                    AppCard(
+                        item = auditItem,
+                        onFixClick = onFixClick,
+                        onRecheckClick = { viewModel.onRefresh() },
+                    )
+                }
+            }
+
+            // Bottom spacing
+            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
-
-        // Bottom spacing
-        item { Spacer(modifier = Modifier.height(16.dp)) }
     }
 }

@@ -33,3 +33,14 @@ data class CheckResponse(
     @SerializedName("confidence") val confidence: Float,
     @SerializedName("details") val details: Map<String, String>? = null,
 )
+
+data class AlertDto(
+    @SerializedName("id") val id: String,
+    @SerializedName("title") val title: String,
+    @SerializedName("description") val description: String,
+    @SerializedName("scam_type") val scamType: String,
+    @SerializedName("severity") val severity: String,
+    @SerializedName("region") val region: String,
+    @SerializedName("report_count") val reportCount: Int,
+    @SerializedName("created_at") val createdAt: String,
+)

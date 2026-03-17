@@ -5,7 +5,9 @@ package com.safeanot.app.di
 
 import android.content.Context
 import androidx.room.Room
+import com.safeanot.app.data.local.AlertsDao
 import com.safeanot.app.data.local.AuditDao
+import com.safeanot.app.data.local.ReminderConfigDao
 import com.safeanot.app.data.local.SafeAnotDatabase
 import com.safeanot.app.data.local.ScamDomainDao
 import dagger.Module
@@ -41,5 +43,17 @@ object DatabaseModule {
     @Singleton
     fun provideScamDomainDao(database: SafeAnotDatabase): ScamDomainDao {
         return database.scamDomainDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideAlertsDao(database: SafeAnotDatabase): AlertsDao {
+        return database.alertsDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideReminderConfigDao(database: SafeAnotDatabase): ReminderConfigDao {
+        return database.reminderConfigDao()
     }
 }

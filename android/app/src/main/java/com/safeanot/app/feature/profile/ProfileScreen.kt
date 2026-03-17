@@ -20,6 +20,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -38,6 +40,7 @@ import com.safeanot.app.ui.theme.DarkCard
 import com.safeanot.app.ui.theme.GreenAccent
 import com.safeanot.app.ui.theme.TextPrimary
 import com.safeanot.app.ui.theme.TextSecondary
+import com.safeanot.app.util.Constants
 
 @Composable
 fun ProfileScreen(
@@ -147,6 +150,33 @@ fun ProfileScreen(
                                 checkedTrackColor = GreenAccent.copy(alpha = 0.3f),
                             ),
                         )
+                    }
+
+                    // Interval selector (only visible when reminders are enabled)
+                    if (uiState.remindersEnabled) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Reminder Interval",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextPrimary,
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Constants.REMINDER_INTERVAL_OPTIONS.forEach { days ->
+                                FilterChip(
+                                    selected = uiState.reminderIntervalDays == days,
+                                    onClick = { viewModel.setReminderInterval(days) },
+                                    label = { Text("${days}d") },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = BlueAccent.copy(alpha = 0.2f),
+                                        selectedLabelColor = BlueAccent,
+                                    ),
+                                )
+                            }
+                        }
                     }
                 }
             }

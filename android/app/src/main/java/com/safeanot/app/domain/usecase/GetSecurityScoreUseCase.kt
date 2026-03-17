@@ -1,6 +1,7 @@
 /**
  * Use case that observes the current security score as a Flow.
  * Score formula: (securedItems / totalDetectedItems) * 100.
+ * Score band thresholds: RED (0-49), AMBER (50-79), GREEN (80-100).
  */
 package com.safeanot.app.domain.usecase
 

@@ -23,6 +23,7 @@ import javax.inject.Inject
 
 data class ShieldUiState(
     val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
     val hasScanned: Boolean = false,
     val error: String? = null,
 )
@@ -56,6 +57,25 @@ class ShieldViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
+                    error = e.message ?: "Audit failed",
+                )
+            }
+        }
+    }
+
+    /** Pull-to-refresh handler. */
+    fun onRefresh() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isRefreshing = true, error = null)
+            try {
+                runAuditUseCase()
+                _uiState.value = _uiState.value.copy(
+                    isRefreshing = false,
+                    hasScanned = true,
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isRefreshing = false,
                     error = e.message ?: "Audit failed",
                 )
             }

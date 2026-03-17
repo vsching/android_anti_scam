@@ -3,9 +3,11 @@
  */
 package com.safeanot.app.di
 
+import com.safeanot.app.data.repository.AlertsRepositoryImpl
 import com.safeanot.app.data.repository.AuditRepositoryImpl
 import com.safeanot.app.data.repository.LinkCheckRepositoryImpl
 import com.safeanot.app.data.repository.SyncRepositoryImpl
+import com.safeanot.app.domain.repository.AlertsRepository
 import com.safeanot.app.domain.repository.AuditRepository
 import com.safeanot.app.domain.repository.LinkCheckRepository
 import com.safeanot.app.domain.repository.SyncRepository
@@ -30,4 +32,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindLinkCheckRepository(impl: LinkCheckRepositoryImpl): LinkCheckRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAlertsRepository(impl: AlertsRepositoryImpl): AlertsRepository
 }

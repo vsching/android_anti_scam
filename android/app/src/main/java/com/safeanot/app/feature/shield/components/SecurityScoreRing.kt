@@ -1,6 +1,6 @@
 /**
  * Animated circular progress indicator displaying the security score percentage.
- * Color transitions: red (0-49%) -> amber (50-79%) -> green (80-100%).
+ * Color transitions are driven by the ScoreBand from the domain model.
  */
 package com.safeanot.app.feature.shield.components
 
@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.safeanot.app.domain.model.ScoreBand
 import com.safeanot.app.ui.theme.DarkBorder
 import com.safeanot.app.ui.theme.ScoreAmber
 import com.safeanot.app.ui.theme.ScoreGreen
@@ -36,12 +37,13 @@ fun SecurityScoreRing(
     scorePercent: Int,
     securedCount: Int,
     totalCount: Int,
+    scoreBand: ScoreBand = ScoreBand.fromPercent(scorePercent),
     modifier: Modifier = Modifier,
 ) {
-    val scoreColor = when {
-        scorePercent >= 80 -> ScoreGreen
-        scorePercent >= 50 -> ScoreAmber
-        else -> ScoreRed
+    val scoreColor = when (scoreBand) {
+        ScoreBand.GREEN -> ScoreGreen
+        ScoreBand.AMBER -> ScoreAmber
+        ScoreBand.RED -> ScoreRed
     }
 
     var targetProgress by remember { mutableFloatStateOf(0f) }

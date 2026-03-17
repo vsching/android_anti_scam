@@ -1,13 +1,15 @@
 /**
  * Represents the security audit status of a tracked app.
+ * NOT_QUERYABLE detection state is mapped to NEEDS_REVIEW with an explicit explanation
+ * that the app's install status could not be verified.
  */
 package com.safeanot.app.domain.model
 
 enum class AuditStatus {
-    /** User has confirmed they disabled install permission for this app. */
+    /** App is installed and user has not yet addressed the risk. */
     NEEDS_REVIEW,
 
-    /** App is installed and user has not yet addressed the risk. */
+    /** User has confirmed they disabled install permission for this app. */
     SECURED,
 
     /** App is not present on the device. */

@@ -1,6 +1,7 @@
 /**
  * Guided Fix flow screen with risk explanation, numbered steps, settings deep-link button,
  * and confirm/skip buttons for user to mark remediation status.
+ * Shows a confirmation prompt when the user returns from settings.
  */
 package com.safeanot.app.feature.fix
 
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,6 +38,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -45,10 +48,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.safeanot.app.ui.theme.BlueAccent
 import com.safeanot.app.ui.theme.DarkBackground
 import com.safeanot.app.ui.theme.DarkCard
@@ -66,12 +72,44 @@ fun FixScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     // Navigate back when completed or skipped
     LaunchedEffect(uiState.isCompleted, uiState.isSkipped) {
         if (uiState.isCompleted || uiState.isSkipped) {
             onNavigateBack()
         }
+    }
+
+    // Detect return from settings via lifecycle resume
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            viewModel.onReturnedFromSettings()
+        }
+    }
+
+    // Confirmation dialog after returning from settings
+    if (uiState.showConfirmation) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissConfirmation() },
+            title = { Text("Did you disable it?") },
+            text = {
+                Text("Did you turn off \"Install unknown apps\" for ${uiState.appName}?")
+            },
+            confirmButton = {
+                Button(
+                    onClick = { viewModel.markAsSecured() },
+                    colors = ButtonDefaults.buttonColors(containerColor = GreenAccent),
+                ) {
+                    Text("Yes, I did")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.dismissConfirmation() }) {
+                    Text("Not yet")
+                }
+            },
+        )
     }
 
     Column(
@@ -132,9 +170,13 @@ fun FixScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            val riskText = uiState.riskDescription.ifEmpty {
+                "Scammers exploit this to send malware disguised as useful apps. " +
+                    "Disabling \"Install unknown apps\" for ${uiState.appName} prevents this attack vector."
+            }
+
             Text(
-                text = "Scammers exploit this to send malware disguised as useful apps. " +
-                    "Disabling \"Install unknown apps\" for ${uiState.appName} prevents this attack vector.",
+                text = riskText,
                 style = MaterialTheme.typography.bodyMedium,
                 color = TextSecondary,
             )

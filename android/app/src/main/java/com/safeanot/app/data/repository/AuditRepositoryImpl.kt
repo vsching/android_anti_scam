@@ -8,11 +8,13 @@ import com.safeanot.app.data.local.AuditDao
 import com.safeanot.app.data.local.entity.AuditItemEntity
 import com.safeanot.app.data.local.entity.SecurityScoreEntity
 import com.safeanot.app.domain.model.AppCategory
+import com.safeanot.app.domain.model.AuditChangeSummary
 import com.safeanot.app.domain.model.AuditItem
 import com.safeanot.app.domain.model.AuditStatus
 import com.safeanot.app.domain.model.SecurityScore
 import com.safeanot.app.domain.repository.AuditRepository
 import com.safeanot.app.util.Constants
+import com.safeanot.app.util.DetectionState
 import com.safeanot.app.util.PackageChecker
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -56,10 +58,14 @@ class AuditRepositoryImpl @Inject constructor(
 
         val auditEntities = allTrackedApps.map { trackedApp ->
             val existing = auditDao.getByPackageName(trackedApp.packageName)
-            val isInstalled = packageChecker.isInstalled(trackedApp.packageName)
+            val detection = packageChecker.detect(trackedApp.packageName, trackedApp.appName)
+
+            val detectionState = detection.state
+            val appLabel = detection.appLabel ?: trackedApp.appName
 
             val status = when {
-                !isInstalled -> AuditStatus.NOT_INSTALLED.name
+                detectionState == DetectionState.NOT_INSTALLED -> AuditStatus.NOT_INSTALLED.name
+                detectionState == DetectionState.NOT_QUERYABLE -> AuditStatus.NEEDS_REVIEW.name
                 existing != null && existing.status == AuditStatus.SECURED.name -> AuditStatus.SECURED.name
                 existing != null && existing.status == AuditStatus.SKIPPED.name -> AuditStatus.SKIPPED.name
                 else -> AuditStatus.NEEDS_REVIEW.name
@@ -68,9 +74,11 @@ class AuditRepositoryImpl @Inject constructor(
             AuditItemEntity(
                 id = existing?.id ?: 0,
                 packageName = trackedApp.packageName,
-                appName = trackedApp.appName,
+                appName = appLabel,
                 category = trackedApp.category,
                 status = status,
+                riskDescription = trackedApp.riskDescription,
+                detectionState = detectionState.name,
                 lastChecked = now,
             )
         }
@@ -79,14 +87,59 @@ class AuditRepositoryImpl @Inject constructor(
         recalculateScore()
     }
 
+    override suspend fun runAuditAndDetectChanges(): AuditChangeSummary {
+        val previousItems = auditDao.getAllOnce()
+        val previousMap = previousItems.associateBy { it.packageName }
+
+        runAudit()
+
+        val currentItems = auditDao.getAllOnce()
+        val newlyRisky = mutableListOf<String>()
+        val regressions = mutableListOf<String>()
+
+        for (current in currentItems) {
+            val previous = previousMap[current.packageName]
+            if (previous == null) {
+                // New app detected as installed and needing review
+                if (current.detectionState == DetectionState.INSTALLED.name &&
+                    current.status == AuditStatus.NEEDS_REVIEW.name
+                ) {
+                    newlyRisky.add(current.appName)
+                }
+            } else {
+                // Regression: was SECURED or NOT_INSTALLED, now NEEDS_REVIEW
+                if (previous.status == AuditStatus.SECURED.name &&
+                    current.status == AuditStatus.NEEDS_REVIEW.name
+                ) {
+                    regressions.add(current.appName)
+                }
+                if (previous.status == AuditStatus.NOT_INSTALLED.name &&
+                    current.status == AuditStatus.NEEDS_REVIEW.name
+                ) {
+                    newlyRisky.add(current.appName)
+                }
+            }
+        }
+
+        return AuditChangeSummary(
+            newlyRiskyApps = newlyRisky,
+            regressions = regressions,
+        )
+    }
+
     override suspend fun updateItemStatus(id: Int, status: AuditStatus) {
         auditDao.updateStatus(id, status.name)
         recalculateScore()
     }
 
+    override suspend fun updateItemStatusByPackage(packageName: String, status: AuditStatus) {
+        auditDao.updateStatusByPackageName(packageName, status.name)
+        recalculateScore()
+    }
+
     override suspend fun recalculateScore() {
         val secured = auditDao.getSecuredCount()
-        val installed = auditDao.getInstalledCount()
+        val installed = auditDao.getInstalledDetectedCount()
         val percent = if (installed > 0) (secured * 100) / installed else 100
 
         auditDao.insertScore(
@@ -113,6 +166,12 @@ class AuditRepositoryImpl @Inject constructor(
                 AuditStatus.valueOf(status)
             } catch (_: IllegalArgumentException) {
                 AuditStatus.NEEDS_REVIEW
+            },
+            riskDescription = riskDescription,
+            detectionState = try {
+                DetectionState.valueOf(detectionState)
+            } catch (_: IllegalArgumentException) {
+                DetectionState.NOT_INSTALLED
             },
             lastChecked = lastChecked,
         )

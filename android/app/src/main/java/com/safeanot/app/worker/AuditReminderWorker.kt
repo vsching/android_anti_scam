@@ -1,7 +1,7 @@
 /**
  * WorkManager worker for periodic audit reminders.
- * Runs weekly (configurable), re-scans installed packages, and posts a notification
- * if the security posture has changed.
+ * Runs at the configured interval, re-scans installed packages, and posts a notification
+ * only if the security posture has changed (new risks or regressions detected).
  */
 package com.safeanot.app.worker
 
@@ -20,6 +20,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.safeanot.app.MainActivity
+import com.safeanot.app.data.local.ReminderConfigDao
 import com.safeanot.app.domain.repository.AuditRepository
 import com.safeanot.app.util.Constants
 import dagger.assisted.Assisted
@@ -30,18 +31,27 @@ class AuditReminderWorker @AssistedInject constructor(
     @Assisted private val appContext: Context,
     @Assisted workerParams: WorkerParameters,
     private val repository: AuditRepository,
+    private val reminderConfigDao: ReminderConfigDao,
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
         return try {
-            // Re-run the audit
-            repository.runAudit()
-            repository.recalculateScore()
+            // Check if reminders are enabled
+            val config = reminderConfigDao.getConfigOnce()
+            if (config != null && !config.enabled) {
+                return Result.success()
+            }
 
-            // Post notification if permission granted
-            if (hasNotificationPermission()) {
+            // Run diff-aware audit
+            val changes = repository.runAuditAndDetectChanges()
+
+            // Update last reminder timestamp
+            reminderConfigDao.updateLastReminderDate(System.currentTimeMillis())
+
+            // Only notify if there are actual changes
+            if (changes.hasChanges && hasNotificationPermission()) {
                 createNotificationChannel()
-                sendNotification()
+                sendNotification(changes.toNotificationText())
             }
 
             Result.success()
@@ -75,7 +85,7 @@ class AuditReminderWorker @AssistedInject constructor(
         notificationManager.createNotificationChannel(channel)
     }
 
-    private fun sendNotification() {
+    private fun sendNotification(contentText: String) {
         val intent = Intent(appContext, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -89,8 +99,8 @@ class AuditReminderWorker @AssistedInject constructor(
 
         val notification = NotificationCompat.Builder(appContext, Constants.NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("Safe Anot? Audit Reminder")
-            .setContentText("Time for a security check! Tap to review your device.")
+            .setContentTitle("Safe Anot? Security Update")
+            .setContentText(contentText)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
