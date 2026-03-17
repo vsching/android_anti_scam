@@ -25,7 +25,7 @@
 
 3. File: `/backend/workers/wrangler.toml`
    Action: Create
-   Details: Configure Worker name, entrypoint, compatibility date, placeholder bindings for KV, R2, and D1, and Cloudflare rate limiting rules (100 req/min per IP on `/api/*` routes).
+   Details: Configure Worker name, entrypoint, compatibility date, and placeholder bindings for KV, R2, and D1. Note: rate limiting is NOT configured here — it is provisioned via Cloudflare Rate Limiting Rulesets (dashboard or API/Terraform), not wrangler.toml. Add a comment in wrangler.toml documenting this.
 
 4. File: `/backend/workers/.dev.vars`
    Action: Create
@@ -57,7 +57,7 @@
 
 11. File: `/backend/workers/src/middleware/security-headers.ts`
     Action: Create
-    Details: Add security headers to all responses: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 1; mode=block`, `Strict-Transport-Security`, `Referrer-Policy: strict-origin-when-cross-origin`.
+    Details: Add security headers to all responses: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Strict-Transport-Security: max-age=31536000; includeSubDomains`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`. Note: `X-XSS-Protection` is deprecated and omitted. `Content-Security-Policy` should be added for HTML responses in E06 (website).
 
 12. File: `/.github/workflows/deploy-workers.yml`
     Action: Create
@@ -76,8 +76,8 @@
     Details: Setup instructions: how to install dependencies, run locally with `wrangler dev`, run tests, deploy, and configure environment variables.
 
 16. File: `/backend/pipeline/requirements.txt`
-    Action: Create
-    Details: Pinned Python dependencies: `requests`, `cloudflare` (or `boto3` for R2 S3-compat), `pytest`, `pytest-cov`, `mmh3` (for Bloom filter), and any other pipeline dependencies.
+    Action: Remove (if exists)
+    Details: Superseded by `pyproject.toml` in E01-002. If deployment tooling requires `requirements.txt`, generate it from `pyproject.toml` via `pip-compile` or equivalent — do not maintain two dependency lists manually.
 
 17. File: `/backend/pipeline/README.md`
     Action: Create
@@ -91,7 +91,7 @@
 - `wrangler dev` runs locally and serves a hello-world Worker
 - TypeScript configured with strict mode
 - KV, R2, and D1 bindings declared in `wrangler.toml`
-- Cloudflare rate limiting rules configured in `wrangler.toml`
+- Cloudflare rate limiting rules provisioned via Cloudflare Rate Limiting Rulesets (not wrangler.toml); wrangler.toml documents the expected rules as comments
 - `.dev.vars` for local secrets (Firebase key placeholder)
 - `.env.example` with clearly documented required secrets
 - CORS middleware allowing safeanot.com origin + app requests
@@ -130,8 +130,13 @@
    Action: Create
    Details: Validate table existence, insert/select viability for each table, presence of seed alerts, unique constraint enforcement, and idempotent migration (running twice doesn't error).
 
+7. File: `/backend/workers/test/retention.test.ts`
+   Action: Create
+   Details: Test retention cron handler: verify reports older than 90 days are deleted, pending_discoveries older than 30 days are deleted, recent records are preserved, and the handler is idempotent (running twice with no old data is a no-op).
+
 ### Tests
 - `/backend/workers/test/d1-migrations.test.ts` -- tests schema creation, CRUD smoke checks, seeded alert presence, unique constraints, idempotent migration, and `pending_discoveries` table
+- `/backend/workers/test/retention.test.ts` -- tests retention cron deletes old reports/discoveries while preserving recent data
 
 ### Acceptance Criteria
 - D1 database `safeanot-db` created via Wrangler
@@ -213,12 +218,22 @@
     Action: Create
     Details: Test source fetch failure handling: network errors, HTTP 404, malformed data. Verify graceful degradation (pipeline continues with remaining sources).
 
+16. File: `/backend/pipeline/tests/test_discovery_processor.py`
+    Action: Create
+    Details: Test discovery processor: reads pending_discoveries from D1 API, cross-references with fetched sources, promotes confirmed domains, marks rows as processed. Test error cases: Cloudflare API failure/retry, idempotent mark-processed behavior, stale entry cleanup.
+
+17. File: `/backend/pipeline/tests/test_cloudflare.py`
+    Action: Create
+    Details: Test Cloudflare adapter: R2 upload success/failure/retry, KV write success/failure, authentication errors, network timeouts. Verify credentials are not logged.
+
 ### Tests
 - `/backend/pipeline/tests/test_normalize.py` -- tests domain normalization and canonicalization
 - `/backend/pipeline/tests/test_seed_database.py` -- tests feed merge, JSON schema, allowlist seeding, R2/KV upload orchestration, and idempotent reruns
 - `/backend/pipeline/tests/test_sqlite_exporter.py` -- tests SQLite export validity and queryability
 - `/backend/pipeline/tests/test_bloom_filter.py` -- tests Bloom filter false positive rate and correctness
 - `/backend/pipeline/tests/test_sources.py` -- tests source fetch failure handling and graceful degradation
+- `/backend/pipeline/tests/test_discovery_processor.py` -- tests discovery processor D1 integration and error handling
+- `/backend/pipeline/tests/test_cloudflare.py` -- tests Cloudflare R2/KV adapter error paths and retry behavior
 
 ### Acceptance Criteria
 - Python script (`/backend/pipeline/seed_database.py`) that:
@@ -307,11 +322,11 @@
 
 7. File: `/backend/workers/wrangler.toml`
    Action: Modify
-   Details: Add Cloudflare rate limiting rules configuration: 100 req/min per IP for `/api/check`, 10 req/min for `/api/report`. Rate limiting is handled entirely by Cloudflare's built-in infrastructure — no application-level counters, no KV, no in-memory tracking. Worker returns 429 when Cloudflare enforces the limit.
+   Details: Document expected rate limiting rules as comments in wrangler.toml: 100 req/min per IP for `/api/check`, 10 req/min for `/api/report`. Actual rate limiting is provisioned via Cloudflare Rate Limiting Rulesets (dashboard or API/Terraform), NOT wrangler.toml config. Worker returns 429 when Cloudflare enforces the limit. No application-level counters, no KV, no in-memory tracking.
 
 8. File: `/backend/workers/src/lib/discovery.ts`
    Action: Create
-   Details: Write suspicious unknown domains to D1 `pending_discoveries` table for pipeline review. Insert domain, verdict, confidence, heuristic reason, and timestamp. Use INSERT OR IGNORE to avoid duplicates. This is the v1 async discovery mechanism (no full queue needed).
+   Details: Write suspicious unknown domains to D1 `pending_discoveries` table for pipeline review. Use UPSERT (INSERT ... ON CONFLICT(domain) DO UPDATE) to increment `check_count`, update `verdict`/`reason` if confidence is higher, and set `last_seen_at = CURRENT_TIMESTAMP`. This preserves signal about how frequently a domain is being checked. This is the v1 async discovery mechanism (no full queue needed).
 
 9. File: `/backend/workers/src/env.d.ts`
    Action: Modify
@@ -406,7 +421,7 @@
 | `/backend/workers/vitest.config.ts` | Create | E01-001 |
 | `/backend/workers/test/app.test.ts` | Create | E01-001 |
 | `/backend/workers/README.md` | Create | E01-001 |
-| `/backend/pipeline/requirements.txt` | Create | E01-001 |
+| `/backend/pipeline/requirements.txt` | Remove/Generate | E01-001 (superseded by pyproject.toml) |
 | `/backend/pipeline/README.md` | Create | E01-001 |
 | `/backend/pipeline/pyproject.toml` | Create | E01-002 |
 | `/backend/pipeline/seed_database.py` | Create/Modify | E01-002, E01-006 |
@@ -423,12 +438,14 @@
 | `/backend/pipeline/tests/test_sqlite_exporter.py` | Create | E01-002 |
 | `/backend/pipeline/tests/test_bloom_filter.py` | Create | E01-002 |
 | `/backend/pipeline/tests/test_sources.py` | Create | E01-002 |
+| `/backend/pipeline/tests/test_discovery_processor.py` | Create | E01-002 |
+| `/backend/pipeline/tests/test_cloudflare.py` | Create | E01-002 |
 | `/backend/workers/src/routes/check.ts` | Create | E01-003 |
 | `/backend/workers/src/lib/domain.ts` | Create | E01-003 |
 | `/backend/workers/src/lib/heuristics.ts` | Create | E01-003 |
 | `/backend/workers/src/lib/cache.ts` | Create/Modify | E01-003, E01-004, E01-006 |
 | `/backend/workers/src/lib/inflight.ts` | Create | E01-003 |
-| `/backend/workers/wrangler.toml` | Modify (rate limiting rules) | E01-003 |
+| `/backend/workers/wrangler.toml` | Modify (rate limiting comments) | E01-003 |
 | `/backend/workers/src/lib/discovery.ts` | Create | E01-003 |
 | `/backend/workers/test/check.test.ts` | Create | E01-003 |
 | `/backend/workers/src/routes/alerts.ts` | Create | E01-004 |
@@ -438,6 +455,15 @@
 | `/backend/workers/migrations/0002_seed_alerts.sql` | Create | E01-005 |
 | `/backend/workers/src/lib/retention.ts` | Create | E01-005 |
 | `/backend/workers/test/d1-migrations.test.ts` | Create | E01-005 |
+| `/backend/workers/test/retention.test.ts` | Create | E01-005 |
 | `/backend/workers/src/routes/data.ts` | Create | E01-006 |
 | `/backend/workers/src/lib/r2-manifest.ts` | Create | E01-006 |
 | `/backend/workers/test/data.test.ts` | Create | E01-006 |
+
+---
+
+## Codex Review Trace
+
+| Round | Date | Findings | Fixed | Notes |
+|-------|------|----------|-------|-------|
+| R1 | 2026-03-17 | 7 (3 HIGH, 3 MEDIUM, 1 LOW) | 6 fixed, 1 dismissed | Rate limiting → Ruleset IaC; UPSERT for pending_discoveries; modernize headers; add missing tests; de-dup Python deps; clarify TECHNICAL_REQUIREMENTS v1 scope. KV caching finding dismissed — spec already allows tiny response caches (lines 121-122 of INFRASTRUCTURE_ARCHITECTURE.md). |

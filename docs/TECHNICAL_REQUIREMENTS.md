@@ -781,16 +781,17 @@ The database is pre-seeded with the following audit items on first launch:
 | **Settings UI varies by OEM** | The "Install unknown apps" settings page may look different on Samsung, Xiaomi, OnePlus, etc. Instructions must be generic enough to work across OEMs. |
 | **No auto-detection of regression** | If a user re-enables install permission after marking it "Secured," the app cannot detect this automatically. Periodic re-audits mitigate but don't eliminate this gap. |
 
-### 7.3 Scope Exclusions (v1)
+### 7.3 Scope Exclusions (v1 Android App)
 
-The following are explicitly **out of scope** for v1:
+The following are explicitly **out of scope** for the v1 Android app:
 
 - Real-time APK install interception or blocking.
-- Network-based threat intelligence lookups.
+- Network-based threat intelligence lookups (on-device; the backend API handles server-side checks).
 - Device administrator or MDM functionality.
 - Root detection or SafetyNet/Play Integrity checks.
 - Scanning APK files for malware signatures.
-- Integration with any external API or cloud service.
+
+**Note:** The backend API and data pipeline (E01) are in-scope for Phase 1 MVP. The exclusions above apply to the Android app's v1 feature set. The app connects to the backend API for link checking, database updates, and alerts starting in Phase 1.
 
 ---
 

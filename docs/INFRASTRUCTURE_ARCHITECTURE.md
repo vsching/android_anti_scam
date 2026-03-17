@@ -215,16 +215,20 @@ CREATE TABLE shared_scores (
 -- Suspicious domains queued for pipeline review (async discovery)
 CREATE TABLE pending_discoveries (
   id TEXT PRIMARY KEY,
-  domain TEXT NOT NULL,
+  domain TEXT NOT NULL UNIQUE,
   verdict TEXT,            -- heuristic verdict (suspicious/unknown)
   reason TEXT,
   source TEXT,             -- 'heuristic', 'user_report'
   check_count INTEGER DEFAULT 1,
+  last_seen_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   processed BOOLEAN DEFAULT FALSE,
   processed_at DATETIME
 );
 CREATE INDEX idx_pending_unprocessed ON pending_discoveries(processed, created_at);
+-- UPSERT pattern: INSERT ... ON CONFLICT(domain) DO UPDATE SET
+--   check_count = check_count + 1, last_seen_at = CURRENT_TIMESTAMP,
+--   verdict/reason updated if new confidence is higher
 ```
 
 **Pricing:**
