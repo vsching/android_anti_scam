@@ -37,13 +37,17 @@
    Action: Create
    Details: Implement Bloom filter logic using MurmurHash3 (use `com.google.guava:guava` Hashing or inline implementation). Methods: `loadFromBytes(data: ByteArray)` (parse 32-byte header: magic, version, size, hashCount, domainCount), `mightContain(domain: String): Boolean`. Binary format must match backend's `bloom_filter.py` output.
 
-6. File: `android/app/src/main/java/com/safeanot/app/di/DatabaseModule.kt`
+6. File: `android/app/src/main/java/com/safeanot/app/data/local/entity/CheckResultCacheEntity.kt`
+   Action: Create
+   Details: Dedicated Room entity for caching API check results with TTL. Fields: `domain` (PK), `verdict`, `reason`, `confidence`, `cachedAt` (Long, epoch ms), `expiresAt` (Long, epoch ms = cachedAt + 24h). Separate from canonical `ScamDomainEntity` to avoid mixing pipeline-sourced data with ephemeral API cache.
+
+7. File: `android/app/src/main/java/com/safeanot/app/di/DatabaseModule.kt`
    Action: Modify
-   Details: Add provider for `ScamDomainDao`.
+   Details: Add providers for `ScamDomainDao`. Register `CheckResultCacheEntity` in database.
 
 ### Tests
 - `android/app/src/test/java/com/safeanot/app/util/BloomFilterTest.kt` -- test `mightContain` with known positives/negatives; test false positive rate <1%; test header parsing; test corrupted header handling
-- `android/app/src/androidTest/java/com/safeanot/app/data/local/ScamDomainDaoTest.kt` -- test CRUD operations on scam domains and metadata; test upsert behavior
+- `android/app/src/androidTest/java/com/safeanot/app/data/local/ScamDomainDaoTest.kt` -- test CRUD on scam domains, metadata, and check result cache; test cache TTL expiry query; test upsert behavior
 
 ### Acceptance Criteria
 - Room database schema updated with scam domain and sync metadata tables
@@ -63,7 +67,7 @@
 
 2. File: `android/app/src/main/java/com/safeanot/app/data/remote/model/ApiModels.kt`
    Action: Create
-   Details: Data classes: `LatestMetadataResponse` (version, full_key, delta_key, bloom_key, full_size_kb, delta_size_kb, bloom_size_kb, sqlite_size_kb, domain_count, build_timestamp), `CheckRequest` (url/domain), `CheckResponse` (domain, verdict, reason, confidence, details).
+   Details: Data classes: `LatestMetadataResponse` (version, full_key, delta_key, bloom_key, full_size_kb, delta_size_kb, bloom_size_kb, sqlite_size_kb, domain_count, build_timestamp), `CheckRequest` (domain only — always send normalized domain, never full URL with path/query to avoid leaking sensitive URL data), `CheckResponse` (domain, verdict, reason, confidence, details).
 
 3. File: `android/app/src/main/java/com/safeanot/app/domain/repository/SyncRepository.kt`
    Action: Create
@@ -71,22 +75,26 @@
 
 4. File: `android/app/src/main/java/com/safeanot/app/data/repository/SyncRepositoryImpl.kt`
    Action: Create
-   Details: Orchestrate sync: 1) GET `/api/data/latest` → compare version. 2) If first run or >7 days old → GET `/api/data/full` → parse SQLite → bulk insert into Room. 3) Otherwise → GET `/api/data/delta` → parse JSON → apply adds/removes to Room. 4) GET `/api/data/bloom` → verify SHA-256 checksum from manifest → save to internal files dir. 5) Update metadata. All operations wrapped in Room transaction. On checksum mismatch → abort and retry on next cycle.
+   Details: Orchestrate sync in two phases. Phase 1 (network, outside transaction): GET `/api/data/latest` → compare version → download artifacts to temp files → verify SHA-256 checksums against manifest. Phase 2 (DB, inside Room transaction): If first run or >7 days old → parse SQLite temp file → bulk insert into Room. Otherwise → parse delta JSON temp file → apply adds/removes to Room. Update metadata. After transaction commits → atomically move bloom temp file to final path in internal files dir. On checksum mismatch or parse failure → abort, delete temp files, return Result.retry().
 
 5. File: `android/app/src/main/java/com/safeanot/app/worker/DatabaseSyncWorker.kt`
    Action: Create
-   Details: `CoroutineWorker` that calls `SyncRepository.syncDatabase()`. Constraints: `NetworkType.UNMETERED` (WiFi), `requiresBatteryNotLow(true)`. Return `Result.retry()` on transient failure. Unique work name: `"safeanot_db_sync"`.
+   Details: `@HiltWorker` `CoroutineWorker` with `@AssistedInject` constructor receiving `SyncRepository`. Constraints: `NetworkType.UNMETERED`, `requiresBatteryNotLow(true)`. Return `Result.retry()` on transient failure.
+
+5b. File: `android/app/src/main/java/com/safeanot/app/SafeAnotApp.kt`
+    Action: Modify
+    Details: Implement `Configuration.Provider` interface. Return `Configuration.Builder().setWorkerFactory(hiltWorkerFactory).build()` to enable Hilt-injected workers. Remove default WorkManager initialization in AndroidManifest (add `<provider tools:node="remove">`).
 
 6. File: `android/app/src/main/java/com/safeanot/app/SafeAnotApp.kt`
    Action: Modify
-   Details: Schedule `DatabaseSyncWorker` as `PeriodicWorkRequest` (24h, `ExistingPeriodicWorkPolicy.KEEP`). Also trigger immediate `OneTimeWorkRequest` on first run (when metadata is null).
+   Details: Schedule `DatabaseSyncWorker` as `PeriodicWorkRequest` (24h, `ExistingPeriodicWorkPolicy.KEEP`, unique name `"safeanot_db_sync_periodic"`). Also trigger immediate sync via `enqueueUniqueWork("safeanot_db_sync_immediate", ExistingWorkPolicy.KEEP, OneTimeWorkRequest)` on first run (when metadata is null). KEEP policy prevents duplicate first-run syncs on rapid cold-start restarts.
 
 7. File: `android/app/src/main/java/com/safeanot/app/di/NetworkModule.kt`
    Action: Create
    Details: Hilt module providing Retrofit instance, OkHttpClient, and `SafeAnotApi`. Base URL configurable via BuildConfig.
 
 ### Tests
-- `android/app/src/test/java/com/safeanot/app/data/repository/SyncRepositoryImplTest.kt` -- mock API and DAO to test: delta vs full fallback, checksum verification, transaction rollback on failure, first-run detection, metadata update
+- `android/app/src/test/java/com/safeanot/app/data/repository/SyncRepositoryImplTest.kt` -- mock API and DAO to test: delta vs full fallback, checksum verification, transaction rollback on failure, first-run detection, metadata update, malformed delta JSON (invalid JSON, missing fields), truncated bloom binary (header too short), manifest-key mismatch (bloom hash doesn't match), metadata NOT advanced on failed sync
 - `android/app/src/androidTest/java/com/safeanot/app/worker/DatabaseSyncWorkerTest.kt` -- verify worker constraints (UNMETERED network, battery), unique work policy
 
 ### Acceptance Criteria
@@ -121,7 +129,7 @@
 
 5. File: `android/app/src/main/java/com/safeanot/app/domain/usecase/CheckLinkUseCase.kt`
    Action: Create
-   Details: Thin wrapper: normalize input, call repository, return result. Validates input is non-empty.
+   Details: Thin orchestration wrapper: validate input is non-empty, call repository (which handles normalization internally), return result. Does NOT normalize — normalization is the repository's responsibility to avoid double-normalization.
 
 ### Tests
 - `android/app/src/test/java/com/safeanot/app/util/UrlNormalizerTest.kt` -- exhaustive test fixtures: protocols, paths, queries, fragments, www, uppercase, Punycode/IDN, two-part TLDs (maybank2u.com.my), IPs (rejected), localhost (rejected), consecutive dots (rejected), leading/trailing hyphens (rejected)
@@ -191,7 +199,11 @@
 
 4. File: `android/app/src/main/AndroidManifest.xml`
    Action: Modify
-   Details: Register FileProvider for sharing images. Add deep link intent filter for `safeanot.com/result?domain=...`.
+   Details: Register FileProvider for sharing images. Add `ACTION_VIEW` intent filter for deep link `safeanot.com/result?domain=...` — when app is installed, deep links open the app and trigger a check for the domain query param. Web fallback (when app not installed) is handled by E06 website deployment. Also add verified domain via Digital Asset Links (assetlinks.json in E06).
+
+4b. File: `android/app/src/main/java/com/safeanot/app/MainActivity.kt`
+    Action: Modify (addendum to E02-004 task)
+    Details: Handle `ACTION_VIEW` intents with `safeanot.com/result` URI — parse `domain` query param and navigate to Check screen with pre-filled domain.
 
 ### Tests
 - `android/app/src/test/java/com/safeanot/app/util/VerdictCardGeneratorTest.kt` -- verify bitmap dimensions, non-null output for all verdict types
@@ -248,3 +260,4 @@
 | Round | Date | Findings | Fixed | Notes |
 |-------|------|----------|-------|-------|
 | R1 | 2026-03-17 | 10 (3 HIGH, 5 MEDIUM, 1 LOW, 1 implicit) | 10 fixed | File paths corrected to `android/app/src/...`; use existing `feature/check/` not new `feature/linkchecker/`; added SHA-256 checksum verification for sync artifacts; removed `/api/score/share` (wrong contract); fixed WorkManager to `NetworkType.UNMETERED` + `ExistingPeriodicWorkPolicy.KEEP` + backoff; forced first-run sync instead of empty placeholder; fixed implementation order (sync before check flow); added delta merge/corruption/checksum tests; URL normalization tightened with two-part TLD list; added 24h cache TTL for cached check results; removed QR code from v1 verdict card. |
+| R2 | 2026-03-17 | 8 (2 HIGH, 5 MEDIUM, 1 LOW) | 8 fixed | Added dedicated `CheckResultCacheEntity` for TTL cache (separate from canonical domain table); sync transaction boundary fixed (network outside, DB mutations inside transaction, atomic bloom file move); deep link `ACTION_VIEW` handling + product decision (app-open, web fallback in E06); API sends normalized domain only (never full URL); first-run sync uses unique work name + KEEP policy; added @HiltWorker + AssistedInject + Configuration.Provider; normalization responsibility in repository only; explicit corruption test cases added. |
