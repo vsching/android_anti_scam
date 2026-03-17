@@ -223,7 +223,10 @@ def run_pipeline(
         json.dump(domain_records, f, indent=2)
 
     # Delta JSON — uses add/remove semantics matching Worker contract
-    # For initial seed (no previous version), all domains are "added"
+    # TODO: v2 — load previous version's domain set from R2 and compute actual diff.
+    # For v1 (initial seed / no previous version), all domains are "added".
+    # The Worker's /api/data/delta endpoint returns this same delta regardless of
+    # the `since` parameter — true per-date deltas require storing daily snapshots.
     delta_json_path = os.path.join(output_dir, f"domains-delta-{version}.json")
     delta_payload = {
         "version": version,

@@ -49,7 +49,8 @@ export async function handleAlerts(
   let bindValues: string[] = [];
 
   if (region) {
-    query = `SELECT * FROM alerts WHERE region = ? ORDER BY created_at DESC`;
+    // Include alerts with region='both' alongside region-specific alerts
+    query = `SELECT * FROM alerts WHERE region = ? OR region = 'both' ORDER BY created_at DESC`;
     bindValues = [region];
   } else {
     query = `SELECT * FROM alerts ORDER BY created_at DESC`;

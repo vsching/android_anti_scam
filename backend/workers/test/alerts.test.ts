@@ -114,23 +114,26 @@ describe('GET /api/alerts', () => {
   });
 
   describe('region filtering', () => {
-    it('filters by region=MY', async () => {
+    it('filters by region=MY (includes both)', async () => {
       const response = await SELF.fetch('http://localhost/api/alerts?region=MY');
       const alerts = await response.json<Alert[]>();
 
-      expect(alerts.length).toBe(2);
+      // 2 MY-specific + 2 region='both' = 4
+      expect(alerts.length).toBe(4);
       for (const alert of alerts) {
-        expect(alert.region).toBe('MY');
+        expect(['MY', 'both']).toContain(alert.region);
       }
     });
 
-    it('filters by region=SG', async () => {
+    it('filters by region=SG (includes both)', async () => {
       const response = await SELF.fetch('http://localhost/api/alerts?region=SG');
       const alerts = await response.json<Alert[]>();
 
-      expect(alerts.length).toBe(1);
-      expect(alerts[0].region).toBe('SG');
-      expect(alerts[0].id).toBe('alert-004');
+      // 1 SG-specific + 2 region='both' = 3
+      expect(alerts.length).toBe(3);
+      for (const alert of alerts) {
+        expect(['SG', 'both']).toContain(alert.region);
+      }
     });
 
     it('filters by region=both', async () => {
@@ -197,7 +200,8 @@ describe('GET /api/alerts', () => {
       expect(cached).not.toBeNull();
 
       const parsed = JSON.parse(cached!) as Alert[];
-      expect(parsed.length).toBe(2);
+      // 2 MY-specific + 2 region='both' = 4
+      expect(parsed.length).toBe(4);
     });
 
     it('does not serve expired cache entries', async () => {

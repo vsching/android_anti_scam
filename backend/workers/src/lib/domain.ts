@@ -39,9 +39,15 @@ export function extractDomain(input: string): string | null {
   // Lowercase (URL constructor already does this, but be safe)
   hostname = hostname.toLowerCase();
 
-  // Basic validation: must have at least one dot and only valid chars
+  // Validate hostname format:
+  // - Must have at least one dot
+  // - Only valid chars (letters, digits, hyphens, dots)
+  // - No leading/trailing dots or hyphens
+  // - No consecutive dots
+  // - Each label must start/end with alphanumeric
   if (!hostname.includes('.')) return null;
-  if (!/^[a-z0-9.-]+$/.test(hostname)) return null;
+  if (!/^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$/.test(hostname)) return null;
+  if (hostname.includes('..')) return null;
 
   return hostname;
 }
