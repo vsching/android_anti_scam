@@ -1,6 +1,6 @@
 /**
- * Composable card displaying a URL verdict result with color-coded status
- * (DANGEROUS=red, SUSPICIOUS=orange, SAFE=green) and a share button.
+ * Composable card displaying a LinkVerdict result with color-coded verdict badge,
+ * confidence bar, reason text, and share/check-another buttons.
  */
 package com.safeanot.app.feature.check.components
 
@@ -14,94 +14,159 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.safeanot.app.feature.check.Verdict
-import com.safeanot.app.feature.check.VerdictResult
+import com.safeanot.app.domain.model.LinkVerdict
+import com.safeanot.app.domain.model.VerdictType
 import com.safeanot.app.ui.theme.DarkCard
-import com.safeanot.app.ui.theme.GreenAccent
-import com.safeanot.app.ui.theme.OrangeAccent
-import com.safeanot.app.ui.theme.RedAccent
 import com.safeanot.app.ui.theme.TextPrimary
 import com.safeanot.app.ui.theme.TextSecondary
 
+private val VerdictGreen = Color(0xFF4CAF50)
+private val VerdictRed = Color(0xFFF44336)
+private val VerdictAmber = Color(0xFFFF9800)
+private val VerdictGray = Color(0xFF9E9E9E)
+
+private fun verdictColor(type: VerdictType): Color = when (type) {
+    VerdictType.SAFE -> VerdictGreen
+    VerdictType.DANGEROUS -> VerdictRed
+    VerdictType.SUSPICIOUS -> VerdictAmber
+    VerdictType.UNKNOWN, VerdictType.NOT_IN_DATABASE -> VerdictGray
+}
+
 @Composable
 fun VerdictCard(
-    result: VerdictResult,
+    verdict: LinkVerdict,
     onShareClick: () -> Unit,
+    onCheckAnotherClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val (verdictColor, verdictLabel) = when (result.verdict) {
-        Verdict.DANGEROUS -> RedAccent to "DANGEROUS"
-        Verdict.SUSPICIOUS -> OrangeAccent to "SUSPICIOUS"
-        Verdict.SAFE -> GreenAccent to "SAFE"
-    }
+    val color = verdictColor(verdict.verdict)
 
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = DarkCard),
         shape = RoundedCornerShape(12.dp),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+        Column {
+            // Color bar at top
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                    .background(color),
+            )
+
+            Column(modifier = Modifier.padding(16.dp)) {
+                // Domain name
+                Text(
+                    text = verdict.domain,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 // Verdict badge
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
-                        .background(verdictColor.copy(alpha = 0.15f))
-                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                        .background(color.copy(alpha = 0.15f))
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
                 ) {
                     Text(
-                        text = verdictLabel,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = verdictColor,
+                        text = verdict.verdict.name.replace('_', ' '),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = color,
                         fontWeight = FontWeight.Bold,
                     )
                 }
 
-                IconButton(onClick = onShareClick) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = "Share verdict",
-                        tint = TextSecondary,
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Reason text
+                Text(
+                    text = verdict.reason,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary,
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Confidence bar
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = "Confidence",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = TextSecondary,
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = "${(verdict.confidence * 100).toInt()}%",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = TextPrimary,
+                        fontWeight = FontWeight.SemiBold,
                     )
                 }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                LinearProgressIndicator(
+                    progress = { verdict.confidence },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    color = color,
+                    trackColor = color.copy(alpha = 0.15f),
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Action buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    OutlinedButton(
+                        onClick = onCheckAnotherClick,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp),
+                    ) {
+                        Text("Check Another")
+                    }
+
+                    Button(
+                        onClick = onShareClick,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = color),
+                        shape = RoundedCornerShape(10.dp),
+                    ) {
+                        Text("Share Result")
+                    }
+                }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = result.url,
-                style = MaterialTheme.typography.bodyMedium,
-                color = TextPrimary,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = result.reason,
-                style = MaterialTheme.typography.bodySmall,
-                color = TextSecondary,
-            )
         }
     }
 }

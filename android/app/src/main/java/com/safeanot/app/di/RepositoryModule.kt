@@ -1,10 +1,14 @@
 /**
- * Hilt module binding the AuditRepository interface to its concrete implementation.
+ * Hilt module binding repository interfaces to their concrete implementations.
  */
 package com.safeanot.app.di
 
 import com.safeanot.app.data.repository.AuditRepositoryImpl
+import com.safeanot.app.data.repository.LinkCheckRepositoryImpl
+import com.safeanot.app.data.repository.SyncRepositoryImpl
 import com.safeanot.app.domain.repository.AuditRepository
+import com.safeanot.app.domain.repository.LinkCheckRepository
+import com.safeanot.app.domain.repository.SyncRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -18,4 +22,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAuditRepository(impl: AuditRepositoryImpl): AuditRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSyncRepository(impl: SyncRepositoryImpl): SyncRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLinkCheckRepository(impl: LinkCheckRepositoryImpl): LinkCheckRepository
 }

@@ -1,108 +1,115 @@
 /**
  * ViewModel for the Link Checker screen.
- * Handles URL checking against local scam pattern database (v1: local regex matching).
+ * Delegates URL checking to CheckLinkUseCase and manages UI state.
  */
 package com.safeanot.app.feature.check
 
+import android.content.Context
+import android.content.Intent
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.safeanot.app.domain.model.LinkVerdict
+import com.safeanot.app.domain.usecase.CheckLinkUseCase
+import com.safeanot.app.util.VerdictCardGenerator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
 
-enum class Verdict {
-    SAFE, SUSPICIOUS, DANGEROUS
+sealed class CheckUiState {
+    object Idle : CheckUiState()
+    object Loading : CheckUiState()
+    data class Result(val verdict: LinkVerdict) : CheckUiState()
+    data class Error(val message: String) : CheckUiState()
 }
 
-data class VerdictResult(
-    val url: String,
-    val verdict: Verdict,
-    val reason: String,
-    val timestamp: Long = System.currentTimeMillis(),
-)
-
-data class CheckUiState(
-    val urlInput: String = "",
-    val isChecking: Boolean = false,
-    val currentVerdict: VerdictResult? = null,
-    val recentResults: List<VerdictResult> = emptyList(),
-)
-
 @HiltViewModel
-class CheckViewModel @Inject constructor() : ViewModel() {
+class CheckViewModel @Inject constructor(
+    private val checkLinkUseCase: CheckLinkUseCase,
+) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(CheckUiState())
-    val uiState: StateFlow<CheckUiState> = _uiState.asStateFlow()
+    private val _urlInput = MutableStateFlow("")
+    val urlInput: StateFlow<String> = _urlInput.asStateFlow()
 
-    /** Suspicious URL patterns — local regex matching for v1. */
-    private val suspiciousPatterns = listOf(
-        Regex("""\.apk$""", RegexOption.IGNORE_CASE),
-        Regex("""bit\.ly/""", RegexOption.IGNORE_CASE),
-        Regex("""tinyurl\.com/""", RegexOption.IGNORE_CASE),
-        Regex("""t\.me/""", RegexOption.IGNORE_CASE),
-        Regex("""goo\.gl/""", RegexOption.IGNORE_CASE),
-        Regex("""shorturl\.at/""", RegexOption.IGNORE_CASE),
-    )
-
-    private val dangerousPatterns = listOf(
-        Regex("""\.apk\?""", RegexOption.IGNORE_CASE),
-        Regex("""download.*\.apk""", RegexOption.IGNORE_CASE),
-        Regex("""install.*update""", RegexOption.IGNORE_CASE),
-        Regex("""bank.*login""", RegexOption.IGNORE_CASE),
-        Regex("""free.*reward""", RegexOption.IGNORE_CASE),
-    )
+    private val _checkState = MutableStateFlow<CheckUiState>(CheckUiState.Idle)
+    val checkState: StateFlow<CheckUiState> = _checkState.asStateFlow()
 
     fun onUrlChanged(url: String) {
-        _uiState.value = _uiState.value.copy(urlInput = url, currentVerdict = null)
+        _urlInput.value = url
     }
 
-    fun checkUrl() {
-        val url = _uiState.value.urlInput.trim()
-        if (url.isBlank()) return
+    fun checkLink(url: String = _urlInput.value) {
+        val trimmed = url.trim()
+        if (trimmed.isBlank()) return
 
-        _uiState.value = _uiState.value.copy(isChecking = true)
+        _checkState.value = CheckUiState.Loading
 
-        val verdict = analyzeUrl(url)
-
-        _uiState.value = _uiState.value.copy(
-            isChecking = false,
-            currentVerdict = verdict,
-            recentResults = listOf(verdict) + _uiState.value.recentResults.take(9),
-        )
-    }
-
-    private fun analyzeUrl(url: String): VerdictResult {
-        // Check dangerous patterns first
-        for (pattern in dangerousPatterns) {
-            if (pattern.containsMatchIn(url)) {
-                return VerdictResult(
-                    url = url,
-                    verdict = Verdict.DANGEROUS,
-                    reason = "URL matches known scam/malware patterns.",
+        viewModelScope.launch {
+            try {
+                val verdict = checkLinkUseCase(trimmed)
+                _checkState.value = CheckUiState.Result(verdict)
+            } catch (e: Exception) {
+                _checkState.value = CheckUiState.Error(
+                    e.message ?: "An unexpected error occurred."
                 )
             }
         }
-
-        // Check suspicious patterns
-        for (pattern in suspiciousPatterns) {
-            if (pattern.containsMatchIn(url)) {
-                return VerdictResult(
-                    url = url,
-                    verdict = Verdict.SUSPICIOUS,
-                    reason = "URL uses a shortened link or APK download. Proceed with caution.",
-                )
-            }
-        }
-
-        return VerdictResult(
-            url = url,
-            verdict = Verdict.SAFE,
-            reason = "No known scam patterns detected. Stay vigilant.",
-        )
     }
 
     fun clearResults() {
-        _uiState.value = CheckUiState()
+        _checkState.value = CheckUiState.Idle
+        _urlInput.value = ""
+    }
+
+    fun prefillUrl(url: String) {
+        _urlInput.value = url
+    }
+
+    fun shareResult(context: Context) {
+        val state = _checkState.value
+        if (state !is CheckUiState.Result) return
+
+        viewModelScope.launch {
+            try {
+                val verdict = state.verdict
+                val bitmap = VerdictCardGenerator.generate(verdict)
+
+                val sharedDir = File(context.cacheDir, "shared_verdicts")
+                sharedDir.mkdirs()
+                val file = File(sharedDir, "verdict_${System.currentTimeMillis()}.png")
+                FileOutputStream(file).use { out ->
+                    bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
+                }
+
+                val uri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    file,
+                )
+
+                val deepLink = "https://safeanot.com/result?domain=${verdict.domain}"
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "image/png"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    putExtra(
+                        Intent.EXTRA_TEXT,
+                        "I checked \"${verdict.domain}\" on Safe Anot? " +
+                            "Verdict: ${verdict.verdict.name}. $deepLink"
+                    )
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+
+                context.startActivity(
+                    Intent.createChooser(shareIntent, "Share Verdict")
+                )
+            } catch (_: Exception) {
+                // Silently handle share failures
+            }
+        }
     }
 }

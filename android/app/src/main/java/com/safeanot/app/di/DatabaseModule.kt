@@ -7,6 +7,7 @@ import android.content.Context
 import androidx.room.Room
 import com.safeanot.app.data.local.AuditDao
 import com.safeanot.app.data.local.SafeAnotDatabase
+import com.safeanot.app.data.local.ScamDomainDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,5 +35,11 @@ object DatabaseModule {
     @Singleton
     fun provideAuditDao(database: SafeAnotDatabase): AuditDao {
         return database.auditDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideScamDomainDao(database: SafeAnotDatabase): ScamDomainDao {
+        return database.scamDomainDao()
     }
 }
