@@ -40,6 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.safeanot.app.domain.model.AlertRegionFilter
+import com.safeanot.app.feature.profile.components.AboutSection
+import com.safeanot.app.feature.profile.components.EmergencyContactCard
 import com.safeanot.app.ui.theme.BlueAccent
 import com.safeanot.app.ui.theme.DarkCard
 import com.safeanot.app.ui.theme.GreenAccent
@@ -284,6 +286,33 @@ fun ProfileScreen(
             }
         }
 
+        // Report a Scam / Get Help section
+        if (uiState.emergencyContacts.isNotEmpty()) {
+            item {
+                Text(
+                    text = "Report a Scam / Get Help",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
+
+            items(
+                count = uiState.emergencyContacts.size,
+                key = { uiState.emergencyContacts[it].name },
+            ) { index ->
+                EmergencyContactCard(contact = uiState.emergencyContacts[index])
+            }
+        }
+
+        // About section
+        item {
+            AboutSection(
+                appVersion = uiState.appVersion,
+                legalLinks = uiState.legalLinks,
+            )
+        }
+
         // Share button
         item {
             Button(
@@ -304,14 +333,8 @@ fun ProfileScreen(
             }
         }
 
-        // App version
+        // Bottom spacing
         item {
-            Text(
-                text = "Version ${uiState.appVersion}",
-                style = MaterialTheme.typography.bodySmall,
-                color = TextSecondary,
-                modifier = Modifier.padding(top = 8.dp),
-            )
             Spacer(modifier = Modifier.height(16.dp))
         }
     }

@@ -13,7 +13,10 @@ import com.safeanot.app.BuildConfig
 import com.safeanot.app.data.local.ReminderConfigDao
 import com.safeanot.app.data.local.entity.ReminderConfigEntity
 import com.safeanot.app.domain.model.AlertRegionFilter
+import com.safeanot.app.domain.model.EmergencyContact
+import com.safeanot.app.domain.model.EmergencyContacts
 import com.safeanot.app.domain.repository.UserPreferencesRepository
+import com.safeanot.app.util.Constants
 import com.safeanot.app.domain.usecase.GetAuditStatsUseCase
 import com.safeanot.app.domain.usecase.GetPreferredRegionUseCase
 import com.safeanot.app.domain.usecase.SetPreferredRegionUseCase
@@ -36,6 +39,11 @@ data class ProfileUiState(
     val securityScore: Int = 0,
     val selectedRegion: AlertRegionFilter = AlertRegionFilter.ALL,
     val scamAlertsEnabled: Boolean = true,
+    val emergencyContacts: List<EmergencyContact> = emptyList(),
+    val legalLinks: Map<String, String> = mapOf(
+        "Privacy Policy" to Constants.PRIVACY_POLICY_URL,
+        "Terms of Service" to Constants.TERMS_OF_SERVICE_URL,
+    ),
 )
 
 @HiltViewModel
@@ -78,7 +86,10 @@ class ProfileViewModel @Inject constructor(
 
         viewModelScope.launch {
             getPreferredRegionUseCase().collect { region ->
-                _uiState.value = _uiState.value.copy(selectedRegion = region)
+                _uiState.value = _uiState.value.copy(
+                    selectedRegion = region,
+                    emergencyContacts = EmergencyContacts.forRegion(region),
+                )
             }
         }
 

@@ -28,6 +28,18 @@ object Constants {
     /** Allowed reminder interval options in days. */
     val REMINDER_INTERVAL_OPTIONS = listOf(3, 7, 14, 30)
 
+    /** Legal link URLs. */
+    const val PRIVACY_POLICY_URL = "https://safeanot.com/privacy"
+    const val TERMS_OF_SERVICE_URL = "https://safeanot.com/terms"
+
+    /** Emergency contact constants - Malaysia. */
+    const val NSRC_HOTLINE = "997"
+    const val MCMC_URL = "https://aduan.skmm.gov.my/"
+
+    /** Emergency contact constants - Singapore. */
+    const val SPF_HOTLINE = "18007226688"
+    const val SCAMSHIELD_URL = "https://www.scamshield.gov.sg/"
+
     object TrackedApps {
         val MESSAGING = listOf(
             TrackedApp(

@@ -2,6 +2,7 @@ package com.safeanot.app.feature.profile
 
 import com.safeanot.app.domain.model.AlertRegionFilter
 import com.safeanot.app.domain.model.AuditChangeSummary
+import com.safeanot.app.domain.model.EmergencyContacts
 import com.safeanot.app.domain.model.AuditItem
 import com.safeanot.app.domain.model.AuditStatus
 import com.safeanot.app.domain.model.SecurityScore
@@ -162,6 +163,52 @@ class ProfileViewModelTest {
         fakePrefs.setScamAlertsEnabled(true)
 
         assertTrue(fakePrefs.getScamAlertsEnabled().first())
+    }
+
+    // --- Emergency contacts tests ---
+
+    @Test
+    fun `emergency contacts update when region changes to MALAYSIA`() = runTest {
+        val fakePrefs = FakeUserPreferencesRepository()
+        fakePrefs.regionFlow.value = AlertRegionFilter.MALAYSIA
+
+        val contacts = EmergencyContacts.forRegion(AlertRegionFilter.MALAYSIA)
+        assertEquals(3, contacts.size)
+        assertTrue(contacts.any { it.name == "MCMC" })
+    }
+
+    @Test
+    fun `emergency contacts update when region changes to SINGAPORE`() = runTest {
+        val fakePrefs = FakeUserPreferencesRepository()
+        fakePrefs.regionFlow.value = AlertRegionFilter.SINGAPORE
+
+        val contacts = EmergencyContacts.forRegion(AlertRegionFilter.SINGAPORE)
+        assertEquals(3, contacts.size)
+        assertTrue(contacts.any { it.name == "ScamShield" })
+    }
+
+    @Test
+    fun `emergency contacts empty when region is ALL`() = runTest {
+        val contacts = EmergencyContacts.forRegion(AlertRegionFilter.ALL)
+        assertTrue(contacts.isEmpty())
+    }
+
+    // --- Legal links tests ---
+
+    @Test
+    fun `legal links are non-empty in default state`() {
+        val state = ProfileUiState()
+        assertTrue(state.legalLinks.isNotEmpty())
+        assertTrue(state.legalLinks.containsKey("Privacy Policy"))
+        assertTrue(state.legalLinks.containsKey("Terms of Service"))
+    }
+
+    @Test
+    fun `legal links contain valid URLs`() {
+        val state = ProfileUiState()
+        state.legalLinks.values.forEach { url ->
+            assertTrue("URL '$url' should start with https://", url.startsWith("https://"))
+        }
     }
 
     // --- Fakes ---
