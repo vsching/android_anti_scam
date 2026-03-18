@@ -43,15 +43,20 @@
    - Action: Modify
    - Details: Add `@Query("SELECT audit_count FROM security_scores WHERE id = 1") fun getAuditCount(): Flow<Int?>` and `@Query("SELECT last_full_audit_at FROM security_scores WHERE id = 1") fun getLastFullAuditTimestamp(): Flow<Long?>`. Uses the dedicated `last_full_audit_at` column instead of `MAX(last_checked)` from `audit_items` to avoid counting individual item edits as full audits.
 
-6. **Update ProfileUiState and ProfileViewModel with real data**
+6. **Create Profile-specific UseCases for audit stats**
+   - File: `android/app/src/main/java/com/safeanot/app/domain/usecase/GetAuditStatsUseCase.kt`
+   - Action: Create
+   - Details: UseCase that returns a `Flow<AuditStats>` data class (totalAudits: Int, lastAuditTimestamp: Long?, securityScore: Int) by combining `AuditRepository.getCompletedAuditCount()`, `getLastAuditTimestamp()`, and `getSecurityScore()`. This follows the ViewModel -> UseCase -> Repository architecture pattern consistently, matching how `AlertsViewModel` uses UseCases.
+
+7. **Update ProfileUiState and ProfileViewModel with real data via UseCases**
    - File: `android/app/src/main/java/com/safeanot/app/feature/profile/ProfileViewModel.kt`
    - Action: Modify
-   - Details: Inject `AuditRepository` and `Application` context. Load `totalAudits` from repository, read `appVersion` from `BuildConfig.VERSION_NAME`, load `lastAuditDate` from repository, load `securityScore` from `AuditRepository.getSecurityScore()`. Add `ProfileUiState.lastAuditDate: String?` and `ProfileUiState.securityScore: Int` fields. ViewModel emits a share event (Channel/SharedFlow) with share text; it does NOT create intents directly (intents are Android framework concerns that belong in the UI layer).
+   - Details: Inject `GetAuditStatsUseCase` (not `AuditRepository` directly) and `Application` context. Load `totalAudits`, `lastAuditDate`, and `securityScore` from UseCase. Read `appVersion` from `BuildConfig.VERSION_NAME`. Add `ProfileUiState.lastAuditDate: String?` and `ProfileUiState.securityScore: Int` fields. ViewModel emits a share event (Channel/SharedFlow) with share text; it does NOT create intents directly (intents are Android framework concerns that belong in the UI layer). Note: existing `ReminderConfigDao` injection should also be migrated to a UseCase in a follow-up, but is out of scope for this epic.
 
 7. **Update ProfileScreen stats card and share button**
    - File: `android/app/src/main/java/com/safeanot/app/feature/profile/ProfileScreen.kt`
    - Action: Modify
-   - Details: Update stats card to show `totalAudits`, `lastAuditDate`, and `securityScore`. Collect ViewModel share events via `LaunchedEffect` and launch chooser intent via `LocalContext.current` (matching `AlertDetailScreen` pattern). Display formatted last audit date (e.g., "Last audit: 2 days ago") or "No audits yet" for fresh installs.
+   - Details: Update stats card to show `totalAudits`, `lastAuditDate`, and `securityScore`. Collect ViewModel share events via `LaunchedEffect` and launch chooser intent via `LocalContext.current`. All `startActivity` calls (share, dial, browser) must be wrapped in try/catch `ActivityNotFoundException` to prevent crashes on devices without handlers. Display formatted last audit date (e.g., "Last audit: 2 days ago") or "No audits yet" for fresh installs.
 
 8. **Add share intent helper**
    - File: `android/app/src/main/java/com/safeanot/app/feature/profile/ShareHelper.kt`
@@ -76,10 +81,10 @@
 
 ### Tasks
 
-1. **Add DataStore dependency**
+1. **Add DataStore and Room testing dependencies**
    - File: `android/app/build.gradle.kts`
    - Action: Modify
-   - Details: Add `implementation("androidx.datastore:datastore-preferences:1.0.0")` to dependencies block.
+   - Details: Add `implementation("androidx.datastore:datastore-preferences:1.0.0")` to dependencies block. Add `androidTestImplementation("androidx.room:room-testing:2.6.1")` for Room migration tests (required by E05-001 migration test plan).
 
 2. **Create UserPreferencesDataStore**
    - File: `android/app/src/main/java/com/safeanot/app/data/local/UserPreferencesDataStore.kt`
@@ -106,15 +111,15 @@
    - Action: Create
    - Details: Implement interface using `UserPreferencesDataStore`. Map stored string to `AlertRegionFilter` enum. Fall back to `RegionResolver.fromLocale()` when no region is explicitly set.
 
-6. **Bind UserPreferencesRepository in DI**
+7. **Bind UserPreferencesRepository in DI**
    - File: `android/app/src/main/java/com/safeanot/app/di/RepositoryModule.kt`
    - Action: Modify
    - Details: Add `@Binds @Singleton abstract fun bindUserPreferencesRepository(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository`.
 
-7. **Update ProfileUiState and ViewModel for region and notification prefs**
+8. **Update ProfileUiState and ViewModel for region and notification prefs via UseCases**
    - File: `android/app/src/main/java/com/safeanot/app/feature/profile/ProfileViewModel.kt`
    - Action: Modify
-   - Details: Inject `UserPreferencesRepository`. Add `selectedRegion: AlertRegionFilter` and `scamAlertsEnabled: Boolean` to `ProfileUiState`. Collect region and notification preferences as flows. Add `setRegion(region: AlertRegionFilter)` and `toggleScamAlerts(enabled: Boolean)` functions.
+   - Details: Inject `GetPreferredRegionUseCase`, `SetPreferredRegionUseCase`, and `UserPreferencesRepository` (only for notification prefs which don't have UseCases yet). Add `selectedRegion: AlertRegionFilter` and `scamAlertsEnabled: Boolean` to `ProfileUiState`. Collect region via UseCase and notification preferences as flows. Add `setRegion(region: AlertRegionFilter)` (via UseCase) and `toggleScamAlerts(enabled: Boolean)` functions.
 
 9. **Update ProfileScreen with region picker and notification toggle**
    - File: `android/app/src/main/java/com/safeanot/app/feature/profile/ProfileScreen.kt`
@@ -127,16 +132,16 @@
     - Action: Create
     - Details: Following the existing ViewModel -> UseCase -> Repository architecture pattern. `GetPreferredRegionUseCase` returns `Flow<AlertRegionFilter>` from `UserPreferencesRepository`. `SetPreferredRegionUseCase` calls `suspend setRegion()`. This keeps `AlertsViewModel` consistent with its current use-case-only pattern.
 
-11. **Update AlertsViewModel to use persisted region preference via UseCase**
+11. **Update AlertsViewModel to reactively observe persisted region preference via UseCase**
     - File: `android/app/src/main/java/com/safeanot/app/feature/alerts/AlertsViewModel.kt`
     - Action: Modify
-    - Details: Inject `GetPreferredRegionUseCase` (not the repository directly, to maintain ViewModel -> UseCase -> Repository architecture). Use persisted region as the initial filter instead of locale-only default. Fall back to locale detection when no preference is stored.
+    - Details: Inject `GetPreferredRegionUseCase` (not the repository directly, to maintain ViewModel -> UseCase -> Repository architecture). Collect the region preference as a reactive `Flow` (not just one-time initialization) so that when the user changes region in Profile settings, the Alerts feed updates its default filter live without requiring app restart or tab switch. Fall back to locale detection when no preference is stored. Use `flatMapLatest` to re-query alerts when region changes.
 
 ### Tests
 - `android/app/src/test/java/com/safeanot/app/data/repository/UserPreferencesRepositoryImplTest.kt` -- Region persist/load, notification pref persist/load, fallback to RegionResolver.fromLocale() when no preference set.
 - `android/app/src/test/java/com/safeanot/app/util/RegionResolverTest.kt` -- Locale "ms_MY" maps to MALAYSIA, "en_SG" maps to SINGAPORE, unknown locale maps to ALL.
 - `android/app/src/test/java/com/safeanot/app/feature/profile/ProfileViewModelTest.kt` -- (extend) Region change updates state, scam alerts toggle updates state, preferences survive ViewModel recreation, UI renders correct selected state for region chips.
-- `android/app/src/test/java/com/safeanot/app/feature/alerts/AlertsViewModelTest.kt` -- (extend) Initial region filter loaded from user preferences via UseCase, falls back to locale when no preference stored.
+- `android/app/src/test/java/com/safeanot/app/feature/alerts/AlertsViewModelTest.kt` -- (extend) Initial region filter loaded from user preferences via UseCase, falls back to locale when no preference stored, region change reactively updates feed filter without restart.
 
 ### Acceptance Criteria
 - Region picker (Malaysia / Singapore) persisted via DataStore.
@@ -164,12 +169,12 @@
 3. **Create EmergencyContactCard composable**
    - File: `android/app/src/main/java/com/safeanot/app/feature/profile/components/EmergencyContactCard.kt`
    - Action: Create
-   - Details: Card composable that displays contact name, description, and action buttons (phone icon for call, link icon for website). Phone taps launch `Intent.ACTION_DIAL` with `tel:` URI. Website taps launch `Intent.ACTION_VIEW` with URL.
+   - Details: Card composable that displays contact name, description, and action buttons (phone icon for call, link icon for website). Phone taps launch `Intent.ACTION_DIAL` with `tel:` URI. Website taps launch `Intent.ACTION_VIEW` with URL. All intent launches wrapped in try/catch `ActivityNotFoundException` for safety on edge devices.
 
 4. **Create AboutSection composable**
    - File: `android/app/src/main/java/com/safeanot/app/feature/profile/components/AboutSection.kt`
    - Action: Create
-   - Details: Card composable showing app version, build info, "Made in Malaysia" text. Clickable rows for "Privacy Policy" and "Terms of Service" that open browser intents. Uses `LocalContext.current` for intent launching.
+   - Details: Card composable showing app version, build info, "Made in Malaysia" text. Clickable rows for "Privacy Policy" and "Terms of Service" that open browser intents. Uses `LocalContext.current` for intent launching. All intent launches wrapped in try/catch `ActivityNotFoundException`.
 
 5. **Add about and emergency sections to ProfileScreen**
    - File: `android/app/src/main/java/com/safeanot/app/feature/profile/ProfileScreen.kt`
@@ -226,6 +231,7 @@
 | `android/app/src/main/java/com/safeanot/app/domain/usecase/GetPreferredRegionUseCase.kt` | Create | E05-002 |
 | `android/app/src/main/java/com/safeanot/app/domain/usecase/SetPreferredRegionUseCase.kt` | Create | E05-002 |
 | `android/app/src/main/java/com/safeanot/app/data/local/SafeAnotDatabase.kt` | Modify | E05-001 |
+| `android/app/src/main/java/com/safeanot/app/domain/usecase/GetAuditStatsUseCase.kt` | Create | E05-001 |
 | `android/app/src/main/java/com/safeanot/app/domain/model/EmergencyContact.kt` | Create | E05-003 |
 | `android/app/src/main/java/com/safeanot/app/feature/profile/components/EmergencyContactCard.kt` | Create | E05-003 |
 | `android/app/src/main/java/com/safeanot/app/feature/profile/components/AboutSection.kt` | Create | E05-003 |
@@ -251,3 +257,4 @@
 | Round | Date | Findings | Fixed | Details |
 |-------|------|----------|-------|---------|
 | R1 | 2026-03-18 | 8 | 8 | [CRITICAL] Wrong lastAuditDate source → dedicated `last_full_audit_at` column; [WARNING] Missing Room migration → added MIGRATION_4_5 task; [WARNING] Architecture violation in AlertsViewModel → added UseCases; [WARNING] Contradictory share-flow → ViewModel emits event, UI launches intent; [WARNING] Missing securityScore wiring → added to ProfileUiState; [WARNING] Notification toggle has no backend → scoped as preference-only, delivery deferred to E09; [WARNING] Missing spec-level tests → added zero-audit, post-audit refresh, intent resolution, migration tests; [INFO] DRY locale logic → extracted RegionResolver utility |
+| R2 | 2026-03-18 | 5 | 5 | [WARNING] ProfileViewModel architecture drift → added GetAuditStatsUseCase, ProfileVM now uses UseCases not repositories; [WARNING] Region change underspecified → AlertsViewModel now reactively collects region Flow with flatMapLatest; [WARNING-RECURRING] Migration tests need room-testing dep → added to build.gradle.kts task; [WARNING] Intent safety gap → all startActivity calls wrapped in try/catch ActivityNotFoundException; [INFO] SetPreferredRegionUseCase unused by ProfileVM → ProfileVM now uses it via UseCase |
