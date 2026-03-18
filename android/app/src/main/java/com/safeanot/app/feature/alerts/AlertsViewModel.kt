@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -56,25 +57,36 @@ class AlertsViewModel @Inject constructor(
 
     /**
      * Holds the current active filter, driven by either user preference or manual filter change.
-     * This flow is used as the source for flatMapLatest observation.
+     * Initialized to null so the first refresh waits until the persisted region arrives.
      */
-    private val activeFilter = MutableStateFlow(AlertRegionFilter.ALL)
+    private val activeFilter = MutableStateFlow<AlertRegionFilter?>(null)
+
+    /** Set to true once the user explicitly changes the filter, overriding the preference. */
+    private var userOverrodeFilter = false
 
     init {
-        // Reactively observe the persisted region preference
+        // Seed the active filter from the persisted region, then keep observing preference changes
         viewModelScope.launch {
             getPreferredRegionUseCase().collect { region ->
-                activeFilter.value = region
-                _uiState.update { it.copy(selectedFilter = region) }
+                // Only update if user hasn't explicitly overridden the filter
+                if (!userOverrodeFilter) {
+                    activeFilter.value = region
+                    _uiState.update { it.copy(selectedFilter = region) }
+                }
             }
         }
 
-        // Reactively observe alerts whenever the active filter changes
+        // Reactively observe alerts once the first region value arrives
         viewModelScope.launch {
+            // Wait for the initial region preference before starting observation
+            activeFilter.first { it != null }
+
             activeFilter.flatMapLatest { filter ->
+                // filter is guaranteed non-null after the first { it != null } gate
+                val resolvedFilter = filter ?: AlertRegionFilter.ALL
                 _uiState.update { it.copy(isInitialLoading = true, errorMessage = null) }
-                refresh(filter, isInitial = true)
-                observeAlertsUseCase(filter)
+                refresh(resolvedFilter, isInitial = true)
+                observeAlertsUseCase(resolvedFilter)
             }.collectLatest { alerts ->
                 _uiState.update {
                     it.copy(
@@ -88,6 +100,7 @@ class AlertsViewModel @Inject constructor(
 
     fun onFilterChanged(filter: AlertRegionFilter) {
         if (filter == _uiState.value.selectedFilter) return
+        userOverrodeFilter = true
         activeFilter.value = filter
         _uiState.update { it.copy(selectedFilter = filter) }
     }

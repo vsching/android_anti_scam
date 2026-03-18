@@ -60,6 +60,9 @@ interface AuditDao {
     @Query("SELECT * FROM security_scores WHERE id = 1")
     suspend fun getSecurityScoreOnce(): SecurityScoreEntity?
 
+    @Query("UPDATE security_scores SET audit_count = audit_count + 1, last_full_audit_at = :timestamp WHERE id = 1")
+    suspend fun incrementAuditCount(timestamp: Long)
+
     @Query("DELETE FROM audit_items")
     suspend fun deleteAll()
 

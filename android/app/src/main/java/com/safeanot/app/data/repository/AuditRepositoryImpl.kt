@@ -85,15 +85,11 @@ class AuditRepositoryImpl @Inject constructor(
 
         auditDao.insertAll(auditEntities)
 
-        // Increment audit count and set last full audit timestamp
-        // Pass existing score to avoid a redundant getSecurityScoreOnce() inside recalculateScore
-        val existingScore = auditDao.getSecurityScoreOnce()
-        val newAuditCount = (existingScore?.auditCount ?: 0) + 1
-        recalculateScore(
-            auditCount = newAuditCount,
-            lastFullAuditAt = now,
-            existingScore = existingScore,
-        )
+        // Recalculate score first (ensures the security_scores row exists for the atomic update)
+        recalculateScore()
+
+        // Atomically increment audit count and set last full audit timestamp
+        auditDao.incrementAuditCount(now)
     }
 
     override suspend fun runAuditAndDetectChanges(): AuditChangeSummary {
@@ -147,25 +143,12 @@ class AuditRepositoryImpl @Inject constructor(
     }
 
     override suspend fun recalculateScore() {
-        recalculateScore(auditCount = null, lastFullAuditAt = null, existingScore = null)
-    }
-
-    /**
-     * Internal recalculate that preserves existing audit stats.
-     * When auditCount/lastFullAuditAt are null, existing values are preserved.
-     * When existingScore is provided, avoids a redundant getSecurityScoreOnce() call.
-     */
-    private suspend fun recalculateScore(
-        auditCount: Int?,
-        lastFullAuditAt: Long?,
-        existingScore: SecurityScoreEntity?,
-    ) {
         val secured = auditDao.getSecuredCount()
         val installed = auditDao.getInstalledDetectedCount()
         val percent = if (installed > 0) (secured * 100) / installed else 100
 
-        // Preserve existing audit stats on upsert (reuse passed value or fetch)
-        val existing = existingScore ?: auditDao.getSecurityScoreOnce()
+        // Preserve existing audit stats on upsert
+        val existing = auditDao.getSecurityScoreOnce()
 
         auditDao.insertScore(
             SecurityScoreEntity(
@@ -173,8 +156,8 @@ class AuditRepositoryImpl @Inject constructor(
                 securedItems = secured,
                 scorePercent = percent,
                 lastAuditDate = System.currentTimeMillis(),
-                auditCount = auditCount ?: existing?.auditCount ?: 0,
-                lastFullAuditAt = lastFullAuditAt ?: existing?.lastFullAuditAt,
+                auditCount = existing?.auditCount ?: 0,
+                lastFullAuditAt = existing?.lastFullAuditAt,
             )
         )
     }

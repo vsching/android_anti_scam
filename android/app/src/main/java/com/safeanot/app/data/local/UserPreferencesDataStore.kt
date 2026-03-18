@@ -9,11 +9,14 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import java.io.IOException
 import javax.inject.Inject
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
@@ -32,26 +35,38 @@ open class UserPreferencesDataStore @Inject constructor(
     /**
      * Observe the stored region string, or null when no preference has been set.
      */
-    open val regionFlow: Flow<String?> = context.dataStore.data.map { prefs ->
-        prefs[Keys.REGION]
-    }
+    open val regionFlow: Flow<String?> = context.dataStore.data
+        .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
+        .map { prefs ->
+            prefs[Keys.REGION]
+        }
 
     /**
      * Observe whether scam alert notifications are enabled. Defaults to true.
      */
-    open val scamAlertsNotificationsEnabledFlow: Flow<Boolean> = context.dataStore.data.map { prefs ->
-        prefs[Keys.SCAM_ALERTS_NOTIFICATIONS_ENABLED] ?: true
-    }
+    open val scamAlertsNotificationsEnabledFlow: Flow<Boolean> = context.dataStore.data
+        .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
+        .map { prefs ->
+            prefs[Keys.SCAM_ALERTS_NOTIFICATIONS_ENABLED] ?: true
+        }
 
     open suspend fun setRegion(region: String) {
-        context.dataStore.edit { prefs ->
-            prefs[Keys.REGION] = region
+        try {
+            context.dataStore.edit { prefs ->
+                prefs[Keys.REGION] = region
+            }
+        } catch (_: IOException) {
+            // Silently fail — preference will use default on next read
         }
     }
 
     open suspend fun setScamAlertsNotificationsEnabled(enabled: Boolean) {
-        context.dataStore.edit { prefs ->
-            prefs[Keys.SCAM_ALERTS_NOTIFICATIONS_ENABLED] = enabled
+        try {
+            context.dataStore.edit { prefs ->
+                prefs[Keys.SCAM_ALERTS_NOTIFICATIONS_ENABLED] = enabled
+            }
+        } catch (_: IOException) {
+            // Silently fail — preference will use default on next read
         }
     }
 }
