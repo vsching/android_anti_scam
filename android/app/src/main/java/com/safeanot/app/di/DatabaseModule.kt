@@ -29,7 +29,7 @@ object DatabaseModule {
             SafeAnotDatabase::class.java,
             "safeanot_database",
         )
-            .fallbackToDestructiveMigration()
+            .addMigrations(SafeAnotDatabase.MIGRATION_4_5)
             .build()
     }
 

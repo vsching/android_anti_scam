@@ -34,4 +34,10 @@ interface AuditRepository {
 
     /** Recalculate and persist the security score. */
     suspend fun recalculateScore()
+
+    /** Observe the total number of completed full audits. */
+    fun getCompletedAuditCount(): Flow<Int>
+
+    /** Observe the timestamp of the last completed full audit. */
+    fun getLastAuditTimestamp(): Flow<Long?>
 }

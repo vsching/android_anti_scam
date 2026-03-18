@@ -84,7 +84,11 @@ class AuditRepositoryImpl @Inject constructor(
         }
 
         auditDao.insertAll(auditEntities)
-        recalculateScore()
+
+        // Increment audit count and set last full audit timestamp
+        val existingScore = auditDao.getSecurityScoreOnce()
+        val newAuditCount = (existingScore?.auditCount ?: 0) + 1
+        recalculateScore(auditCount = newAuditCount, lastFullAuditAt = now)
     }
 
     override suspend fun runAuditAndDetectChanges(): AuditChangeSummary {
@@ -138,9 +142,20 @@ class AuditRepositoryImpl @Inject constructor(
     }
 
     override suspend fun recalculateScore() {
+        recalculateScore(auditCount = null, lastFullAuditAt = null)
+    }
+
+    /**
+     * Internal recalculate that preserves existing audit stats.
+     * When auditCount/lastFullAuditAt are null, existing values are preserved.
+     */
+    private suspend fun recalculateScore(auditCount: Int?, lastFullAuditAt: Long?) {
         val secured = auditDao.getSecuredCount()
         val installed = auditDao.getInstalledDetectedCount()
         val percent = if (installed > 0) (secured * 100) / installed else 100
+
+        // Preserve existing audit stats on upsert
+        val existing = auditDao.getSecurityScoreOnce()
 
         auditDao.insertScore(
             SecurityScoreEntity(
@@ -148,8 +163,18 @@ class AuditRepositoryImpl @Inject constructor(
                 securedItems = secured,
                 scorePercent = percent,
                 lastAuditDate = System.currentTimeMillis(),
+                auditCount = auditCount ?: existing?.auditCount ?: 0,
+                lastFullAuditAt = lastFullAuditAt ?: existing?.lastFullAuditAt,
             )
         )
+    }
+
+    override fun getCompletedAuditCount(): Flow<Int> {
+        return auditDao.getAuditCount().map { it ?: 0 }
+    }
+
+    override fun getLastAuditTimestamp(): Flow<Long?> {
+        return auditDao.getLastFullAuditTimestamp()
     }
 
     private fun AuditItemEntity.toDomain(): AuditItem {

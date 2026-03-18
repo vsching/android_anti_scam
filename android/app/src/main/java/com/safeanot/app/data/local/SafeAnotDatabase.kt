@@ -6,6 +6,8 @@ package com.safeanot.app.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.safeanot.app.data.local.entity.AlertEntity
 import com.safeanot.app.data.local.entity.AuditItemEntity
 import com.safeanot.app.data.local.entity.CheckResultCacheEntity
@@ -24,7 +26,7 @@ import com.safeanot.app.data.local.entity.SyncMetadataEntity
         AlertEntity::class,
         ReminderConfigEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class SafeAnotDatabase : RoomDatabase() {
@@ -32,4 +34,13 @@ abstract class SafeAnotDatabase : RoomDatabase() {
     abstract fun scamDomainDao(): ScamDomainDao
     abstract fun alertsDao(): AlertsDao
     abstract fun reminderConfigDao(): ReminderConfigDao
+
+    companion object {
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE security_scores ADD COLUMN audit_count INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE security_scores ADD COLUMN last_full_audit_at INTEGER")
+            }
+        }
+    }
 }

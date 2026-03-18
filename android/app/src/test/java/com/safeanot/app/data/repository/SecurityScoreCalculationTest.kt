@@ -1,5 +1,6 @@
 package com.safeanot.app.data.repository
 
+import com.safeanot.app.data.local.entity.SecurityScoreEntity
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -8,6 +9,51 @@ import org.junit.Test
  * (secured / installedDetected) * 100, with zero denominator yielding 100.
  */
 class SecurityScoreCalculationTest {
+
+    /**
+     * Mirrors the upsert logic in AuditRepositoryImpl.recalculateScore():
+     * when auditCount/lastFullAuditAt are null, existing values must be preserved.
+     */
+    private fun buildScoreEntity(
+        existing: SecurityScoreEntity?,
+        secured: Int,
+        installed: Int,
+        auditCount: Int?,
+        lastFullAuditAt: Long?,
+    ): SecurityScoreEntity {
+        val percent = if (installed > 0) (secured * 100) / installed else 100
+        return SecurityScoreEntity(
+            totalItems = installed,
+            securedItems = secured,
+            scorePercent = percent,
+            lastAuditDate = System.currentTimeMillis(),
+            auditCount = auditCount ?: existing?.auditCount ?: 0,
+            lastFullAuditAt = lastFullAuditAt ?: existing?.lastFullAuditAt,
+        )
+    }
+
+    @Test
+    fun `recalculateScore preserves auditCount when called without explicit value`() {
+        val existing = SecurityScoreEntity(auditCount = 5, lastFullAuditAt = 1000L)
+        val result = buildScoreEntity(existing, secured = 3, installed = 5, auditCount = null, lastFullAuditAt = null)
+        assertEquals(5, result.auditCount)
+        assertEquals(1000L, result.lastFullAuditAt)
+    }
+
+    @Test
+    fun `recalculateScore updates auditCount when explicit value provided`() {
+        val existing = SecurityScoreEntity(auditCount = 5, lastFullAuditAt = 1000L)
+        val result = buildScoreEntity(existing, secured = 3, installed = 5, auditCount = 6, lastFullAuditAt = 2000L)
+        assertEquals(6, result.auditCount)
+        assertEquals(2000L, result.lastFullAuditAt)
+    }
+
+    @Test
+    fun `recalculateScore defaults to zero auditCount when no existing score`() {
+        val result = buildScoreEntity(null, secured = 0, installed = 0, auditCount = null, lastFullAuditAt = null)
+        assertEquals(0, result.auditCount)
+        assertEquals(null, result.lastFullAuditAt)
+    }
 
     /** Mirrors the score calculation logic in AuditRepositoryImpl.recalculateScore(). */
     private fun calculateScore(secured: Int, installed: Int): Int {

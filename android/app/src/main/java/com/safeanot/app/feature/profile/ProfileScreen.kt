@@ -3,6 +3,8 @@
  */
 package com.safeanot.app.feature.profile
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -28,9 +30,11 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,6 +51,18 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.shareEvent.collect { shareText ->
+            try {
+                val intent = ShareHelper.createShareIntent()
+                context.startActivity(Intent.createChooser(intent, "Share Safe Anot?"))
+            } catch (_: ActivityNotFoundException) {
+                // No activity available to handle share intent
+            }
+        }
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -79,6 +95,18 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Total audits completed: ${uiState.totalAudits}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextSecondary,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = uiState.lastAuditDate ?: "No audits yet",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextSecondary,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Security score: ${uiState.securityScore}%",
                         style = MaterialTheme.typography.bodyMedium,
                         color = TextSecondary,
                     )
@@ -185,7 +213,7 @@ fun ProfileScreen(
         // Share button
         item {
             Button(
-                onClick = { /* TODO: Share intent */ },
+                onClick = { viewModel.shareApp() },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = BlueAccent),
                 shape = RoundedCornerShape(12.dp),

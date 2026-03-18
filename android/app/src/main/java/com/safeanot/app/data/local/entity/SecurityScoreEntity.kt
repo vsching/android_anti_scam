@@ -23,4 +23,10 @@ data class SecurityScoreEntity(
 
     @ColumnInfo(name = "last_audit_date")
     val lastAuditDate: Long = 0L,
+
+    @ColumnInfo(name = "audit_count")
+    val auditCount: Int = 0,
+
+    @ColumnInfo(name = "last_full_audit_at")
+    val lastFullAuditAt: Long? = null,
 )

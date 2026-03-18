@@ -51,6 +51,15 @@ interface AuditDao {
     @Query("SELECT * FROM security_scores WHERE id = 1")
     fun getSecurityScore(): Flow<SecurityScoreEntity?>
 
+    @Query("SELECT audit_count FROM security_scores WHERE id = 1")
+    fun getAuditCount(): Flow<Int?>
+
+    @Query("SELECT last_full_audit_at FROM security_scores WHERE id = 1")
+    fun getLastFullAuditTimestamp(): Flow<Long?>
+
+    @Query("SELECT * FROM security_scores WHERE id = 1")
+    suspend fun getSecurityScoreOnce(): SecurityScoreEntity?
+
     @Query("DELETE FROM audit_items")
     suspend fun deleteAll()
 
