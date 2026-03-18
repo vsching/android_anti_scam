@@ -7,10 +7,12 @@ import com.safeanot.app.data.repository.AlertsRepositoryImpl
 import com.safeanot.app.data.repository.AuditRepositoryImpl
 import com.safeanot.app.data.repository.LinkCheckRepositoryImpl
 import com.safeanot.app.data.repository.SyncRepositoryImpl
+import com.safeanot.app.data.repository.UserPreferencesRepositoryImpl
 import com.safeanot.app.domain.repository.AlertsRepository
 import com.safeanot.app.domain.repository.AuditRepository
 import com.safeanot.app.domain.repository.LinkCheckRepository
 import com.safeanot.app.domain.repository.SyncRepository
+import com.safeanot.app.domain.repository.UserPreferencesRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -36,4 +38,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAlertsRepository(impl: AlertsRepositoryImpl): AlertsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserPreferencesRepository(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository
 }

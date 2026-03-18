@@ -1,7 +1,8 @@
 /**
  * ViewModel for the Profile/Settings screen.
- * Manages notification preferences, reminder settings, and app info state.
+ * Manages notification preferences, reminder settings, region preference, and app info state.
  * Reminder settings are persisted via Room and trigger scheduler updates.
+ * Region and scam alert notification preferences are persisted via DataStore.
  * Audit stats are loaded via GetAuditStatsUseCase following clean architecture.
  */
 package com.safeanot.app.feature.profile
@@ -11,7 +12,11 @@ import androidx.lifecycle.viewModelScope
 import com.safeanot.app.BuildConfig
 import com.safeanot.app.data.local.ReminderConfigDao
 import com.safeanot.app.data.local.entity.ReminderConfigEntity
+import com.safeanot.app.domain.model.AlertRegionFilter
+import com.safeanot.app.domain.repository.UserPreferencesRepository
 import com.safeanot.app.domain.usecase.GetAuditStatsUseCase
+import com.safeanot.app.domain.usecase.GetPreferredRegionUseCase
+import com.safeanot.app.domain.usecase.SetPreferredRegionUseCase
 import com.safeanot.app.worker.AuditReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -29,6 +34,8 @@ data class ProfileUiState(
     val appVersion: String = BuildConfig.VERSION_NAME,
     val lastAuditDate: String? = null,
     val securityScore: Int = 0,
+    val selectedRegion: AlertRegionFilter = AlertRegionFilter.ALL,
+    val scamAlertsEnabled: Boolean = true,
 )
 
 @HiltViewModel
@@ -36,6 +43,9 @@ class ProfileViewModel @Inject constructor(
     private val reminderConfigDao: ReminderConfigDao,
     private val reminderScheduler: AuditReminderScheduler,
     private val getAuditStatsUseCase: GetAuditStatsUseCase,
+    private val getPreferredRegionUseCase: GetPreferredRegionUseCase,
+    private val setPreferredRegionUseCase: SetPreferredRegionUseCase,
+    private val userPreferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -63,6 +73,18 @@ class ProfileViewModel @Inject constructor(
                     securityScore = stats.securityScore,
                     lastAuditDate = formatLastAuditDate(stats.lastAuditTimestamp),
                 )
+            }
+        }
+
+        viewModelScope.launch {
+            getPreferredRegionUseCase().collect { region ->
+                _uiState.value = _uiState.value.copy(selectedRegion = region)
+            }
+        }
+
+        viewModelScope.launch {
+            userPreferencesRepository.getScamAlertsEnabled().collect { enabled ->
+                _uiState.value = _uiState.value.copy(scamAlertsEnabled = enabled)
             }
         }
     }
@@ -94,6 +116,18 @@ class ProfileViewModel @Inject constructor(
             if (enabled) {
                 reminderScheduler.schedule(days)
             }
+        }
+    }
+
+    fun setRegion(region: AlertRegionFilter) {
+        viewModelScope.launch {
+            setPreferredRegionUseCase(region)
+        }
+    }
+
+    fun toggleScamAlerts(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setScamAlertsEnabled(enabled)
         }
     }
 

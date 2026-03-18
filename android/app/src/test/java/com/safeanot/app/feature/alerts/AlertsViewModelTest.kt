@@ -3,14 +3,14 @@ package com.safeanot.app.feature.alerts
 import com.safeanot.app.domain.model.AlertRegionFilter
 import com.safeanot.app.domain.model.ScamAlert
 import com.safeanot.app.domain.repository.AlertsRepository
-import com.safeanot.app.domain.usecase.GetDefaultAlertRegionUseCase
+import com.safeanot.app.domain.repository.UserPreferencesRepository
+import com.safeanot.app.domain.usecase.GetPreferredRegionUseCase
 import com.safeanot.app.domain.usecase.ObserveAlertsUseCase
 import com.safeanot.app.domain.usecase.RefreshAlertsUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -26,12 +26,13 @@ class AlertsViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var fakeRepository: FakeAlertsRepository
-    private lateinit var viewModel: AlertsViewModel
+    private lateinit var fakePrefsRepository: FakeUserPreferencesRepository
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         fakeRepository = FakeAlertsRepository()
+        fakePrefsRepository = FakeUserPreferencesRepository()
     }
 
     @After
@@ -43,28 +44,50 @@ class AlertsViewModelTest {
         return AlertsViewModel(
             observeAlertsUseCase = ObserveAlertsUseCase(fakeRepository),
             refreshAlertsUseCase = RefreshAlertsUseCase(fakeRepository),
-            getDefaultAlertRegionUseCase = GetDefaultAlertRegionUseCase(fakeRepository),
+            getPreferredRegionUseCase = GetPreferredRegionUseCase(fakePrefsRepository),
         )
     }
 
     @Test
-    fun `initial state uses default region filter`() {
-        fakeRepository.defaultFilter = AlertRegionFilter.MALAYSIA
-        viewModel = createViewModel()
+    fun `initial region filter loaded from user preferences`() {
+        fakePrefsRepository.regionFlow.value = AlertRegionFilter.MALAYSIA
+        val viewModel = createViewModel()
 
         assertEquals(AlertRegionFilter.MALAYSIA, viewModel.uiState.value.selectedFilter)
     }
 
     @Test
+    fun `falls back to locale when no preference stored`() {
+        // FakeUserPreferencesRepository defaults to ALL (simulating no stored preference)
+        fakePrefsRepository.regionFlow.value = AlertRegionFilter.ALL
+        val viewModel = createViewModel()
+
+        assertEquals(AlertRegionFilter.ALL, viewModel.uiState.value.selectedFilter)
+    }
+
+    @Test
+    fun `region change reactively updates feed filter`() = runTest {
+        fakePrefsRepository.regionFlow.value = AlertRegionFilter.MALAYSIA
+        val viewModel = createViewModel()
+
+        assertEquals(AlertRegionFilter.MALAYSIA, viewModel.uiState.value.selectedFilter)
+
+        // Simulate region change from Profile screen
+        fakePrefsRepository.regionFlow.value = AlertRegionFilter.SINGAPORE
+
+        assertEquals(AlertRegionFilter.SINGAPORE, viewModel.uiState.value.selectedFilter)
+    }
+
+    @Test
     fun `initial load sets isInitialLoading to false after refresh`() {
-        viewModel = createViewModel()
+        val viewModel = createViewModel()
 
         assertFalse(viewModel.uiState.value.isInitialLoading)
     }
 
     @Test
     fun `onFilterChanged updates selected filter`() {
-        viewModel = createViewModel()
+        val viewModel = createViewModel()
 
         viewModel.onFilterChanged(AlertRegionFilter.SINGAPORE)
 
@@ -73,8 +96,8 @@ class AlertsViewModelTest {
 
     @Test
     fun `onFilterChanged with same filter is no-op`() {
-        fakeRepository.defaultFilter = AlertRegionFilter.ALL
-        viewModel = createViewModel()
+        fakePrefsRepository.regionFlow.value = AlertRegionFilter.ALL
+        val viewModel = createViewModel()
         val initialRefreshCount = fakeRepository.refreshCount
 
         viewModel.onFilterChanged(AlertRegionFilter.ALL)
@@ -86,16 +109,15 @@ class AlertsViewModelTest {
     @Test
     fun `error state set when refresh fails and no cached data`() {
         fakeRepository.shouldThrowOnRefresh = true
-        viewModel = createViewModel()
+        val viewModel = createViewModel()
 
         assertEquals("Network error", viewModel.uiState.value.errorMessage)
     }
 
-    // --- Fake ---
+    // --- Fakes ---
 
     private class FakeAlertsRepository : AlertsRepository {
         val alertsFlow = MutableStateFlow<List<ScamAlert>>(emptyList())
-        var defaultFilter = AlertRegionFilter.ALL
         var shouldThrowOnRefresh = false
         var refreshCount = 0
 
@@ -105,6 +127,16 @@ class AlertsViewModelTest {
             if (shouldThrowOnRefresh) throw RuntimeException("Network error")
         }
         override suspend fun getAlertById(id: String): ScamAlert? = null
-        override fun getDefaultRegionFilter(): AlertRegionFilter = defaultFilter
+        override fun getDefaultRegionFilter(): AlertRegionFilter = AlertRegionFilter.ALL
+    }
+
+    private class FakeUserPreferencesRepository : UserPreferencesRepository {
+        val regionFlow = MutableStateFlow(AlertRegionFilter.ALL)
+        val scamAlertsFlow = MutableStateFlow(true)
+
+        override fun getRegion(): Flow<AlertRegionFilter> = regionFlow
+        override suspend fun setRegion(region: AlertRegionFilter) { regionFlow.value = region }
+        override fun getScamAlertsEnabled(): Flow<Boolean> = scamAlertsFlow
+        override suspend fun setScamAlertsEnabled(enabled: Boolean) { scamAlertsFlow.value = enabled }
     }
 }

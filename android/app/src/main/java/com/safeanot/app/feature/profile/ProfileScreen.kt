@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.safeanot.app.domain.model.AlertRegionFilter
 import com.safeanot.app.ui.theme.BlueAccent
 import com.safeanot.app.ui.theme.DarkCard
 import com.safeanot.app.ui.theme.GreenAccent
@@ -137,6 +138,49 @@ fun ProfileScreen(
             }
         }
 
+        // Region preference
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = DarkCard),
+                shape = RoundedCornerShape(12.dp),
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Region",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Affects which scam alerts you see first.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        listOf(
+                            AlertRegionFilter.MALAYSIA,
+                            AlertRegionFilter.SINGAPORE,
+                        ).forEach { region ->
+                            FilterChip(
+                                selected = uiState.selectedRegion == region,
+                                onClick = { viewModel.setRegion(region) },
+                                label = { Text(region.label) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = BlueAccent.copy(alpha = 0.2f),
+                                    selectedLabelColor = BlueAccent,
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         // Settings
         item {
             Card(
@@ -205,6 +249,36 @@ fun ProfileScreen(
                                 )
                             }
                         }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Scam Alert Notifications toggle
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column {
+                            Text(
+                                text = "Scam Alert Notifications",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextPrimary,
+                            )
+                            Text(
+                                text = "Get notified about new scam alerts",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextSecondary,
+                            )
+                        }
+                        Switch(
+                            checked = uiState.scamAlertsEnabled,
+                            onCheckedChange = { viewModel.toggleScamAlerts(it) },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = GreenAccent,
+                                checkedTrackColor = GreenAccent.copy(alpha = 0.3f),
+                            ),
+                        )
                     }
                 }
             }

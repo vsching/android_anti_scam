@@ -12,6 +12,7 @@ import com.safeanot.app.domain.model.AlertRegionFilter
 import com.safeanot.app.domain.model.AlertSeverity
 import com.safeanot.app.domain.model.ScamAlert
 import com.safeanot.app.domain.repository.AlertsRepository
+import com.safeanot.app.util.RegionResolver
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
@@ -50,12 +51,7 @@ class AlertsRepositoryImpl @Inject constructor(
     }
 
     override fun getDefaultRegionFilter(): AlertRegionFilter {
-        val country = Locale.getDefault().country.uppercase()
-        return when (country) {
-            "MY" -> AlertRegionFilter.MALAYSIA
-            "SG" -> AlertRegionFilter.SINGAPORE
-            else -> AlertRegionFilter.ALL
-        }
+        return RegionResolver.fromLocale()
     }
 
     private fun AlertDto.toEntity(): AlertEntity = AlertEntity(

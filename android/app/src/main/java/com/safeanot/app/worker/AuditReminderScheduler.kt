@@ -17,7 +17,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AuditReminderScheduler @Inject constructor(
+open class AuditReminderScheduler @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
 
@@ -27,7 +27,7 @@ class AuditReminderScheduler @Inject constructor(
      *
      * @param intervalDays The interval in days (3, 7, 14, or 30).
      */
-    fun schedule(intervalDays: Int) {
+    open fun schedule(intervalDays: Int) {
         val constraints = Constraints.Builder()
             .setRequiresBatteryNotLow(true)
             .build()
@@ -48,7 +48,7 @@ class AuditReminderScheduler @Inject constructor(
     /**
      * Cancels any scheduled audit reminder worker.
      */
-    fun cancel() {
+    open fun cancel() {
         WorkManager.getInstance(context).cancelUniqueWork(Constants.AUDIT_WORK_NAME)
     }
 
@@ -58,7 +58,7 @@ class AuditReminderScheduler @Inject constructor(
      * @param enabled Whether reminders are enabled.
      * @param intervalDays The interval in days.
      */
-    fun updateSchedule(enabled: Boolean, intervalDays: Int) {
+    open fun updateSchedule(enabled: Boolean, intervalDays: Int) {
         if (enabled) {
             schedule(intervalDays)
         } else {
