@@ -10,8 +10,9 @@ import com.safeanot.app.domain.repository.AuditRepository
 import com.safeanot.app.domain.usecase.GetAuditStatsUseCase
 import com.safeanot.app.domain.usecase.GetPreferredRegionUseCase
 import com.safeanot.app.domain.usecase.SetPreferredRegionUseCase
+import com.safeanot.app.testutil.FakeAuditReminderScheduler
+import com.safeanot.app.testutil.FakeReminderConfigDao
 import com.safeanot.app.testutil.FakeUserPreferencesRepository
-import com.safeanot.app.testutil.TestProfileViewModelFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -49,9 +50,13 @@ class ProfileViewModelTest {
     }
 
     private fun createViewModel(): ProfileViewModel {
-        return TestProfileViewModelFactory.create(
-            fakeAuditRepo = fakeAuditRepo,
-            fakePrefs = fakePrefs,
+        return ProfileViewModel(
+            reminderConfigDao = FakeReminderConfigDao(),
+            reminderScheduler = FakeAuditReminderScheduler.create(),
+            getAuditStatsUseCase = GetAuditStatsUseCase(fakeAuditRepo),
+            getPreferredRegionUseCase = GetPreferredRegionUseCase(fakePrefs),
+            setPreferredRegionUseCase = SetPreferredRegionUseCase(fakePrefs),
+            userPreferencesRepository = fakePrefs,
         )
     }
 

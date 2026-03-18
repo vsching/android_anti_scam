@@ -61,18 +61,14 @@ class AlertsViewModel @Inject constructor(
      */
     private val activeFilter = MutableStateFlow<AlertRegionFilter?>(null)
 
-    /** Set to true once the user explicitly changes the filter, overriding the preference. */
-    private var userOverrodeFilter = false
-
     init {
-        // Seed the active filter from the persisted region, then keep observing preference changes
+        // Seed the active filter from the persisted region, then keep observing preference changes.
+        // Manual filter changes via onFilterChanged() update activeFilter directly;
+        // preference changes also update activeFilter so Profile region changes always propagate.
         viewModelScope.launch {
             getPreferredRegionUseCase().collect { region ->
-                // Only update if user hasn't explicitly overridden the filter
-                if (!userOverrodeFilter) {
-                    activeFilter.value = region
-                    _uiState.update { it.copy(selectedFilter = region) }
-                }
+                activeFilter.value = region
+                _uiState.update { it.copy(selectedFilter = region) }
             }
         }
 
@@ -100,7 +96,6 @@ class AlertsViewModel @Inject constructor(
 
     fun onFilterChanged(filter: AlertRegionFilter) {
         if (filter == _uiState.value.selectedFilter) return
-        userOverrodeFilter = true
         activeFilter.value = filter
         _uiState.update { it.copy(selectedFilter = filter) }
     }

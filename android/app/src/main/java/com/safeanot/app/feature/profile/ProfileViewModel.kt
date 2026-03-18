@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -68,41 +69,41 @@ class ProfileViewModel @Inject constructor(
             reminderConfigDao.getConfig().collect { config ->
                 val enabled = config?.enabled ?: true
                 val interval = config?.intervalDays ?: 7
-                _uiState.value = _uiState.value.copy(
+                _uiState.update { it.copy(
                     remindersEnabled = enabled,
                     reminderIntervalDays = interval,
-                )
+                ) }
             }
         }
 
         viewModelScope.launch {
             getAuditStatsUseCase().collect { stats ->
-                _uiState.value = _uiState.value.copy(
+                _uiState.update { it.copy(
                     totalAudits = stats.totalAudits,
                     securityScore = stats.securityScore,
                     lastAuditDate = formatLastAuditDate(stats.lastAuditTimestamp),
-                )
+                ) }
             }
         }
 
         viewModelScope.launch {
             getPreferredRegionUseCase().collect { region ->
-                _uiState.value = _uiState.value.copy(
+                _uiState.update { it.copy(
                     selectedRegion = region,
                     emergencyContacts = EmergencyContacts.forRegion(region),
-                )
+                ) }
             }
         }
 
         viewModelScope.launch {
             userPreferencesRepository.getScamAlertsEnabled().collect { enabled ->
-                _uiState.value = _uiState.value.copy(scamAlertsEnabled = enabled)
+                _uiState.update { it.copy(scamAlertsEnabled = enabled) }
             }
         }
     }
 
     fun toggleReminders(enabled: Boolean) {
-        _uiState.value = _uiState.value.copy(remindersEnabled = enabled)
+        _uiState.update { it.copy(remindersEnabled = enabled) }
         viewModelScope.launch {
             val interval = _uiState.value.reminderIntervalDays
             reminderConfigDao.upsert(
@@ -116,7 +117,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun setReminderInterval(days: Int) {
-        _uiState.value = _uiState.value.copy(reminderIntervalDays = days)
+        _uiState.update { it.copy(reminderIntervalDays = days) }
         viewModelScope.launch {
             val enabled = _uiState.value.remindersEnabled
             reminderConfigDao.upsert(
