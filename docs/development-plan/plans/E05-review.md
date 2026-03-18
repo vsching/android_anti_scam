@@ -25,12 +25,22 @@ Wire real stats, region preferences, notification settings, emergency contacts, 
 - Code quality: 1 (silent error swallowing — deferred)
 - Test coverage: 1 (migration test — deferred)
 
+### Round 2 (Codex) — 2026-03-18
+**Status:** Complete
+**Findings:** 3 issues found (0 critical, 1 high, 2 medium)
+**Fixed:** 3 issues fixed
+**Themes:** race-condition x1, propagation-gap x1, test-gap x1
+**Categories:**
+- Code quality: 1 (non-atomic uiState updates → _uiState.update{})
+- Correctness: 1 (userOverrodeFilter blocks preference propagation)
+- Test infrastructure: 1 (null Context in Java factory → Kotlin fake)
+
 ## Recurring Issue Tracker
 
 | Theme | Rounds Hit | Total Findings | Files Affected | Status |
 |-------|-----------|----------------|----------------|--------|
-| test-gap | Pre, R1 | 6 | ProfileViewModelTest, MigrationTest | PATTERN |
+| test-gap | Pre, R1, R2 | 7 | ProfileViewModelTest, MigrationTest, TestFactory | ARCHITECTURAL |
 | fail-open | Pre, R1 | 3 | UserPreferencesDataStore, DatabaseModule, ProfileScreen | PATTERN |
-| propagation-gap | Pre, R1 | 4 | ProfileScreen, AlertsViewModel, AboutSection | PATTERN |
-| race-condition | R1 | 1 | AuditRepositoryImpl | RESOLVED |
+| propagation-gap | Pre, R1, R2 | 5 | ProfileScreen, AlertsViewModel, AboutSection, ProfileViewModel | ARCHITECTURAL |
+| race-condition | R1, R2 | 2 | AuditRepositoryImpl, ProfileViewModel | PATTERN |
 | other | Pre, R1 | 6 | various | — |
