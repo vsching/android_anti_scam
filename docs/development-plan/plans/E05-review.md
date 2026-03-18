@@ -35,6 +35,16 @@ Wire real stats, region preferences, notification settings, emergency contacts, 
 - Correctness: 1 (userOverrodeFilter blocks preference propagation)
 - Test infrastructure: 1 (null Context in Java factory → Kotlin fake)
 
+### Round 3 (Codex) — 2026-03-18
+**Status:** Complete
+**Findings:** 3 issues found (0 critical, 0 high, 3 medium)
+**Fixed:** 0 (all accepted as-is for MVP)
+**Deferred:** 3 medium findings
+**Notes:**
+- Silent DataStore write failures: flows self-correct on next read, acceptable for MVP
+- No "ALL" region chip in Profile: by design — MY/SG are the target markets, ALL is locale fallback only
+- Test replica vs real impl: requires Robolectric which isn't set up; tracked as known limitation
+
 ## Recurring Issue Tracker
 
 | Theme | Rounds Hit | Total Findings | Files Affected | Status |
