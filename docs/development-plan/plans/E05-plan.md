@@ -9,7 +9,7 @@
 - [x] Dependencies complete: None (E05 has no blocking dependencies)
 - [x] Technical specs reviewed: product-context, system-patterns, brainstorm features
 - [x] Existing Profile code audited via Codex (identified 3 gaps: placeholders, missing settings, no help section)
-- [x] Plan reviewed by Codex (Round 1: 8 findings, 8 fixed)
+- [x] Plan reviewed by Codex (3 rounds: R1=8, R2=5, R3=4 — 17 total findings fixed)
 - [ ] Plan approved by user
 
 ---
@@ -26,7 +26,7 @@
 2. **Implement audit count and last audit timestamp in repository**
    - File: `android/app/src/main/java/com/safeanot/app/data/repository/AuditRepositoryImpl.kt`
    - Action: Modify
-   - Details: Implement `getCompletedAuditCount()` by querying `SecurityScoreEntity` audit count field, and `getLastAuditTimestamp()` from `SecurityScoreEntity.lastFullAuditAt` (a dedicated timestamp updated only in `runAudit()`, not on individual item edits). Increment audit counter and set `lastFullAuditAt` each time `runAudit()` completes.
+   - Details: Implement `getCompletedAuditCount()` by querying `SecurityScoreEntity` audit count field, and `getLastAuditTimestamp()` from `SecurityScoreEntity.lastFullAuditAt` (a dedicated timestamp updated only in `runAudit()`, not on individual item edits). Increment audit counter and set `lastFullAuditAt` each time `runAudit()` completes. IMPORTANT: `recalculateScore()` currently uses `@Insert(onConflict = REPLACE)` which would wipe `auditCount` and `lastFullAuditAt` back to defaults. Fix by changing `recalculateScore()` to read existing values first and preserve them on upsert, or switch to `@Update` with selective field writes. Add a regression test verifying that `recalculateScore()` preserves audit stats.
 
 3. **Add audit count and last audit timestamp columns to SecurityScoreEntity**
    - File: `android/app/src/main/java/com/safeanot/app/data/local/entity/SecurityScoreEntity.kt`
@@ -36,7 +36,10 @@
 4. **Add Room migration for new SecurityScoreEntity columns**
    - File: `android/app/src/main/java/com/safeanot/app/data/local/SafeAnotDatabase.kt`
    - Action: Modify
-   - Details: Bump database version from 4 to 5. Add `MIGRATION_4_5` that runs `ALTER TABLE security_scores ADD COLUMN audit_count INTEGER NOT NULL DEFAULT 0` and `ALTER TABLE security_scores ADD COLUMN last_full_audit_at INTEGER`. Register migration in database builder. This prevents data loss on app update.
+   - Details: Bump database version from 4 to 5. Define `MIGRATION_4_5` companion object val that runs `ALTER TABLE security_scores ADD COLUMN audit_count INTEGER NOT NULL DEFAULT 0` and `ALTER TABLE security_scores ADD COLUMN last_full_audit_at INTEGER`.
+   - File: `android/app/src/main/java/com/safeanot/app/di/DatabaseModule.kt`
+   - Action: Modify
+   - Details: Register `MIGRATION_4_5` in the Room database builder via `.addMigrations(SafeAnotDatabase.MIGRATION_4_5)`. Remove `fallbackToDestructiveMigration()` to prevent silent data loss on version mismatches. This is where the builder is configured (not in SafeAnotDatabase itself).
 
 5. **Add DAO query for audit stats**
    - File: `android/app/src/main/java/com/safeanot/app/data/local/AuditDao.kt`
@@ -65,8 +68,8 @@
 
 ### Tests
 - `android/app/src/test/java/com/safeanot/app/feature/profile/ProfileViewModelTest.kt` -- ViewModel loads real totalAudits, appVersion from BuildConfig, lastAuditDate from repository, securityScore from repository; shareApp emits share event with correct text; stats update after a new audit completes; zero-audit state shows correct defaults.
-- `android/app/src/test/java/com/safeanot/app/feature/profile/ShareHelperTest.kt` -- Share intent has correct action, type, and text content; intent resolves successfully.
-- `android/app/src/test/java/com/safeanot/app/data/local/MigrationTest.kt` -- (extend) MIGRATION_4_5 adds audit_count and last_full_audit_at columns without data loss.
+- `android/app/src/test/java/com/safeanot/app/feature/profile/ShareHelperTest.kt` -- Share intent has correct action, type, and text content (pure intent-shape assertions only; resolution checks belong in instrumentation tests).
+- `android/app/src/androidTest/java/com/safeanot/app/data/local/MigrationTest.kt` -- (extend) MIGRATION_4_5 adds audit_count and last_full_audit_at columns without data loss. Uses `MigrationTestHelper` from `room-testing` (requires instrumentation, hence androidTest source set).
 
 ### Acceptance Criteria
 - `totalAudits` counts the actual number of completed audit scans from persisted data.
@@ -81,10 +84,10 @@
 
 ### Tasks
 
-1. **Add DataStore and Room testing dependencies**
+1. **Add DataStore, Room testing, and Espresso Intents dependencies**
    - File: `android/app/build.gradle.kts`
    - Action: Modify
-   - Details: Add `implementation("androidx.datastore:datastore-preferences:1.0.0")` to dependencies block. Add `androidTestImplementation("androidx.room:room-testing:2.6.1")` for Room migration tests (required by E05-001 migration test plan).
+   - Details: Add `implementation("androidx.datastore:datastore-preferences:1.0.0")` to dependencies block. Add `androidTestImplementation("androidx.room:room-testing:2.6.1")` for Room migration tests. Add `androidTestImplementation("androidx.test.espresso:espresso-intents:3.5.1")` for intent-resolution instrumentation tests. Note: these test dependencies are needed by E05-001 migration tests and E05-003 intent tests, so this dependency task should be done first even though it's listed under E05-002 — during implementation, add these deps as a prerequisite step.
 
 2. **Create UserPreferencesDataStore**
    - File: `android/app/src/main/java/com/safeanot/app/data/local/UserPreferencesDataStore.kt`
@@ -189,7 +192,7 @@
 ### Tests
 - `android/app/src/test/java/com/safeanot/app/domain/model/EmergencyContactTest.kt` -- `forRegion(MALAYSIA)` returns 3 MY contacts with correct phone/URL, `forRegion(SINGAPORE)` returns 3 SG contacts, all phone numbers are valid dial-able formats, all URLs are valid.
 - `android/app/src/test/java/com/safeanot/app/feature/profile/ProfileViewModelTest.kt` -- (extend) Emergency contacts update when region changes, legal links are non-empty.
-- `android/app/src/androidTest/java/com/safeanot/app/feature/profile/ProfileScreenTest.kt` -- Emergency contact cards rendered, about section shows version, privacy/terms links are clickable, phone dialer intent resolves for hotline numbers, browser intent resolves for website links.
+- `android/app/src/androidTest/java/com/safeanot/app/feature/profile/ProfileScreenTest.kt` -- Emergency contact cards rendered, about section shows version, privacy/terms links are clickable. Uses `espresso-intents` (`IntentsTestRule`) to verify phone dialer intent resolves for hotline numbers and browser intent resolves for website links (intent resolution requires real device/emulator context).
 
 ### Acceptance Criteria
 - About section shows app version, build number, and "Made in Malaysia" branding.
@@ -246,7 +249,7 @@
 | `android/app/src/test/java/com/safeanot/app/data/repository/UserPreferencesRepositoryImplTest.kt` | Create | E05-002 |
 | `android/app/src/test/java/com/safeanot/app/feature/alerts/AlertsViewModelTest.kt` | Modify | E05-002 |
 | `android/app/src/test/java/com/safeanot/app/util/RegionResolverTest.kt` | Create | E05-002 |
-| `android/app/src/test/java/com/safeanot/app/data/local/MigrationTest.kt` | Modify | E05-001 |
+| `android/app/src/androidTest/java/com/safeanot/app/data/local/MigrationTest.kt` | Modify | E05-001 |
 | `android/app/src/test/java/com/safeanot/app/domain/model/EmergencyContactTest.kt` | Create | E05-003 |
 | `android/app/src/androidTest/java/com/safeanot/app/feature/profile/ProfileScreenTest.kt` | Create | E05-003 |
 
@@ -258,3 +261,4 @@
 |-------|------|----------|-------|---------|
 | R1 | 2026-03-18 | 8 | 8 | [CRITICAL] Wrong lastAuditDate source → dedicated `last_full_audit_at` column; [WARNING] Missing Room migration → added MIGRATION_4_5 task; [WARNING] Architecture violation in AlertsViewModel → added UseCases; [WARNING] Contradictory share-flow → ViewModel emits event, UI launches intent; [WARNING] Missing securityScore wiring → added to ProfileUiState; [WARNING] Notification toggle has no backend → scoped as preference-only, delivery deferred to E09; [WARNING] Missing spec-level tests → added zero-audit, post-audit refresh, intent resolution, migration tests; [INFO] DRY locale logic → extracted RegionResolver utility |
 | R2 | 2026-03-18 | 5 | 5 | [WARNING] ProfileViewModel architecture drift → added GetAuditStatsUseCase, ProfileVM now uses UseCases not repositories; [WARNING] Region change underspecified → AlertsViewModel now reactively collects region Flow with flatMapLatest; [WARNING-RECURRING] Migration tests need room-testing dep → added to build.gradle.kts task; [WARNING] Intent safety gap → all startActivity calls wrapped in try/catch ActivityNotFoundException; [INFO] SetPreferredRegionUseCase unused by ProfileVM → ProfileVM now uses it via UseCase |
+| R3 | 2026-03-18 | 4 | 4 | [CRITICAL] Migration registration belongs in DatabaseModule.kt not SafeAnotDatabase, must remove fallbackToDestructiveMigration() → split task across both files; [WARNING-RECURRING] Migration test source set wrong + missing espresso-intents dep → moved to androidTest, added espresso-intents dep; [WARNING] recalculateScore() REPLACE can wipe auditCount/lastFullAuditAt → added preserve-on-upsert task with regression test; [WARNING] Intent resolution tests at wrong layer → pure shape assertions in unit tests, resolution checks in androidTest with espresso-intents |
