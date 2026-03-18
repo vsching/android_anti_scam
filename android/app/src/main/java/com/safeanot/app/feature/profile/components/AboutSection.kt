@@ -32,6 +32,7 @@ import com.safeanot.app.ui.theme.TextSecondary
 @Composable
 fun AboutSection(
     appVersion: String,
+    buildNumber: Int,
     legalLinks: Map<String, String>,
     modifier: Modifier = Modifier,
 ) {
@@ -50,7 +51,7 @@ fun AboutSection(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Version $appVersion",
+                text = "Version $appVersion ($buildNumber)",
                 style = MaterialTheme.typography.bodyMedium,
                 color = TextSecondary,
             )

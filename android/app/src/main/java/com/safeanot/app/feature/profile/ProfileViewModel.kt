@@ -35,6 +35,7 @@ data class ProfileUiState(
     val reminderIntervalDays: Int = 7,
     val totalAudits: Int = 0,
     val appVersion: String = BuildConfig.VERSION_NAME,
+    val buildNumber: Int = BuildConfig.VERSION_CODE,
     val lastAuditDate: String? = null,
     val securityScore: Int = 0,
     val selectedRegion: AlertRegionFilter = AlertRegionFilter.ALL,
@@ -59,7 +60,7 @@ class ProfileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
-    private val _shareEvent = Channel<String>(Channel.BUFFERED)
+    private val _shareEvent = Channel<Unit>(Channel.BUFFERED)
     val shareEvent = _shareEvent.receiveAsFlow()
 
     init {
@@ -144,7 +145,7 @@ class ProfileViewModel @Inject constructor(
 
     fun shareApp() {
         viewModelScope.launch {
-            _shareEvent.send(ShareHelper.SHARE_TEXT)
+            _shareEvent.send(Unit)
         }
     }
 

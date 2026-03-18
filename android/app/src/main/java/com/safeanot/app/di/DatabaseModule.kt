@@ -30,6 +30,7 @@ object DatabaseModule {
             "safeanot_database",
         )
             .addMigrations(SafeAnotDatabase.MIGRATION_4_5)
+            .fallbackToDestructiveMigrationFrom(1, 2, 3)
             .build()
     }
 

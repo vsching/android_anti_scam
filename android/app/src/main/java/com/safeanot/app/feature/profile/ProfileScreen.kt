@@ -57,7 +57,7 @@ fun ProfileScreen(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        viewModel.shareEvent.collect { shareText ->
+        viewModel.shareEvent.collect {
             try {
                 val intent = ShareHelper.createShareIntent()
                 context.startActivity(Intent.createChooser(intent, "Share Safe Anot?"))
@@ -309,6 +309,7 @@ fun ProfileScreen(
         item {
             AboutSection(
                 appVersion = uiState.appVersion,
+                buildNumber = uiState.buildNumber,
                 legalLinks = uiState.legalLinks,
             )
         }

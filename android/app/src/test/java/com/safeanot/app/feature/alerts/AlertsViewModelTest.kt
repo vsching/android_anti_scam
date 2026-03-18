@@ -3,10 +3,10 @@ package com.safeanot.app.feature.alerts
 import com.safeanot.app.domain.model.AlertRegionFilter
 import com.safeanot.app.domain.model.ScamAlert
 import com.safeanot.app.domain.repository.AlertsRepository
-import com.safeanot.app.domain.repository.UserPreferencesRepository
 import com.safeanot.app.domain.usecase.GetPreferredRegionUseCase
 import com.safeanot.app.domain.usecase.ObserveAlertsUseCase
 import com.safeanot.app.domain.usecase.RefreshAlertsUseCase
+import com.safeanot.app.testutil.FakeUserPreferencesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -128,15 +128,5 @@ class AlertsViewModelTest {
         }
         override suspend fun getAlertById(id: String): ScamAlert? = null
         override fun getDefaultRegionFilter(): AlertRegionFilter = AlertRegionFilter.ALL
-    }
-
-    private class FakeUserPreferencesRepository : UserPreferencesRepository {
-        val regionFlow = MutableStateFlow(AlertRegionFilter.ALL)
-        val scamAlertsFlow = MutableStateFlow(true)
-
-        override fun getRegion(): Flow<AlertRegionFilter> = regionFlow
-        override suspend fun setRegion(region: AlertRegionFilter) { regionFlow.value = region }
-        override fun getScamAlertsEnabled(): Flow<Boolean> = scamAlertsFlow
-        override suspend fun setScamAlertsEnabled(enabled: Boolean) { scamAlertsFlow.value = enabled }
     }
 }

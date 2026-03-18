@@ -2,15 +2,16 @@ package com.safeanot.app.feature.profile
 
 import com.safeanot.app.domain.model.AlertRegionFilter
 import com.safeanot.app.domain.model.AuditChangeSummary
-import com.safeanot.app.domain.model.EmergencyContacts
 import com.safeanot.app.domain.model.AuditItem
 import com.safeanot.app.domain.model.AuditStatus
+import com.safeanot.app.domain.model.EmergencyContacts
 import com.safeanot.app.domain.model.SecurityScore
 import com.safeanot.app.domain.repository.AuditRepository
-import com.safeanot.app.domain.repository.UserPreferencesRepository
 import com.safeanot.app.domain.usecase.GetAuditStatsUseCase
 import com.safeanot.app.domain.usecase.GetPreferredRegionUseCase
 import com.safeanot.app.domain.usecase.SetPreferredRegionUseCase
+import com.safeanot.app.testutil.FakeUserPreferencesRepository
+import com.safeanot.app.testutil.TestProfileViewModelFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -32,15 +33,107 @@ import org.junit.Test
 class ProfileViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
+    private lateinit var fakeAuditRepo: FakeAuditRepository
+    private lateinit var fakePrefs: FakeUserPreferencesRepository
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+        fakeAuditRepo = FakeAuditRepository()
+        fakePrefs = FakeUserPreferencesRepository()
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+    }
+
+    private fun createViewModel(): ProfileViewModel {
+        return TestProfileViewModelFactory.create(
+            fakeAuditRepo = fakeAuditRepo,
+            fakePrefs = fakePrefs,
+        )
+    }
+
+    // --- ViewModel integration tests ---
+
+    @Test
+    fun `initial uiState has correct defaults`() {
+        val viewModel = createViewModel()
+        val state = viewModel.uiState.value
+
+        assertTrue(state.remindersEnabled)
+        assertEquals(7, state.reminderIntervalDays)
+        assertEquals(0, state.totalAudits)
+        assertEquals(0, state.securityScore)
+        assertNull(state.lastAuditDate)
+        assertEquals(AlertRegionFilter.ALL, state.selectedRegion)
+        assertTrue(state.scamAlertsEnabled)
+        assertTrue(state.emergencyContacts.isEmpty())
+    }
+
+    @Test
+    fun `setRegion updates selectedRegion and emergencyContacts via ViewModel`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.setRegion(AlertRegionFilter.MALAYSIA)
+
+        val state = viewModel.uiState.value
+        assertEquals(AlertRegionFilter.MALAYSIA, state.selectedRegion)
+        assertEquals(EmergencyContacts.forRegion(AlertRegionFilter.MALAYSIA), state.emergencyContacts)
+    }
+
+    @Test
+    fun `toggleScamAlerts updates scamAlertsEnabled via ViewModel`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.toggleScamAlerts(false)
+
+        assertFalse(viewModel.uiState.value.scamAlertsEnabled)
+    }
+
+    @Test
+    fun `toggleScamAlerts back to true after being disabled via ViewModel`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.toggleScamAlerts(false)
+        viewModel.toggleScamAlerts(true)
+
+        assertTrue(viewModel.uiState.value.scamAlertsEnabled)
+    }
+
+    @Test
+    fun `shareApp emits event via ViewModel`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.shareApp()
+
+        val event = viewModel.shareEvent.first()
+        assertEquals(Unit, event)
+    }
+
+    @Test
+    fun `audit stats flow updates ViewModel state`() = runTest {
+        fakeAuditRepo.auditCountFlow.value = 5
+        fakeAuditRepo.lastAuditTimestampFlow.value = 1000L
+        fakeAuditRepo.securityScoreFlow.value = SecurityScore(scorePercent = 80)
+
+        val viewModel = createViewModel()
+        val state = viewModel.uiState.value
+
+        assertEquals(5, state.totalAudits)
+        assertEquals(80, state.securityScore)
+    }
+
+    @Test
+    fun `region change updates emergency contacts via ViewModel`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.setRegion(AlertRegionFilter.SINGAPORE)
+
+        val contacts = viewModel.uiState.value.emergencyContacts
+        assertEquals(3, contacts.size)
+        assertTrue(contacts.any { it.name == "ScamShield" })
     }
 
     // --- formatLastAuditDate tests ---
@@ -84,12 +177,11 @@ class ProfileViewModelTest {
 
     @Test
     fun `GetAuditStatsUseCase combines repository flows correctly`() = runTest {
-        val fakeRepo = FakeAuditRepository()
-        fakeRepo.auditCountFlow.value = 5
-        fakeRepo.lastAuditTimestampFlow.value = 1000L
-        fakeRepo.securityScoreFlow.value = SecurityScore(scorePercent = 80)
+        fakeAuditRepo.auditCountFlow.value = 5
+        fakeAuditRepo.lastAuditTimestampFlow.value = 1000L
+        fakeAuditRepo.securityScoreFlow.value = SecurityScore(scorePercent = 80)
 
-        val useCase = GetAuditStatsUseCase(fakeRepo)
+        val useCase = GetAuditStatsUseCase(fakeAuditRepo)
         val result = useCase().first()
 
         assertEquals(5, result.totalAudits)
@@ -99,98 +191,14 @@ class ProfileViewModelTest {
 
     @Test
     fun `GetAuditStatsUseCase defaults to zero score when null`() = runTest {
-        val fakeRepo = FakeAuditRepository()
-        fakeRepo.securityScoreFlow.value = null
+        fakeAuditRepo.securityScoreFlow.value = null
 
-        val useCase = GetAuditStatsUseCase(fakeRepo)
+        val useCase = GetAuditStatsUseCase(fakeAuditRepo)
         val result = useCase().first()
 
         assertEquals(0, result.totalAudits)
         assertNull(result.lastAuditTimestamp)
         assertEquals(0, result.securityScore)
-    }
-
-    // --- Region preference use case tests ---
-
-    @Test
-    fun `GetPreferredRegionUseCase returns region from repository`() = runTest {
-        val fakePrefs = FakeUserPreferencesRepository()
-        fakePrefs.regionFlow.value = AlertRegionFilter.MALAYSIA
-        val useCase = GetPreferredRegionUseCase(fakePrefs)
-
-        val result = useCase().first()
-
-        assertEquals(AlertRegionFilter.MALAYSIA, result)
-    }
-
-    @Test
-    fun `SetPreferredRegionUseCase persists region via repository`() = runTest {
-        val fakePrefs = FakeUserPreferencesRepository()
-        val useCase = SetPreferredRegionUseCase(fakePrefs)
-
-        useCase(AlertRegionFilter.SINGAPORE)
-
-        assertEquals(AlertRegionFilter.SINGAPORE, fakePrefs.regionFlow.value)
-    }
-
-    @Test
-    fun `region change propagates through GetPreferredRegionUseCase`() = runTest {
-        val fakePrefs = FakeUserPreferencesRepository()
-        val getUseCase = GetPreferredRegionUseCase(fakePrefs)
-        val setUseCase = SetPreferredRegionUseCase(fakePrefs)
-
-        assertEquals(AlertRegionFilter.ALL, getUseCase().first())
-
-        setUseCase(AlertRegionFilter.MALAYSIA)
-        assertEquals(AlertRegionFilter.MALAYSIA, getUseCase().first())
-    }
-
-    // --- Scam alerts toggle tests ---
-
-    @Test
-    fun `scam alerts disabled via repository persists false`() = runTest {
-        val fakePrefs = FakeUserPreferencesRepository()
-
-        fakePrefs.setScamAlertsEnabled(false)
-
-        assertFalse(fakePrefs.getScamAlertsEnabled().first())
-    }
-
-    @Test
-    fun `scam alerts toggle back to true after being disabled`() = runTest {
-        val fakePrefs = FakeUserPreferencesRepository()
-        fakePrefs.setScamAlertsEnabled(false)
-        fakePrefs.setScamAlertsEnabled(true)
-
-        assertTrue(fakePrefs.getScamAlertsEnabled().first())
-    }
-
-    // --- Emergency contacts tests ---
-
-    @Test
-    fun `emergency contacts update when region changes to MALAYSIA`() = runTest {
-        val fakePrefs = FakeUserPreferencesRepository()
-        fakePrefs.regionFlow.value = AlertRegionFilter.MALAYSIA
-
-        val contacts = EmergencyContacts.forRegion(AlertRegionFilter.MALAYSIA)
-        assertEquals(3, contacts.size)
-        assertTrue(contacts.any { it.name == "MCMC" })
-    }
-
-    @Test
-    fun `emergency contacts update when region changes to SINGAPORE`() = runTest {
-        val fakePrefs = FakeUserPreferencesRepository()
-        fakePrefs.regionFlow.value = AlertRegionFilter.SINGAPORE
-
-        val contacts = EmergencyContacts.forRegion(AlertRegionFilter.SINGAPORE)
-        assertEquals(3, contacts.size)
-        assertTrue(contacts.any { it.name == "ScamShield" })
-    }
-
-    @Test
-    fun `emergency contacts empty when region is ALL`() = runTest {
-        val contacts = EmergencyContacts.forRegion(AlertRegionFilter.ALL)
-        assertTrue(contacts.isEmpty())
     }
 
     // --- Legal links tests ---
@@ -213,7 +221,7 @@ class ProfileViewModelTest {
 
     // --- Fakes ---
 
-    private class FakeAuditRepository : AuditRepository {
+    internal class FakeAuditRepository : AuditRepository {
         val auditCountFlow = MutableStateFlow(0)
         val lastAuditTimestampFlow = MutableStateFlow<Long?>(null)
         val securityScoreFlow = MutableStateFlow<SecurityScore?>(null)
@@ -230,15 +238,5 @@ class ProfileViewModelTest {
         override suspend fun recalculateScore() {}
         override fun getCompletedAuditCount(): Flow<Int> = auditCountFlow
         override fun getLastAuditTimestamp(): Flow<Long?> = lastAuditTimestampFlow
-    }
-
-    private class FakeUserPreferencesRepository : UserPreferencesRepository {
-        val regionFlow = MutableStateFlow(AlertRegionFilter.ALL)
-        val scamAlertsFlow = MutableStateFlow(true)
-
-        override fun getRegion(): Flow<AlertRegionFilter> = regionFlow
-        override suspend fun setRegion(region: AlertRegionFilter) { regionFlow.value = region }
-        override fun getScamAlertsEnabled(): Flow<Boolean> = scamAlertsFlow
-        override suspend fun setScamAlertsEnabled(enabled: Boolean) { scamAlertsFlow.value = enabled }
     }
 }

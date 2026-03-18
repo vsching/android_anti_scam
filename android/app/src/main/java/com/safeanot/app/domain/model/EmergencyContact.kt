@@ -11,7 +11,20 @@ data class EmergencyContact(
     val description: String,
     val phoneNumber: String?,
     val websiteUrl: String?,
-)
+) {
+    init {
+        if (phoneNumber != null) {
+            require(phoneNumber.all { it.isDigit() || it == '+' }) {
+                "phoneNumber must contain only digits and '+': $phoneNumber"
+            }
+        }
+        if (websiteUrl != null) {
+            require(websiteUrl.startsWith("https://")) {
+                "websiteUrl must start with https://: $websiteUrl"
+            }
+        }
+    }
+}
 
 object EmergencyContacts {
 
