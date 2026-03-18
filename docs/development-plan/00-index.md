@@ -2,7 +2,7 @@
 
 > **Project:** Safe Anot? — Scam protection app for Malaysia/Singapore
 > **Repo:** https://github.com/vsching/android_anti_scam
-> **Last Updated:** 2026-03-16
+> **Last Updated:** 2026-03-18
 
 ---
 
@@ -15,7 +15,7 @@
 | E02 | Link Checker Feature | ☑ | E01 | 5 |
 | E03 | Phone Shield Feature | ☑ | — | 5 |
 | E04 | Scam Alerts Feed | ☑ | E01 | 3 |
-| E05 | Profile + Settings | ◐ | — | 3 |
+| E05 | Profile + Settings | ☑ | — | 3 |
 | E06 | Website Deployment | ☐ | E01 | 4 |
 | E07 | Share & Viral Loops | ☐ | E02, E03 | 5 |
 
