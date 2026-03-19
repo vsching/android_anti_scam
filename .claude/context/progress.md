@@ -7,7 +7,7 @@ author: Claude Code PM System
 
 # Project Progress
 
-## Phase 1 MVP — 6/7 Epics Complete
+## Phase 1 MVP — 7/7 Epics Complete (E01B deferred)
 
 | Epic | Name | Status | Notes |
 |------|------|--------|-------|
@@ -17,7 +17,7 @@ author: Claude Code PM System
 | E03 | Phone Shield Feature | Done | Sideload audit, permission guidance |
 | E04 | Scam Alerts Feed | Done | News feed from D1, pull-to-refresh |
 | E05 | Profile + Settings | Done | Real stats, region prefs, emergency contacts |
-| E06 | Website Deployment | Not Started | Cloudflare Pages, 4 issues |
+| E06 | Website Deployment | Done | Cloudflare Pages, security headers, legal pages, API wiring |
 | E07 | Share & Viral Loops | Done | Share infra, score card, warning templates, analytics, rescue card |
 
 ## Review History
@@ -29,5 +29,5 @@ author: Claude Code PM System
 
 ## Next Priorities
 
-1. E01B — Pipeline deployment (enables live data)
-2. E06 — Website (depends on E01)
+1. E01B — Pipeline deployment (enables live data) — check if infra blockers resolved
+2. Phase 2: E08 (Guardian), E09 (Push Notifications), E10 (Gamification)

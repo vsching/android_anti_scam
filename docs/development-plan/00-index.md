@@ -16,7 +16,7 @@
 | E03 | Phone Shield Feature | ☑ | — | 5 |
 | E04 | Scam Alerts Feed | ☑ | E01 | 3 |
 | E05 | Profile + Settings | ☑ | — | 3 |
-| E06 | Website Deployment | ☐ | E01 | 4 |
+| E06 | Website Deployment | ☑ | E01 | 4 |
 | E07 | Share & Viral Loops | ☑ | E02, E03 | 5 |
 
 ## Phase 2: Growth (Guardian + Engagement)
