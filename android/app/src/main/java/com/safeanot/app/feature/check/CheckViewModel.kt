@@ -8,8 +8,10 @@ package com.safeanot.app.feature.check
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.safeanot.app.domain.model.LinkVerdict
+import com.safeanot.app.domain.model.WarningTemplate
 import com.safeanot.app.domain.usecase.CheckLinkUseCase
 import com.safeanot.app.util.VerdictCardGenerator
+import com.safeanot.app.util.WarningTemplateProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +42,9 @@ class CheckViewModel @Inject constructor(
     private val _shareEvents = Channel<ShareEvent>(Channel.BUFFERED)
     val shareEvents = _shareEvents.receiveAsFlow()
 
+    private val _warningShareEvent = Channel<String>(Channel.BUFFERED)
+    val warningShareEvent = _warningShareEvent.receiveAsFlow()
+
     fun onUrlChanged(url: String) {
         _urlInput.value = url
     }
@@ -69,6 +74,26 @@ class CheckViewModel @Inject constructor(
 
     fun prefillUrl(url: String) {
         _urlInput.value = url
+    }
+
+    /**
+     * Formats a warning template with verdict data and emits the text string.
+     * The UI layer handles WhatsApp detection, intent creation, and startActivity.
+     */
+    fun shareWarning(template: WarningTemplate, localeTag: String) {
+        val state = _checkState.value
+        if (state !is CheckUiState.Result) return
+
+        viewModelScope.launch {
+            val verdict = state.verdict
+            val formatted = WarningTemplateProvider.format(
+                template = template,
+                domain = verdict.domain,
+                verdict = verdict.verdict.name,
+                locale = localeTag,
+            )
+            _warningShareEvent.send(formatted)
+        }
     }
 
     /**

@@ -8,17 +8,23 @@ import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -27,6 +33,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,7 +43,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.safeanot.app.domain.model.VerdictType
 import com.safeanot.app.feature.check.components.VerdictCard
+import com.safeanot.app.feature.check.components.WarningTemplatePicker
 import com.safeanot.app.ui.theme.BlueAccent
 import com.safeanot.app.ui.theme.DarkBorder
 import com.safeanot.app.ui.theme.DarkCard
@@ -43,6 +54,7 @@ import com.safeanot.app.ui.theme.TextPrimary
 import com.safeanot.app.ui.theme.TextSecondary
 import com.safeanot.app.util.ShareImageCache
 import com.safeanot.app.util.ShareIntentFactory
+import com.safeanot.app.util.WhatsAppUtils
 
 @Composable
 fun CheckScreen(
@@ -51,6 +63,7 @@ fun CheckScreen(
     val urlInput by viewModel.urlInput.collectAsStateWithLifecycle()
     val checkState by viewModel.checkState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var showWarningPicker by remember { mutableStateOf(false) }
 
     // Collect share events from the ViewModel and handle intent creation in UI
     LaunchedEffect(Unit) {
@@ -74,6 +87,22 @@ fun CheckScreen(
                 }
             } catch (e: Exception) {
                 Log.e("CheckScreen", "Failed to share", e)
+            }
+        }
+    }
+
+    // Collect warning share events — plain text for WhatsApp or generic share
+    LaunchedEffect(Unit) {
+        viewModel.warningShareEvent.collect { text ->
+            try {
+                val intent = if (WhatsAppUtils.isWhatsAppInstalled(context)) {
+                    ShareIntentFactory.createWhatsAppTextShare(text)
+                } else {
+                    ShareIntentFactory.createTextShare(text)
+                }
+                context.startActivity(intent)
+            } catch (e: Exception) {
+                Log.e("CheckScreen", "Failed to share warning", e)
             }
         }
     }
@@ -168,6 +197,47 @@ fun CheckScreen(
                     onShareClick = { viewModel.shareResult() },
                     onCheckAnotherClick = { viewModel.clearResults() },
                 )
+
+                // "Warn My Contacts" button — DANGEROUS verdicts only
+                if (state.verdict.verdict == VerdictType.DANGEROUS) {
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Button(
+                        onClick = { showWarningPicker = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = RedAccent.copy(alpha = 0.15f),
+                            contentColor = RedAccent,
+                        ),
+                        shape = RoundedCornerShape(10.dp),
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Warn My Contacts",
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                    }
+                }
+
+                // Warning template picker bottom sheet
+                if (showWarningPicker && state.verdict.verdict == VerdictType.DANGEROUS) {
+                    WarningTemplatePicker(
+                        domain = state.verdict.domain,
+                        verdict = state.verdict.verdict.name,
+                        onTemplateSelected = { template, localeTag ->
+                            showWarningPicker = false
+                            viewModel.shareWarning(template, localeTag)
+                        },
+                        onDismiss = { showWarningPicker = false },
+                    )
+                }
             }
 
             is CheckUiState.Error -> {

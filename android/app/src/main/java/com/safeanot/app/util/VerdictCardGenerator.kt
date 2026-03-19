@@ -75,7 +75,7 @@ object VerdictCardGenerator {
             textSize = 40f
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
         }
-        val reasonLines = wrapText(verdict.reason, reasonPaint, SIZE - 120f)
+        val reasonLines = CardRenderUtils.wrapText(verdict.reason, reasonPaint, SIZE - 120f)
         var reasonY = COLOR_BAR_HEIGHT + 330f
         for (line in reasonLines) {
             canvas.drawText(line, 60f, reasonY, reasonPaint)
@@ -134,26 +134,7 @@ object VerdictCardGenerator {
         return bitmap
     }
 
-    private fun wrapText(text: String, paint: Paint, maxWidth: Float): List<String> {
-        val words = text.split(' ')
-        val lines = mutableListOf<String>()
-        var currentLine = StringBuilder()
-
-        for (word in words) {
-            val testLine = if (currentLine.isEmpty()) word else "$currentLine $word"
-            if (paint.measureText(testLine) <= maxWidth) {
-                currentLine = StringBuilder(testLine)
-            } else {
-                if (currentLine.isNotEmpty()) {
-                    lines.add(currentLine.toString())
-                }
-                currentLine = StringBuilder(word)
-            }
-        }
-        if (currentLine.isNotEmpty()) {
-            lines.add(currentLine.toString())
-        }
-
-        return lines
-    }
+    /** @see CardRenderUtils.wrapText */
+    private fun wrapText(text: String, paint: Paint, maxWidth: Float): List<String> =
+        CardRenderUtils.wrapText(text, paint, maxWidth)
 }
