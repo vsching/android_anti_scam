@@ -40,6 +40,9 @@ const MAX_CONTENT_ID_LENGTH = 512;
 /** Maximum device_id length. */
 const MAX_DEVICE_ID_LENGTH = 128;
 
+/** Regex for allowed content_id characters (domain-safe). */
+const CONTENT_ID_PATTERN = /^[a-zA-Z0-9._\-:\/]+$/;
+
 interface ShareEventInput {
   share_type: string;
   content_id: string;
@@ -154,6 +157,13 @@ export async function handleShare(
       );
     }
 
+    if (!CONTENT_ID_PATTERN.test(event.content_id)) {
+      return jsonResponse(
+        { error: `events[${i}].content_id contains invalid characters` },
+        400,
+      );
+    }
+
     if (!VALID_PLATFORMS.has(event.platform)) {
       return jsonResponse(
         { error: `events[${i}].platform is invalid` },
@@ -197,8 +207,8 @@ export async function handleShare(
       .first<{ cnt: number }>();
     todayCount = result?.cnt ?? 0;
   } catch {
-    // If D1 query fails, allow the request (fail open for analytics)
-    todayCount = 0;
+    // If D1 query fails, fail closed to prevent abuse
+    return jsonResponse({ error: 'Service temporarily unavailable' }, 503);
   }
 
   if (todayCount + body.events.length > DAILY_RATE_LIMIT) {

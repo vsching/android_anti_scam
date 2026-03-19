@@ -28,6 +28,9 @@ object Constants {
     /** Allowed reminder interval options in days. */
     val REMINDER_INTERVAL_OPTIONS = listOf(3, 7, 14, 30)
 
+    /** WhatsApp package name used for targeted sharing and availability checks. */
+    const val WHATSAPP_PACKAGE = "com.whatsapp"
+
     /** App download URL for sharing. */
     const val APP_DOWNLOAD_URL = "https://play.google.com/store/apps/details?id=com.safeanot.app"
 

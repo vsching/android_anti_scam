@@ -134,7 +134,4 @@ object VerdictCardGenerator {
         return bitmap
     }
 
-    /** @see CardRenderUtils.wrapText */
-    private fun wrapText(text: String, paint: Paint, maxWidth: Float): List<String> =
-        CardRenderUtils.wrapText(text, paint, maxWidth)
 }

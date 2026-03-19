@@ -18,10 +18,12 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 
@@ -109,15 +111,13 @@ class CheckViewModelTest {
 
         vm.shareResult()
 
-        // No event should be emitted — verify by trying to receive with a timeout
-        val deferred = async {
-            try {
-                vm.shareEvents.first()
-            } catch (_: Exception) {
-                null
-            }
+        // No event should be emitted — verify with a short timeout
+        try {
+            withTimeout(100) { vm.shareEvents.first() }
+            fail("Expected no emission but got one")
+        } catch (_: kotlinx.coroutines.TimeoutCancellationException) {
+            // Expected — no event was emitted
         }
-        deferred.cancel()
     }
 
     @Test
@@ -166,14 +166,13 @@ class CheckViewModelTest {
 
         vm.shareWarning(template, "en")
 
-        val deferred = async {
-            try {
-                vm.warningShareEvent.first()
-            } catch (_: Exception) {
-                null
-            }
+        // No event should be emitted — verify with a short timeout
+        try {
+            withTimeout(100) { vm.warningShareEvent.first() }
+            fail("Expected no emission but got one")
+        } catch (_: kotlinx.coroutines.TimeoutCancellationException) {
+            // Expected — no event was emitted
         }
-        deferred.cancel()
     }
 
     @Test
@@ -202,7 +201,7 @@ class CheckViewModelTest {
     }
 
     @Test
-    fun `shareRescueCard emits BitmapOnly event`() = runTest {
+    fun `shareRescueCard emits ImageWithText event with domain and download link`() = runTest {
         val verdict = LinkVerdict("evil.com", VerdictType.DANGEROUS, "Phishing", 0.99f)
         val vm = createViewModel(verdict)
 
@@ -213,9 +212,11 @@ class CheckViewModelTest {
         vm.shareRescueCard()
 
         val event = eventDeferred.await()
-        assertTrue("Event should be BitmapOnly", event is ShareEvent.BitmapOnly)
-        val bitmapEvent = event as ShareEvent.BitmapOnly
-        assertNotNull("Bitmap should not be null", bitmapEvent.bitmap)
+        assertTrue("Event should be ImageWithText", event is ShareEvent.ImageWithText)
+        val imageEvent = event as ShareEvent.ImageWithText
+        assertNotNull("Bitmap should not be null", imageEvent.bitmap)
+        assertTrue("Text should contain domain", imageEvent.text.contains("evil.com"))
+        assertTrue("Text should contain download link", imageEvent.text.contains("play.google.com"))
     }
 
     @Test
@@ -224,14 +225,13 @@ class CheckViewModelTest {
 
         vm.shareRescueCard()
 
-        val deferred = async {
-            try {
-                vm.shareEvents.first()
-            } catch (_: Exception) {
-                null
-            }
+        // No event should be emitted — verify with a short timeout
+        try {
+            withTimeout(100) { vm.shareEvents.first() }
+            fail("Expected no emission but got one")
+        } catch (_: kotlinx.coroutines.TimeoutCancellationException) {
+            // Expected — no event was emitted
         }
-        deferred.cancel()
     }
 
     private fun createViewModel(

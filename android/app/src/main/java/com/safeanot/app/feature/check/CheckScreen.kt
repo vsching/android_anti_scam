@@ -70,8 +70,10 @@ fun CheckScreen(
                         val uri = ShareImageCache.saveBitmap(context, event.bitmap)
                         val intent = ShareIntentFactory.createImageShare(uri, event.text)
                         context.startActivity(intent)
+                        // Rescue cards include the Play Store download link
+                        val isRescueCard = event.text.contains("play.google.com")
                         viewModel.onShareCompleted(
-                            ShareType.VERDICT,
+                            if (isRescueCard) ShareType.RESCUE_CARD else ShareType.VERDICT,
                             urlInput,
                             SharePlatform.GENERIC,
                         )
@@ -81,7 +83,7 @@ fun CheckScreen(
                         val intent = ShareIntentFactory.createImageShare(uri)
                         context.startActivity(intent)
                         viewModel.onShareCompleted(
-                            ShareType.RESCUE_CARD,
+                            ShareType.VERDICT,
                             urlInput,
                             SharePlatform.GENERIC,
                         )

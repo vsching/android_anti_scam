@@ -43,18 +43,33 @@ object ShareImageCache {
         )
     }
 
+    private const val MAX_CACHED_FILES = 10
+
     /**
-     * Deletes files older than [maxAgeMs] from the shared_verdicts cache directory.
+     * Deletes files older than [maxAgeMs] from the shared_verdicts cache directory,
+     * and also caps the total number of cached files to [MAX_CACHED_FILES] (keeps most recent).
      */
     fun cleanupOldFiles(context: Context, maxAgeMs: Long = DEFAULT_MAX_AGE_MS) {
         val sharedDir = File(context.cacheDir, SHARED_DIR)
         if (!sharedDir.exists()) return
 
         val cutoff = System.currentTimeMillis() - maxAgeMs
-        sharedDir.listFiles()?.forEach { file ->
-            if (file.isFile && file.lastModified() < cutoff) {
+        val files = sharedDir.listFiles()?.filter { it.isFile } ?: return
+
+        // Delete files older than the max age
+        files.forEach { file ->
+            if (file.lastModified() < cutoff) {
                 file.delete()
             }
+        }
+
+        // Cap total files to MAX_CACHED_FILES, deleting oldest beyond the limit
+        val remaining = sharedDir.listFiles()?.filter { it.isFile } ?: return
+        if (remaining.size > MAX_CACHED_FILES) {
+            remaining
+                .sortedByDescending { it.lastModified() }
+                .drop(MAX_CACHED_FILES)
+                .forEach { it.delete() }
         }
     }
 }

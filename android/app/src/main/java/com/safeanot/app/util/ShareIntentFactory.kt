@@ -9,8 +9,6 @@ import android.net.Uri
 
 object ShareIntentFactory {
 
-    private const val WHATSAPP_PACKAGE = "com.whatsapp"
-
     /**
      * Creates a text-only share intent with a chooser.
      */
@@ -47,7 +45,7 @@ object ShareIntentFactory {
         return Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, text)
-            setPackage(WHATSAPP_PACKAGE)
+            setPackage(Constants.WHATSAPP_PACKAGE)
         }
     }
 }

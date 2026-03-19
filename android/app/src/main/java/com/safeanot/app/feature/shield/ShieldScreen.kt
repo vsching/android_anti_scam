@@ -80,17 +80,17 @@ fun ShieldScreen(
                         val uri = ShareImageCache.saveBitmap(context, event.bitmap, "score")
                         val intent = ShareIntentFactory.createImageShare(uri)
                         context.startActivity(intent)
+                        viewModel.onShareCompleted(
+                            ShareType.SCORE,
+                            "security_score",
+                            SharePlatform.GENERIC,
+                        )
                     }
                     is ShareEvent.TextOnly -> {
                         val intent = ShareIntentFactory.createTextShare(event.text)
                         context.startActivity(intent)
                     }
                 }
-                viewModel.onShareCompleted(
-                    ShareType.SCORE,
-                    "security_score",
-                    SharePlatform.GENERIC,
-                )
             } catch (e: Exception) {
                 Log.e("ShieldScreen", "Failed to share", e)
             }

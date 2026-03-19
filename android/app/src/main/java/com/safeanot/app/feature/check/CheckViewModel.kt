@@ -128,7 +128,8 @@ class CheckViewModel @Inject constructor(
     }
 
     /**
-     * Generates a rescue card bitmap and emits a BitmapOnly ShareEvent.
+     * Generates a rescue card bitmap and emits an ImageWithText ShareEvent.
+     * Includes domain info and download link so recipients get context.
      * The UI layer handles saving the bitmap to cache and starting the share intent.
      */
     fun shareRescueCard() {
@@ -137,8 +138,12 @@ class CheckViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val bitmap = generateRescueCardUseCase(state.verdict)
-                _shareEvents.send(ShareEvent.BitmapOnly(bitmap))
+                val verdict = state.verdict
+                val bitmap = generateRescueCardUseCase(verdict)
+                val rescueShareText = "I checked \"${verdict.domain}\" on Safe Anot? " +
+                    "It looks DANGEROUS. Protect yourself — download the app: " +
+                    "https://play.google.com/store/apps/details?id=com.safeanot.app"
+                _shareEvents.send(ShareEvent.ImageWithText(bitmap, rescueShareText))
             } catch (_: Exception) {
                 // Silently handle bitmap generation failures
             }
