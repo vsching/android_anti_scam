@@ -94,11 +94,9 @@ fun CheckScreen(
         }
     }
 
-    // Collect warning share events — plain text for WhatsApp or generic share
+    // Collect warning share events — (formattedText, domain) pairs
     LaunchedEffect(Unit) {
-        viewModel.warningShareEvent.collect { text ->
-            // Use stable domain from result state, not mutable urlInput
-            val warningDomain = (checkState as? CheckUiState.Result)?.verdict?.domain ?: urlInput
+        viewModel.warningShareEvent.collect { (text, domain) ->
             try {
                 val isWhatsApp = WhatsAppUtils.isWhatsAppInstalled(context)
                 val intent = if (isWhatsApp) {
@@ -109,7 +107,7 @@ fun CheckScreen(
                 context.startActivity(intent)
                 viewModel.onShareCompleted(
                     ShareType.WARNING_TEMPLATE,
-                    warningDomain,
+                    domain,
                     if (isWhatsApp) SharePlatform.WHATSAPP else SharePlatform.GENERIC,
                 )
             } catch (e: Exception) {

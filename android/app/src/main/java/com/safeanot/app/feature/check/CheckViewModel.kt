@@ -49,7 +49,8 @@ class CheckViewModel @Inject constructor(
     private val _shareEvents = Channel<ShareEvent>(Channel.BUFFERED)
     val shareEvents = _shareEvents.receiveAsFlow()
 
-    private val _warningShareEvent = Channel<String>(Channel.BUFFERED)
+    /** Emits (formattedText, domain) pairs for warning shares. */
+    private val _warningShareEvent = Channel<Pair<String, String>>(Channel.BUFFERED)
     val warningShareEvent = _warningShareEvent.receiveAsFlow()
 
     fun onUrlChanged(url: String) {
@@ -99,7 +100,7 @@ class CheckViewModel @Inject constructor(
                 verdict = verdict.verdict.name,
                 locale = localeTag,
             )
-            _warningShareEvent.send(formatted)
+            _warningShareEvent.send(Pair(formatted, verdict.domain))
         }
     }
 

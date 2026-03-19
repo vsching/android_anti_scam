@@ -201,6 +201,10 @@ export async function handleShare(
   const oneDayAgoMs = now - 24 * 60 * 60 * 1000;
   const oneDayAgoSql = new Date(oneDayAgoMs).toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, '');
 
+  // Note: rate limit check + insert is not fully atomic (D1 lacks conditional INSERT).
+  // Small race window is acceptable for analytics — this is a soft limit, not a
+  // security boundary. Worst case: a burst of concurrent requests may slightly
+  // exceed 100/day before the count catches up.
   let todayCount: number;
   try {
     const result = await env.DB.prepare(
