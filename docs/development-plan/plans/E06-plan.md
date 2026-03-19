@@ -9,6 +9,7 @@
 - [x] Dependencies complete: E01 (Backend API) -- complete
 - [x] Technical specs reviewed: INFRASTRUCTURE_ARCHITECTURE.md
 - [x] Plan reviewed by Codex (round 1 -- 8 findings fixed)
+- [x] Plan reviewed by Codex (round 2 -- 4 findings fixed)
 - [ ] Plan approved by user
 
 ---
@@ -68,14 +69,15 @@ The `website/` directory contains 5 HTML pages (index.html, check.html, result.h
 ### Tests
 - `website/tests/test_redirects.sh` -- Bash script that validates `_redirects` file format: each line has 3 fields, source starts with `/`, status is `200`. Verify all 6 clean URL routes are present.
 - `website/tests/test_deploy_smoke.sh` -- CI-compatible smoke test script that takes a base URL argument (e.g., a Pages preview URL or `http://localhost:8788`) and uses `curl` to verify: (1) `_headers` security headers are present in responses, (2) `_redirects` clean URLs return 200, (3) `/.well-known/assetlinks.json` returns valid JSON. Exits non-zero on any failure. Can be run in CI after `npx wrangler pages dev` or against a deployed preview URL.
+  **Note**: The security headers (1) and assetlinks (3) checks in this smoke test depend on E06-004 (`_headers`) and E06-003 (assetlinks.json) respectively. These checks will only pass after those issues are complete, not as part of E06-001 alone. During E06-001 implementation, only the clean URL checks (2) are testable.
 - Manual test: after deployment, verify `/check` serves check.html content, `/result?domain=test` serves result.html, etc.
 
 ### Acceptance Criteria
-- [x] Website deploys to Cloudflare Pages from `website/` directory
-- [x] Clean URLs work: `/check`, `/result`, `/challenge`, `/join`
-- [x] Security headers applied to all pages
-- [x] Custom 404 page displayed for unknown routes
-- [x] All internal navigation works correctly with clean URLs
+- [ ] Website deploys to Cloudflare Pages from `website/` directory
+- [ ] Clean URLs work: `/check`, `/result`, `/challenge`, `/join`
+- [ ] Security headers applied to all pages
+- [ ] Custom 404 page displayed for unknown routes
+- [ ] All internal navigation works correctly with clean URLs
 
 ---
 
@@ -131,12 +133,12 @@ The Pages site (`safeanot.com`) and Workers API (`api.safeanot.com` or `*.worker
 - Manual test: with API unreachable -> verify error message appears with retry button
 
 ### Acceptance Criteria
-- [x] check.html sends real API requests to backend
-- [x] Verdict display shows API response (domain, verdict, reason)
-- [x] Loading spinner shows during API call
-- [x] Error state handled (network error, API error)
-- [x] result.html fetches live verdict from API for `?domain=xxx`
-- [x] Share URLs still work: `safeanot.com/result?domain=xxx`
+- [ ] check.html sends real API requests to backend
+- [ ] Verdict display shows API response (domain, verdict, reason)
+- [ ] Loading spinner shows during API call
+- [ ] Error state handled (network error, API error)
+- [ ] result.html fetches live verdict from API for `?domain=xxx`
+- [ ] Share URLs still work: `safeanot.com/result?domain=xxx`
 
 ---
 
@@ -167,6 +169,7 @@ Android App Links require a `/.well-known/assetlinks.json` file served from the 
      Add a comment in the epic/plan noting how to get the fingerprint:
      `keytool -list -v -keystore release.keystore | grep SHA256`
      For debug builds, also include the debug keystore fingerprint during development.
+     **Important**: Production assetlinks.json must contain ONLY release/Play App Signing fingerprints. Debug fingerprints are for local testing only and must NOT be deployed to safeanot.com.
 
 2. **Verify _redirects does not interfere with .well-known path**
    - File: `website/_redirects`
@@ -186,12 +189,13 @@ Android App Links require a `/.well-known/assetlinks.json` file served from the 
 - `website/tests/test_assetlinks.sh` -- Validate JSON syntax of assetlinks.json using `python3 -m json.tool`. Verify required fields are present (relation, target, namespace, package_name, sha256_cert_fingerprints).
 - Manual test: after deployment, `curl https://safeanot.com/.well-known/assetlinks.json` returns valid JSON with Content-Type `application/json`.
 - Manual test: Google Digital Asset Links API validator passes for the domain.
+- Manual test: Run `adb shell pm verify-app-links --re-verify com.safeanot.app` and verify with `adb shell pm get-app-links com.safeanot.app` that status shows `verified`.
 
 ### Acceptance Criteria
-- [x] `safeanot.com/.well-known/assetlinks.json` returns valid Digital Asset Links JSON
-- [x] JSON contains correct package name and SHA-256 fingerprint placeholder
-- [x] Deep links `safeanot.com/result?domain=xxx` verified by Android
-- [x] File served with correct `Content-Type: application/json`
+- [ ] `safeanot.com/.well-known/assetlinks.json` returns valid Digital Asset Links JSON
+- [ ] JSON contains correct package name and SHA-256 fingerprint placeholder
+- [ ] Deep links `safeanot.com/result?domain=xxx` verified by Android
+- [ ] File served with correct `Content-Type: application/json`
 
 ---
 
@@ -283,12 +287,12 @@ All 5 existing pages have footer links to `#` for Privacy and Terms. These need 
 - Manual test: verify `/privacy` and `/terms` pages render and are accessible from all page footers.
 
 ### Acceptance Criteria
-- [x] All pages have proper CSP header
-- [x] HSTS enabled with appropriate max-age
-- [x] Permissions-Policy restricts unnecessary APIs
-- [x] Privacy policy page accessible at `/privacy`
-- [x] Terms of service page accessible at `/terms`
-- [x] All footer "Privacy" and "Terms" links point to correct pages
+- [ ] All pages have proper CSP header
+- [ ] HSTS enabled with appropriate max-age
+- [ ] Permissions-Policy restricts unnecessary APIs
+- [ ] Privacy policy page accessible at `/privacy`
+- [ ] Terms of service page accessible at `/terms`
+- [ ] All footer "Privacy" and "Terms" links point to correct pages
 
 ---
 
@@ -341,3 +345,7 @@ Recommended sequence (respects internal dependencies):
 | 6 | INFO | Task references wrong file context (result.html redirect in check.html task) | Moved redirect reference from check.html task to result.html task in E06-001 | E06-001 |
 | 7 | WARNING | Tests are mostly manual | Added `test_deploy_smoke.sh` CI script task using curl against preview/deployed URL | E06-001 |
 | 8 | INFO | DRY risk with new standalone pages | Added DRY notes to privacy.html and terms.html tasks; shared CSS extraction deferred | E06-004 |
+| 9 | WARNING | Acceptance criteria pre-checked before implementation | Unchecked all `[x]` in acceptance criteria sections | All |
+| 10 | WARNING | Debug keystore fingerprint could leak to production assetlinks.json | Added explicit warning: production must contain ONLY release/Play App Signing fingerprints | E06-003 |
+| 11 | WARNING | App Links validation incomplete -- no adb verification step | Added `adb shell pm verify-app-links` and `pm get-app-links` verification test | E06-003 |
+| 12 | INFO | Cross-issue test coupling in E06-001 smoke test | Added note clarifying header/assetlinks checks depend on E06-003/E06-004 completion | E06-001 |
