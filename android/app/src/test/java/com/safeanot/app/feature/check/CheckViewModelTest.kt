@@ -1,10 +1,14 @@
 package com.safeanot.app.feature.check
 
 import com.safeanot.app.domain.model.LinkVerdict
+import com.safeanot.app.domain.model.ShareEventModel
 import com.safeanot.app.domain.model.VerdictType
 import com.safeanot.app.domain.model.WarningTone
 import com.safeanot.app.domain.repository.LinkCheckRepository
+import com.safeanot.app.domain.repository.ShareEventRepository
 import com.safeanot.app.domain.usecase.CheckLinkUseCase
+import com.safeanot.app.domain.usecase.GenerateRescueCardUseCase
+import com.safeanot.app.domain.usecase.TrackShareEventUseCase
 import com.safeanot.app.util.WarningTemplateProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -197,6 +201,39 @@ class CheckViewModelTest {
         assertNotNull(vm)
     }
 
+    @Test
+    fun `shareRescueCard emits BitmapOnly event`() = runTest {
+        val verdict = LinkVerdict("evil.com", VerdictType.DANGEROUS, "Phishing", 0.99f)
+        val vm = createViewModel(verdict)
+
+        vm.checkLink("https://evil.com")
+
+        val eventDeferred = async { vm.shareEvents.first() }
+
+        vm.shareRescueCard()
+
+        val event = eventDeferred.await()
+        assertTrue("Event should be BitmapOnly", event is ShareEvent.BitmapOnly)
+        val bitmapEvent = event as ShareEvent.BitmapOnly
+        assertNotNull("Bitmap should not be null", bitmapEvent.bitmap)
+    }
+
+    @Test
+    fun `shareRescueCard does not emit when state is not Result`() = runTest {
+        val vm = createViewModel()
+
+        vm.shareRescueCard()
+
+        val deferred = async {
+            try {
+                vm.shareEvents.first()
+            } catch (_: Exception) {
+                null
+            }
+        }
+        deferred.cancel()
+    }
+
     private fun createViewModel(
         verdictToReturn: LinkVerdict? = null,
         error: Exception? = null,
@@ -207,6 +244,14 @@ class CheckViewModelTest {
                 return verdictToReturn ?: LinkVerdict("test.com", VerdictType.UNKNOWN, "Unknown", 0f)
             }
         }
-        return CheckViewModel(CheckLinkUseCase(repo))
+        val shareRepo = object : ShareEventRepository {
+            override suspend fun trackEvent(event: ShareEventModel): Boolean = true
+            override suspend fun syncPendingEvents(): Boolean = true
+        }
+        return CheckViewModel(
+            checkLinkUseCase = CheckLinkUseCase(repo),
+            trackShareEventUseCase = TrackShareEventUseCase(shareRepo),
+            generateRescueCardUseCase = GenerateRescueCardUseCase(),
+        )
     }
 }

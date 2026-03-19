@@ -13,6 +13,7 @@ import com.safeanot.app.domain.model.ShareEventModel
 import com.safeanot.app.domain.model.SharePlatform
 import com.safeanot.app.domain.model.ShareType
 import com.safeanot.app.domain.usecase.CheckLinkUseCase
+import com.safeanot.app.domain.usecase.GenerateRescueCardUseCase
 import com.safeanot.app.domain.usecase.TrackShareEventUseCase
 import com.safeanot.app.util.VerdictCardGenerator
 import com.safeanot.app.util.WarningTemplateProvider
@@ -36,6 +37,7 @@ sealed class CheckUiState {
 class CheckViewModel @Inject constructor(
     private val checkLinkUseCase: CheckLinkUseCase,
     private val trackShareEventUseCase: TrackShareEventUseCase,
+    private val generateRescueCardUseCase: GenerateRescueCardUseCase,
 ) : ViewModel() {
 
     private val _urlInput = MutableStateFlow("")
@@ -119,6 +121,24 @@ class CheckViewModel @Inject constructor(
                     "Verdict: ${verdict.verdict.name}. $deepLink"
 
                 _shareEvents.send(ShareEvent.ImageWithText(bitmap, shareText))
+            } catch (_: Exception) {
+                // Silently handle bitmap generation failures
+            }
+        }
+    }
+
+    /**
+     * Generates a rescue card bitmap and emits a BitmapOnly ShareEvent.
+     * The UI layer handles saving the bitmap to cache and starting the share intent.
+     */
+    fun shareRescueCard() {
+        val state = _checkState.value
+        if (state !is CheckUiState.Result) return
+
+        viewModelScope.launch {
+            try {
+                val bitmap = generateRescueCardUseCase(state.verdict)
+                _shareEvents.send(ShareEvent.BitmapOnly(bitmap))
             } catch (_: Exception) {
                 // Silently handle bitmap generation failures
             }

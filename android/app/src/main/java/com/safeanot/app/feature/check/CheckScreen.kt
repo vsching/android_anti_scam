@@ -8,23 +8,17 @@ import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -87,7 +81,7 @@ fun CheckScreen(
                         val intent = ShareIntentFactory.createImageShare(uri)
                         context.startActivity(intent)
                         viewModel.onShareCompleted(
-                            ShareType.VERDICT,
+                            ShareType.RESCUE_CARD,
                             urlInput,
                             SharePlatform.GENERIC,
                         )
@@ -219,35 +213,17 @@ fun CheckScreen(
                     verdict = state.verdict,
                     onShareClick = { viewModel.shareResult() },
                     onCheckAnotherClick = { viewModel.clearResults() },
+                    onWarnContactsClick = if (state.verdict.verdict == VerdictType.DANGEROUS) {
+                        { showWarningPicker = true }
+                    } else {
+                        null
+                    },
+                    onProtectFamilyClick = if (state.verdict.verdict == VerdictType.DANGEROUS) {
+                        { viewModel.shareRescueCard() }
+                    } else {
+                        null
+                    },
                 )
-
-                // "Warn My Contacts" button — DANGEROUS verdicts only
-                if (state.verdict.verdict == VerdictType.DANGEROUS) {
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Button(
-                        onClick = { showWarningPicker = true },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = RedAccent.copy(alpha = 0.15f),
-                            contentColor = RedAccent,
-                        ),
-                        shape = RoundedCornerShape(10.dp),
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Warning,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Warn My Contacts",
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                        }
-                    }
-                }
 
                 // Warning template picker bottom sheet
                 if (showWarningPicker && state.verdict.verdict == VerdictType.DANGEROUS) {
