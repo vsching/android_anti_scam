@@ -66,7 +66,8 @@ fun ShieldScreen(
     val score by viewModel.securityScore.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    // Collect share events from the ViewModel and handle intent creation in UI
+    // Collect share events from the ViewModel and handle intent creation in UI.
+    // ShareEvent carries its own shareType and contentId metadata.
     LaunchedEffect(Unit) {
         viewModel.shareEvents.collect { event ->
             try {
@@ -80,17 +81,18 @@ fun ShieldScreen(
                         val uri = ShareImageCache.saveBitmap(context, event.bitmap, "score")
                         val intent = ShareIntentFactory.createImageShare(uri)
                         context.startActivity(intent)
-                        viewModel.onShareCompleted(
-                            ShareType.SCORE,
-                            "security_score",
-                            SharePlatform.GENERIC,
-                        )
                     }
                     is ShareEvent.TextOnly -> {
                         val intent = ShareIntentFactory.createTextShare(event.text)
                         context.startActivity(intent)
                     }
                 }
+                // Track using metadata from the event itself
+                viewModel.onShareCompleted(
+                    event.shareType,
+                    event.contentId,
+                    SharePlatform.GENERIC,
+                )
             } catch (e: Exception) {
                 Log.e("ShieldScreen", "Failed to share", e)
             }

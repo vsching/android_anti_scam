@@ -118,7 +118,11 @@ class ShieldViewModel @Inject constructor(
             try {
                 val score = securityScore.value
                 val bitmap = generateScoreCardUseCase(score, format)
-                _shareEvents.send(ShareEvent.BitmapOnly(bitmap))
+                _shareEvents.send(ShareEvent.BitmapOnly(
+                    bitmap = bitmap,
+                    shareType = ShareType.SCORE,
+                    contentId = "${score.securedItems}/${score.totalItems}",
+                ))
             } catch (_: Exception) {
                 // Silently handle bitmap generation failures
             }

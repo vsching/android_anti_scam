@@ -2,6 +2,7 @@ package com.safeanot.app.feature.check
 
 import com.safeanot.app.domain.model.LinkVerdict
 import com.safeanot.app.domain.model.ShareEventModel
+import com.safeanot.app.domain.model.ShareType
 import com.safeanot.app.domain.model.VerdictType
 import com.safeanot.app.domain.model.WarningTone
 import com.safeanot.app.domain.repository.LinkCheckRepository
@@ -139,6 +140,8 @@ class CheckViewModelTest {
         assertTrue("Text should contain domain", imageEvent.text.contains("example.com"))
         assertTrue("Text should contain verdict", imageEvent.text.contains("DANGEROUS"))
         assertTrue("Text should contain deep link", imageEvent.text.contains("https://safeanot.com/result"))
+        assertEquals("Share type should be VERDICT", ShareType.VERDICT, imageEvent.shareType)
+        assertEquals("Content ID should be domain", "example.com", imageEvent.contentId)
     }
 
     @Test
@@ -217,6 +220,8 @@ class CheckViewModelTest {
         assertNotNull("Bitmap should not be null", imageEvent.bitmap)
         assertTrue("Text should contain domain", imageEvent.text.contains("evil.com"))
         assertTrue("Text should contain download link", imageEvent.text.contains("play.google.com"))
+        assertEquals("Share type should be RESCUE_CARD", ShareType.RESCUE_CARD, imageEvent.shareType)
+        assertEquals("Content ID should be domain", "evil.com", imageEvent.contentId)
     }
 
     @Test

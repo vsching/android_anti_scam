@@ -61,44 +61,33 @@ fun CheckScreen(
     val context = LocalContext.current
     var showWarningPicker by remember { mutableStateOf(false) }
 
-    // Collect share events from the ViewModel and handle intent creation in UI
+    // Collect share events from the ViewModel and handle intent creation in UI.
+    // ShareEvent carries its own shareType and contentId, so no heuristics needed.
     LaunchedEffect(Unit) {
         viewModel.shareEvents.collect { event ->
-            // Use stable domain from result state, not mutable urlInput
-            val stableDomain = (checkState as? CheckState.Result)?.verdict?.domain ?: urlInput
             try {
                 when (event) {
                     is ShareEvent.ImageWithText -> {
                         val uri = ShareImageCache.saveBitmap(context, event.bitmap)
                         val intent = ShareIntentFactory.createImageShare(uri, event.text)
                         context.startActivity(intent)
-                        val isRescueCard = event.text.contains("play.google.com")
-                        viewModel.onShareCompleted(
-                            if (isRescueCard) ShareType.RESCUE_CARD else ShareType.VERDICT,
-                            stableDomain,
-                            SharePlatform.GENERIC,
-                        )
                     }
                     is ShareEvent.BitmapOnly -> {
                         val uri = ShareImageCache.saveBitmap(context, event.bitmap)
                         val intent = ShareIntentFactory.createImageShare(uri)
                         context.startActivity(intent)
-                        viewModel.onShareCompleted(
-                            ShareType.VERDICT,
-                            stableDomain,
-                            SharePlatform.GENERIC,
-                        )
                     }
                     is ShareEvent.TextOnly -> {
                         val intent = ShareIntentFactory.createTextShare(event.text)
                         context.startActivity(intent)
-                        viewModel.onShareCompleted(
-                            ShareType.VERDICT,
-                            stableDomain,
-                            SharePlatform.GENERIC,
-                        )
                     }
                 }
+                // Track using metadata from the event itself — no heuristics
+                viewModel.onShareCompleted(
+                    event.shareType,
+                    event.contentId,
+                    SharePlatform.GENERIC,
+                )
             } catch (e: Exception) {
                 Log.e("CheckScreen", "Failed to share", e)
             }
@@ -109,7 +98,7 @@ fun CheckScreen(
     LaunchedEffect(Unit) {
         viewModel.warningShareEvent.collect { text ->
             // Use stable domain from result state, not mutable urlInput
-            val warningDomain = (checkState as? CheckState.Result)?.verdict?.domain ?: urlInput
+            val warningDomain = (checkState as? CheckUiState.Result)?.verdict?.domain ?: urlInput
             try {
                 val isWhatsApp = WhatsAppUtils.isWhatsAppInstalled(context)
                 val intent = if (isWhatsApp) {

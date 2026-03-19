@@ -120,7 +120,12 @@ class CheckViewModel @Inject constructor(
                 val shareText = "I checked \"${verdict.domain}\" on Safe Anot? " +
                     "Verdict: ${verdict.verdict.name}. $deepLink"
 
-                _shareEvents.send(ShareEvent.ImageWithText(bitmap, shareText))
+                _shareEvents.send(ShareEvent.ImageWithText(
+                    bitmap = bitmap,
+                    text = shareText,
+                    shareType = ShareType.VERDICT,
+                    contentId = verdict.domain,
+                ))
             } catch (_: Exception) {
                 // Silently handle bitmap generation failures
             }
@@ -143,7 +148,12 @@ class CheckViewModel @Inject constructor(
                 val rescueShareText = "I checked \"${verdict.domain}\" on Safe Anot? " +
                     "It looks DANGEROUS. Protect yourself — download the app: " +
                     "https://play.google.com/store/apps/details?id=com.safeanot.app"
-                _shareEvents.send(ShareEvent.ImageWithText(bitmap, rescueShareText))
+                _shareEvents.send(ShareEvent.ImageWithText(
+                    bitmap = bitmap,
+                    text = rescueShareText,
+                    shareType = ShareType.RESCUE_CARD,
+                    contentId = verdict.domain,
+                ))
             } catch (_: Exception) {
                 // Silently handle bitmap generation failures
             }
