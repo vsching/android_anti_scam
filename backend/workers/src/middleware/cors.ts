@@ -1,4 +1,4 @@
-// CORS middleware — allows safeanot.com and localhost origins.
+// CORS middleware — allows safeanot.com, localhost, and *.safeanot-app.pages.dev origins.
 // Handles OPTIONS preflight and adds CORS headers to every response.
 
 const ALLOWED_ORIGINS = [
@@ -17,6 +17,8 @@ function isAllowedOrigin(origin: string | null): boolean {
   if (!origin) return false;
   if (ALLOWED_ORIGINS.includes(origin)) return true;
   if (/^http:\/\/localhost(:\d+)?$/.test(origin)) return true;
+  // Allow Cloudflare Pages preview deployments (e.g. abc123.safeanot-app.pages.dev)
+  if (/^https:\/\/[a-z0-9-]+\.safeanot-app\.pages\.dev$/.test(origin)) return true;
   return false;
 }
 

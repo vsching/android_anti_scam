@@ -591,69 +591,15 @@ footer .tiktok {
 <div class="toast" id="toast"></div>
 
 <script>
+const API_BASE = 'https://api.safeanot.com';
+const VALID_VERDICTS = ['dangerous', 'safe', 'suspicious'];
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
-
-const SCAM_DB = {
-  'maybank-secure-update.xyz': {
-    verdict: 'dangerous',
-    reason: 'This domain impersonates Maybank to steal your login credentials and TAC codes.',
-    real: 'Real Maybank: maybank2u.com.my'
-  },
-  'maybank2u-verify.com': {
-    verdict: 'dangerous',
-    reason: 'Fake Maybank verification site. This domain was created to steal banking credentials.',
-    real: 'Real Maybank: maybank2u.com.my'
-  },
-  'cimb-secure-login.xyz': {
-    verdict: 'dangerous',
-    reason: 'Fake CIMB login page designed to steal your banking credentials.',
-    real: 'Real CIMB: cimbclicks.com.my'
-  },
-  'lhdn-tax-refund.com': {
-    verdict: 'dangerous',
-    reason: 'Fake LHDN (tax authority) site. LHDN will never ask you to click a link for refunds.',
-    real: 'Real LHDN: hasil.gov.my'
-  },
-  'shopee-lucky-draw.top': {
-    verdict: 'dangerous',
-    reason: 'Fake Shopee lucky draw scam. Shopee does not run promotions through third-party domains.',
-    real: 'Real Shopee: shopee.com.my'
-  },
-  'grab-promo-winners.buzz': {
-    verdict: 'dangerous',
-    reason: 'Fake Grab promotion scam. This domain harvests personal data.',
-    real: 'Real Grab: grab.com'
-  },
-  'shopee.com.my': {
-    verdict: 'safe',
-    reason: 'This is the official Shopee Malaysia website.'
-  },
-  'maybank2u.com.my': {
-    verdict: 'safe',
-    reason: 'This is the official Maybank2u online banking website.'
-  },
-  'cimbclicks.com.my': {
-    verdict: 'safe',
-    reason: 'This is the official CIMB Clicks online banking website.'
-  },
-  'hasil.gov.my': {
-    verdict: 'safe',
-    reason: 'This is the official LHDN (Inland Revenue Board) website.'
-  },
-  'grab.com': {
-    verdict: 'safe',
-    reason: 'This is the official Grab website.'
-  },
-  'bit.ly/kl-investment': {
-    verdict: 'suspicious',
-    reason: 'Shortened URLs hide the real destination. This link could lead to a scam investment site. Never enter personal details on shortened links.'
-  }
-};
 
 function extractDomain(url) {
   url = url.trim().toLowerCase();
@@ -674,71 +620,180 @@ function checkURL() {
   if (!input) return;
 
   const resultDiv = document.getElementById('result');
+  const checkBtn = document.getElementById('checkBtn');
+
+  // Show loading state
   resultDiv.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Checking domain...</div>';
+  checkBtn.disabled = true;
 
-  const domain = extractDomain(input);
+  fetch(API_BASE + '/api/check', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url: input })
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('Server returned ' + res.status);
+    return res.json();
+  })
+  .then(function(data) {
+    var verdict = VALID_VERDICTS.includes(data.verdict) ? data.verdict : 'suspicious';
+    var domain = typeof data.domain === 'string' ? data.domain : extractDomain(input);
+    var reason = typeof data.reason === 'string' ? data.reason : '';
+    var real = typeof data.real === 'string' ? data.real : null;
+    showResult(domain, verdict, reason, real);
+  })
+  .catch(function(err) {
+    showError('Could not check this link. Please try again.');
+  })
+  .finally(function() {
+    checkBtn.disabled = false;
+  });
+}
 
-  setTimeout(() => {
-    const data = SCAM_DB[domain];
+function showError(message) {
+  var resultDiv = document.getElementById('result');
+  var card = document.createElement('div');
+  card.className = 'result-card';
+  card.style.borderLeft = '5px solid var(--red)';
 
-    if (!data) {
-      const isSuspiciousTLD = /\.(xyz|top|buzz|click|loan|work|gq|ml|tk|cf|ga|info)$/i.test(domain);
-      if (isSuspiciousTLD) {
-        showResult(domain, 'suspicious', 'This domain uses a TLD commonly associated with scam websites. Exercise caution and verify through official channels.', null);
-      } else {
-        showResult(domain, 'safe', 'This domain is not in our scam database. However, always be cautious with unfamiliar websites.', null);
-      }
-      return;
-    }
+  var icon = document.createElement('div');
+  icon.className = 'result-icon';
+  icon.style.color = 'var(--red)';
+  var iconSpan = document.createElement('span');
+  iconSpan.className = 'material-symbols-rounded';
+  iconSpan.style.fontSize = '56px';
+  iconSpan.textContent = 'error';
+  icon.appendChild(iconSpan);
 
-    showResult(domain, data.verdict, data.reason, data.real || null);
-  }, 800 + Math.random() * 600);
+  var msg = document.createElement('div');
+  msg.className = 'result-reason';
+  msg.style.marginBottom = '20px';
+  msg.textContent = message;
+
+  var retryBtn = document.createElement('button');
+  retryBtn.className = 'check-btn';
+  retryBtn.textContent = 'Try Again';
+  retryBtn.addEventListener('click', function() { checkURL(); });
+
+  card.appendChild(icon);
+  card.appendChild(msg);
+  card.appendChild(retryBtn);
+
+  resultDiv.innerHTML = '';
+  resultDiv.appendChild(card);
 }
 
 function showResult(domain, verdict, reason, real) {
-  const resultDiv = document.getElementById('result');
-  const icons = { dangerous: 'gpp_bad', safe: 'verified_user', suspicious: 'gpp_maybe' };
-  const labels = { dangerous: 'DANGEROUS', safe: 'SAFE', suspicious: 'SUSPICIOUS' };
+  var resultDiv = document.getElementById('result');
+  var icons = { dangerous: 'gpp_bad', safe: 'verified_user', suspicious: 'gpp_maybe' };
+  var labels = { dangerous: 'DANGEROUS', safe: 'SAFE', suspicious: 'SUSPICIOUS' };
 
-  const shareText = verdict === 'dangerous'
-    ? `⚠️ WARNING: ${domain} is a SCAM site! Check before you click: ${window.location.origin}/check`
-    : verdict === 'suspicious'
-    ? `⚠️ ${domain} looks suspicious. Check your links here: ${window.location.origin}/check`
-    : `✅ ${domain} is safe. Check any link here: ${window.location.origin}/check`;
+  var safeVerdict = VALID_VERDICTS.includes(verdict) ? verdict : 'suspicious';
 
-  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
-  const resultUrl = `${window.location.origin}/result?domain=${encodeURIComponent(domain)}&verdict=${verdict}`;
+  var shareText = safeVerdict === 'dangerous'
+    ? '\u26A0\uFE0F WARNING: ' + domain + ' is a SCAM site! Check before you click: ' + window.location.origin + '/check'
+    : safeVerdict === 'suspicious'
+    ? '\u26A0\uFE0F ' + domain + ' looks suspicious. Check your links here: ' + window.location.origin + '/check'
+    : '\u2705 ' + domain + ' is safe. Check any link here: ' + window.location.origin + '/check';
 
-  let html = `
-    <div class="result-card ${verdict}">
-      <div class="result-icon"><span class="material-symbols-rounded" style="font-size:56px">${icons[verdict]}</span></div>
-      <div class="result-verdict">${labels[verdict]}</div>
-      <div class="result-domain">${domain}</div>
-      <div class="result-reason">${reason}</div>
-      ${real ? `<div class="result-real">✓ ${real}</div>` : ''}
-      ${verdict === 'dangerous' ? '<div class="result-warning">⚠ Do NOT enter passwords on this site</div>' : ''}
-      <div class="share-buttons">
-        <a href="${whatsappUrl}" target="_blank" class="share-btn share-wa">
-          <span class="material-symbols-rounded" style="font-size:18px">share</span>
-          Share on WhatsApp
-        </a>
-        <button class="share-btn share-copy" onclick="copyResult('${resultUrl}')">
-          <span class="material-symbols-rounded" style="font-size:18px">content_copy</span>
-          Copy Link
-        </button>
-      </div>
-    </div>
-  `;
+  var whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent(shareText);
+  var resultUrl = window.location.origin + '/result?domain=' + encodeURIComponent(domain) + '&verdict=' + safeVerdict;
 
-  resultDiv.innerHTML = html;
+  // Build result card using DOM methods (XSS-safe)
+  var card = document.createElement('div');
+  card.className = 'result-card ' + safeVerdict;
+
+  var iconDiv = document.createElement('div');
+  iconDiv.className = 'result-icon';
+  var iconSpan = document.createElement('span');
+  iconSpan.className = 'material-symbols-rounded';
+  iconSpan.style.fontSize = '56px';
+  iconSpan.textContent = icons[safeVerdict];
+  iconDiv.appendChild(iconSpan);
+
+  var verdictDiv = document.createElement('div');
+  verdictDiv.className = 'result-verdict';
+  verdictDiv.textContent = labels[safeVerdict];
+
+  var domainDiv = document.createElement('div');
+  domainDiv.className = 'result-domain';
+  domainDiv.textContent = domain;
+
+  var reasonDiv = document.createElement('div');
+  reasonDiv.className = 'result-reason';
+  reasonDiv.textContent = reason;
+
+  card.appendChild(iconDiv);
+  card.appendChild(verdictDiv);
+  card.appendChild(domainDiv);
+  card.appendChild(reasonDiv);
+
+  if (real) {
+    var realDiv = document.createElement('div');
+    realDiv.className = 'result-real';
+    realDiv.textContent = '\u2713 ' + real;
+    card.appendChild(realDiv);
+  }
+
+  if (safeVerdict === 'dangerous') {
+    var warnDiv = document.createElement('div');
+    warnDiv.className = 'result-warning';
+    warnDiv.textContent = '\u26A0 Do NOT enter passwords on this site';
+    card.appendChild(warnDiv);
+  }
+
+  var shareDiv = document.createElement('div');
+  shareDiv.className = 'share-buttons';
+
+  var waLink = document.createElement('a');
+  waLink.href = whatsappUrl;
+  waLink.target = '_blank';
+  waLink.className = 'share-btn share-wa';
+  var waIcon = document.createElement('span');
+  waIcon.className = 'material-symbols-rounded';
+  waIcon.style.fontSize = '18px';
+  waIcon.textContent = 'share';
+  waLink.appendChild(waIcon);
+  waLink.appendChild(document.createTextNode(' Share on WhatsApp'));
+
+  var copyBtn = document.createElement('button');
+  copyBtn.className = 'share-btn share-copy';
+  copyBtn.addEventListener('click', function() { copyResult(resultUrl); });
+  var copyIcon = document.createElement('span');
+  copyIcon.className = 'material-symbols-rounded';
+  copyIcon.style.fontSize = '18px';
+  copyIcon.textContent = 'content_copy';
+  copyBtn.appendChild(copyIcon);
+  copyBtn.appendChild(document.createTextNode(' Copy Link'));
+
+  shareDiv.appendChild(waLink);
+  shareDiv.appendChild(copyBtn);
+  card.appendChild(shareDiv);
+
+  resultDiv.innerHTML = '';
+  resultDiv.appendChild(card);
 }
 
 function copyResult(url) {
-  navigator.clipboard.writeText(url).then(() => {
-    const btn = document.querySelector('.share-copy');
-    const orig = btn.innerHTML;
-    btn.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px">check</span> Copied!';
-    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+  navigator.clipboard.writeText(url).then(function() {
+    var btn = document.querySelector('.share-copy');
+    var origText = 'content_copy';
+    btn.textContent = '';
+    var checkIcon = document.createElement('span');
+    checkIcon.className = 'material-symbols-rounded';
+    checkIcon.style.fontSize = '18px';
+    checkIcon.textContent = 'check';
+    btn.appendChild(checkIcon);
+    btn.appendChild(document.createTextNode(' Copied!'));
+    setTimeout(function() {
+      btn.textContent = '';
+      var copyIcon = document.createElement('span');
+      copyIcon.className = 'material-symbols-rounded';
+      copyIcon.style.fontSize = '18px';
+      copyIcon.textContent = origText;
+      btn.appendChild(copyIcon);
+      btn.appendChild(document.createTextNode(' Copy Link'));
+    }, 2000);
   });
 }
 

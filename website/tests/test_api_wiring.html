@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Wiring Test — Safe Anot?</title>
+<style>
+  body { font-family: monospace; max-width: 720px; margin: 40px auto; padding: 0 20px; background: #f8f9fa; color: #1e293b; }
+  h1 { font-size: 1.4rem; margin-bottom: 8px; }
+  p.desc { color: #64748b; margin-bottom: 24px; }
+  .test-group { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+  .test-group h2 { font-size: 1rem; margin-bottom: 12px; }
+  label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 0.85rem; }
+  input[type="text"] { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-family: monospace; font-size: 0.9rem; margin-bottom: 12px; }
+  button { padding: 10px 20px; background: #4f46e5; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-family: monospace; font-weight: bold; }
+  button:hover { background: #4338ca; }
+  .log { background: #1e293b; color: #a5f3fc; padding: 16px; border-radius: 6px; margin-top: 12px; font-size: 0.82rem; line-height: 1.6; max-height: 400px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+  .log .ok { color: #4ade80; }
+  .log .err { color: #f87171; }
+  .log .info { color: #fbbf24; }
+</style>
+</head>
+<body>
+
+<h1>API Wiring Manual Test</h1>
+<p class="desc">Tests the /api/check endpoint. Open browser console for full details.</p>
+
+<div class="test-group">
+  <h2>1. Single URL Check</h2>
+  <label>API Base URL</label>
+  <input type="text" id="apiBase" value="https://api.safeanot.com">
+  <label>URL to check</label>
+  <input type="text" id="testUrl" value="maybank-secure-update.xyz">
+  <button onclick="runSingleTest()">Run Test</button>
+  <div class="log" id="singleLog">Ready.</div>
+</div>
+
+<div class="test-group">
+  <h2>2. Batch Test (multiple domains)</h2>
+  <button onclick="runBatchTest()">Run All</button>
+  <div class="log" id="batchLog">Ready. Will test: dangerous, safe, suspicious, and unknown domains.</div>
+</div>
+
+<script>
+var TEST_DOMAINS = [
+  { url: 'maybank-secure-update.xyz', expect: 'dangerous' },
+  { url: 'shopee.com.my', expect: 'safe' },
+  { url: 'bit.ly/kl-investment', expect: 'suspicious' },
+  { url: 'example-unknown-domain-12345.com', expect: null }
+];
+
+function logTo(elId, msg, cls) {
+  var el = document.getElementById(elId);
+  var line = document.createElement('span');
+  if (cls) line.className = cls;
+  line.textContent = msg + '\n';
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+function clearLog(elId) {
+  document.getElementById(elId).textContent = '';
+}
+
+function runSingleTest() {
+  var base = document.getElementById('apiBase').value.replace(/\/+$/, '');
+  var url = document.getElementById('testUrl').value.trim();
+  clearLog('singleLog');
+  logTo('singleLog', '[INFO] POST ' + base + '/api/check', 'info');
+  logTo('singleLog', '[INFO] Body: ' + JSON.stringify({ url: url }), 'info');
+
+  var start = Date.now();
+  fetch(base + '/api/check', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url: url })
+  })
+  .then(function(res) {
+    var elapsed = Date.now() - start;
+    logTo('singleLog', '[INFO] Status: ' + res.status + ' (' + elapsed + 'ms)', res.ok ? 'ok' : 'err');
+    return res.json();
+  })
+  .then(function(data) {
+    logTo('singleLog', '[OK] Response:', 'ok');
+    logTo('singleLog', JSON.stringify(data, null, 2), 'ok');
+    console.log('API response:', data);
+  })
+  .catch(function(err) {
+    logTo('singleLog', '[ERR] ' + err.message, 'err');
+    console.error('API error:', err);
+  });
+}
+
+function runBatchTest() {
+  var base = document.getElementById('apiBase').value.replace(/\/+$/, '');
+  clearLog('batchLog');
+  logTo('batchLog', '[INFO] Running ' + TEST_DOMAINS.length + ' tests against ' + base, 'info');
+  logTo('batchLog', '', '');
+
+  var index = 0;
+  function next() {
+    if (index >= TEST_DOMAINS.length) {
+      logTo('batchLog', '--- All tests complete ---', 'info');
+      return;
+    }
+    var test = TEST_DOMAINS[index];
+    index++;
+    logTo('batchLog', '[TEST ' + index + '] Checking: ' + test.url + ' (expect: ' + (test.expect || 'any') + ')', 'info');
+
+    var start = Date.now();
+    fetch(base + '/api/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: test.url })
+    })
+    .then(function(res) {
+      var elapsed = Date.now() - start;
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      logTo('batchLog', '  Status: ' + res.status + ' (' + elapsed + 'ms)', 'ok');
+      return res.json();
+    })
+    .then(function(data) {
+      var pass = !test.expect || data.verdict === test.expect;
+      logTo('batchLog', '  Verdict: ' + data.verdict + (pass ? ' [PASS]' : ' [FAIL - expected ' + test.expect + ']'), pass ? 'ok' : 'err');
+      logTo('batchLog', '  Reason: ' + (data.reason || '(none)'), 'ok');
+      logTo('batchLog', '', '');
+    })
+    .catch(function(err) {
+      logTo('batchLog', '  [ERR] ' + err.message, 'err');
+      logTo('batchLog', '', '');
+    })
+    .finally(function() {
+      next();
+    });
+  }
+  next();
+}
+</script>
+</body>
+</html>

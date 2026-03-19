@@ -428,55 +428,105 @@ footer .tiktok {
 </footer>
 
 <script>
-const REASONS = {
-  'maybank-secure-update.xyz': { reason: 'This domain impersonates Maybank to steal your login credentials and TAC codes.', real: 'Real Maybank: maybank2u.com.my' },
-  'maybank2u-verify.com': { reason: 'Fake Maybank verification site designed to steal banking credentials.', real: 'Real Maybank: maybank2u.com.my' },
-  'cimb-secure-login.xyz': { reason: 'Fake CIMB login page designed to steal your banking credentials.', real: 'Real CIMB: cimbclicks.com.my' },
-  'lhdn-tax-refund.com': { reason: 'Fake LHDN site. LHDN will never ask you to click a link for refunds.', real: 'Real LHDN: hasil.gov.my' },
-  'shopee-lucky-draw.top': { reason: 'Fake Shopee lucky draw scam. Shopee does not run promotions through third-party domains.', real: 'Real Shopee: shopee.com.my' },
-  'grab-promo-winners.buzz': { reason: 'Fake Grab promotion scam. This domain harvests personal data.', real: 'Real Grab: grab.com' },
-  'shopee.com.my': { reason: 'This is the official Shopee Malaysia website.' },
-  'maybank2u.com.my': { reason: 'This is the official Maybank2u online banking website.' },
-  'grab.com': { reason: 'This is the official Grab website.' },
-  'bit.ly/kl-investment': { reason: 'Shortened URL that could lead to a scam investment site. Never enter personal details on shortened links.' }
-};
+const API_BASE = 'https://api.safeanot.com';
+const VALID_VERDICTS = ['dangerous', 'safe', 'suspicious'];
+const VERDICT_ICONS = { dangerous: 'gpp_bad', safe: 'verified_user', suspicious: 'gpp_maybe' };
 
-const params = new URLSearchParams(window.location.search);
-const domain = params.get('domain') || 'unknown';
-const verdict = params.get('verdict') || 'suspicious';
+var params = new URLSearchParams(window.location.search);
+var domain = params.get('domain');
 
-const icons = { dangerous: 'gpp_bad', safe: 'verified_user', suspicious: 'gpp_maybe' };
+if (!domain) {
+  // No domain specified — show fallback
+  document.getElementById('vLabel').textContent = 'NO LINK SPECIFIED';
+  document.getElementById('vDomain').textContent = 'No link was provided to check.';
+  document.getElementById('vReason').textContent = 'Go to the check page to verify a link.';
+  var display = document.getElementById('verdictDisplay');
+  display.className = 'verdict-display suspicious';
+  var iconEl = document.querySelector('.v-icon');
+  iconEl.textContent = '';
+  var iconSpan = document.createElement('span');
+  iconSpan.className = 'material-symbols-rounded';
+  iconSpan.style.fontSize = '72px';
+  iconSpan.textContent = 'gpp_maybe';
+  iconEl.appendChild(iconSpan);
 
-const display = document.getElementById('verdictDisplay');
-display.className = `verdict-display ${verdict}`;
-
-document.querySelector('.v-icon').innerHTML = `<span class="material-symbols-rounded" style="font-size:72px">${icons[verdict] || 'gpp_maybe'}</span>`;
-document.getElementById('vLabel').textContent = verdict.toUpperCase();
-document.getElementById('vDomain').textContent = domain;
-
-const info = REASONS[domain];
-if (info) {
-  document.getElementById('vReason').textContent = info.reason;
-  if (info.real) {
-    document.getElementById('vReal').style.display = 'inline-block';
-    document.getElementById('vReal').textContent = '✓ ' + info.real;
-  }
+  // Add link to /check
+  var linkDiv = document.createElement('a');
+  linkDiv.href = '/check';
+  linkDiv.textContent = 'Go to Link Checker';
+  linkDiv.style.cssText = 'display:inline-block;margin-top:16px;color:var(--indigo);font-weight:700;text-decoration:none;';
+  document.getElementById('vReason').after(linkDiv);
 } else {
-  document.getElementById('vReason').textContent = verdict === 'dangerous'
-    ? 'This domain has been flagged as dangerous in our database.'
-    : verdict === 'safe'
-    ? 'This domain appears to be legitimate.'
-    : 'This domain looks suspicious. Exercise caution.';
-}
+  // Show loading state
+  document.getElementById('vDomain').textContent = domain;
+  document.getElementById('vLabel').textContent = 'CHECKING...';
+  document.getElementById('vReason').textContent = 'Verifying this domain against our database...';
 
-if (verdict === 'dangerous') {
-  document.getElementById('vWarning').style.display = 'inline-block';
+  var display = document.getElementById('verdictDisplay');
+  display.className = 'verdict-display suspicious';
+  var iconEl = document.querySelector('.v-icon');
+  iconEl.textContent = '';
+  var loadingIconSpan = document.createElement('span');
+  loadingIconSpan.className = 'material-symbols-rounded';
+  loadingIconSpan.style.fontSize = '72px';
+  loadingIconSpan.textContent = 'hourglass_top';
+  iconEl.appendChild(loadingIconSpan);
+
+  // Fetch from API
+  fetch(API_BASE + '/api/check', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url: domain })
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('Server returned ' + res.status);
+    return res.json();
+  })
+  .then(function(data) {
+    var verdict = VALID_VERDICTS.includes(data.verdict) ? data.verdict : 'suspicious';
+    var reason = typeof data.reason === 'string' ? data.reason : '';
+    var real = typeof data.real === 'string' ? data.real : null;
+
+    display.className = 'verdict-display ' + verdict;
+
+    iconEl.textContent = '';
+    var vIconSpan = document.createElement('span');
+    vIconSpan.className = 'material-symbols-rounded';
+    vIconSpan.style.fontSize = '72px';
+    vIconSpan.textContent = VERDICT_ICONS[verdict];
+    iconEl.appendChild(vIconSpan);
+
+    document.getElementById('vLabel').textContent = verdict.toUpperCase();
+    document.getElementById('vDomain').textContent = domain;
+    document.getElementById('vReason').textContent = reason;
+
+    if (real) {
+      document.getElementById('vReal').style.display = 'inline-block';
+      document.getElementById('vReal').textContent = '\u2713 ' + real;
+    }
+
+    if (verdict === 'dangerous') {
+      document.getElementById('vWarning').style.display = 'inline-block';
+    }
+  })
+  .catch(function(err) {
+    display.className = 'verdict-display suspicious';
+    iconEl.textContent = '';
+    var errIconSpan = document.createElement('span');
+    errIconSpan.className = 'material-symbols-rounded';
+    errIconSpan.style.fontSize = '72px';
+    errIconSpan.textContent = 'error';
+    iconEl.appendChild(errIconSpan);
+
+    document.getElementById('vLabel').textContent = 'ERROR';
+    document.getElementById('vReason').textContent = 'Could not check this domain. Please try again from the check page.';
+  });
 }
 
 function goCheck() {
-  const url = document.getElementById('urlInput').value.trim();
+  var url = document.getElementById('urlInput').value.trim();
   if (url) {
-    window.location.href = `/check?url=${encodeURIComponent(url)}`;
+    window.location.href = '/check?url=' + encodeURIComponent(url);
   }
 }
 
