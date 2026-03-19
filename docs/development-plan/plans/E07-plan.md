@@ -22,17 +22,17 @@
 1. **Create ShareIntentFactory utility**
    - File: `android/app/src/main/java/com/safeanot/app/util/ShareIntentFactory.kt`
    - Action: Create
-   - Details: Object with methods: `fun createTextShare(text: String): Intent` for text-only shares, `fun createImageShare(context: Context, bitmap: Bitmap, text: String): Intent` for image+text shares using FileProvider, `fun createWhatsAppShare(text: String): Intent` that sets `intent.setPackage("com.whatsapp")` with fallback detection via `PackageManager.getLaunchIntentForPackage`. All methods return `Intent` (UI layer handles `startActivity` with try/catch). Replaces the inline intent-building in `CheckViewModel.shareResult()` and `ShareHelper.createShareIntent()`.
+   - Details: Pure object with NO Context dependency. Methods: `fun createTextShare(text: String): Intent` for text-only shares (ACTION_SEND, type text/plain, EXTRA_TEXT), `fun createImageShare(uri: Uri, text: String): Intent` for image+text shares (ACTION_SEND, type image/png, EXTRA_STREAM uri, EXTRA_TEXT, FLAG_GRANT_READ_URI_PERMISSION), `fun createWhatsAppTextShare(text: String): Intent` that creates a text share and sets `intent.setPackage("com.whatsapp")` (no fallback logic -- caller decides). ShareIntentFactory does NOT handle bitmap-to-file conversion, FileProvider URI generation, WhatsApp availability detection, or fallback logic. Those responsibilities belong to `ShareImageCache` (bitmap → Uri) and the UI composable layer (WhatsApp detection via `isWhatsAppInstalled(context)`, fallback selection, `startActivity` with try/catch). Replaces the inline intent-building in `CheckViewModel.shareResult()` and `ShareHelper.createShareIntent()`.
 
 2. **Create ShareImageCache for bitmap file management**
    - File: `android/app/src/main/java/com/safeanot/app/util/ShareImageCache.kt`
    - Action: Create
-   - Details: Object with `fun saveBitmap(context: Context, bitmap: Bitmap, prefix: String): Uri` that writes bitmap to `context.cacheDir/shared_verdicts/` (matching the existing `file_paths.xml` cache-path entry), generates FileProvider URI, and returns it. Add `fun cleanupOldFiles(context: Context, maxAgeMs: Long = 24 * 60 * 60 * 1000L)` that deletes cached share images older than 24 hours. Extract the bitmap-save-and-share pattern currently in `CheckViewModel.shareResult()` lines 82-93. IMPORTANT: Must use `shared_verdicts/` directory name to match the existing FileProvider `file_paths.xml` configuration, not `shared_images/`.
+   - Details: Object responsible ONLY for bitmap → Uri conversion (file I/O). `fun saveBitmap(context: Context, bitmap: Bitmap, prefix: String): Uri` that writes bitmap to `context.cacheDir/shared_verdicts/` (matching the existing `file_paths.xml` cache-path entry), generates FileProvider URI via `FileProvider.getUriForFile()`, and returns the Uri. Add `fun cleanupOldFiles(context: Context, maxAgeMs: Long = 24 * 60 * 60 * 1000L)` that deletes cached share images older than 24 hours. Extract the bitmap-save-and-share pattern currently in `CheckViewModel.shareResult()` lines 82-93. IMPORTANT: Must use `shared_verdicts/` directory name to match the existing FileProvider `file_paths.xml` configuration, not `shared_images/`. NOTE on separation of concerns: `ShareImageCache` handles bitmap → Uri (needs Context for cacheDir + FileProvider). `ShareIntentFactory` handles Uri/text → Intent (pure, no Context). The UI composable layer calls `ShareImageCache` first to get a Uri, then passes that Uri to `ShareIntentFactory` to build the intent. No bitmap-to-file logic should exist in ShareIntentFactory.
 
 3. **Migrate CheckViewModel to use ShareIntentFactory**
    - File: `android/app/src/main/java/com/safeanot/app/feature/check/CheckViewModel.kt`
    - Action: Modify
-   - Details: Replace the inline intent-building in `shareResult()` (lines 73-114) with calls to `ShareImageCache.saveBitmap()` and `ShareIntentFactory.createImageShare()`. The ViewModel should emit a share event (via `Channel<Intent>`) rather than calling `context.startActivity()` directly. The UI layer (`CheckScreen`) collects the channel and launches the intent with try/catch `ActivityNotFoundException`. This aligns with the architecture pattern established in E05 (ViewModel emits events, UI handles platform concerns). IMPORTANT: The ViewModel should NOT take `Context` as a parameter -- instead, inject `@ApplicationContext` via Hilt constructor. Share analytics tracking should happen in the UI layer AFTER `startActivity` succeeds (not in the ViewModel before emit), to avoid overcounting failed/cancelled shares.
+   - Details: Replace the inline intent-building in `shareResult()` (lines 73-114). The ViewModel emits domain data only -- a `Bitmap` and formatted share text via a `_shareEvent` channel of type `Channel<SharePayload>` where `data class SharePayload(val bitmap: Bitmap, val text: String)`. The ViewModel must NOT have `Context`, `@ApplicationContext`, or any Android framework type in its constructor. The UI layer (`CheckScreen`) collects the `SharePayload`, calls `ShareImageCache.saveBitmap(context, bitmap, prefix)` to get a `Uri`, then calls `ShareIntentFactory.createImageShare(uri, text)` to build the intent, and finally calls `startActivity` with try/catch `ActivityNotFoundException`. This aligns with the architecture pattern established in E05 (ViewModel emits domain data, UI handles all platform/Context concerns). Share analytics tracking should happen in the UI layer AFTER `startActivity` succeeds (not in the ViewModel before emit), to avoid overcounting failed/cancelled shares.
 
 4. **Migrate ProfileScreen ShareHelper usage**
    - File: `android/app/src/main/java/com/safeanot/app/feature/profile/ShareHelper.kt`
@@ -45,9 +45,9 @@
    - Details: Replace the inline share intent creation (if any) with `ShareIntentFactory.createTextShare(AlertShareFormatter.format(alert))`. Ensure try/catch wrapping on `startActivity`.
 
 6. **Add WhatsApp availability check utility**
-   - File: `android/app/src/main/java/com/safeanot/app/util/ShareIntentFactory.kt`
-   - Action: Modify (same file as task 1)
-   - Details: Add `fun isWhatsAppInstalled(context: Context): Boolean` that checks via `PackageManager.getLaunchIntentForPackage("com.whatsapp")`. Used by UI to conditionally show WhatsApp-specific share options. Add `<queries><package android:name="com.whatsapp" /></queries>` to AndroidManifest for Android 11+ package visibility.
+   - File: `android/app/src/main/java/com/safeanot/app/util/WhatsAppUtils.kt`
+   - Action: Create (separate file -- ShareIntentFactory must remain Context-free)
+   - Details: Object with `fun isWhatsAppInstalled(context: Context): Boolean` that checks via `context.packageManager.getLaunchIntentForPackage("com.whatsapp") != null`. Called from UI composable layer only (not from ViewModels or ShareIntentFactory). The UI layer uses this to decide whether to call `ShareIntentFactory.createWhatsAppTextShare()` or fall back to `ShareIntentFactory.createTextShare()`. Add `<queries><package android:name="com.whatsapp" /></queries>` to AndroidManifest for Android 11+ package visibility.
 
 7. **Verify/update AndroidManifest for WhatsApp package visibility**
    - File: `android/app/src/main/AndroidManifest.xml`
@@ -56,9 +56,9 @@
 
 ### Tests
 
-- `android/app/src/test/java/com/safeanot/app/util/ShareIntentFactoryTest.kt` -- Text share intent has ACTION_SEND, type text/plain, correct EXTRA_TEXT. Image share intent has type image/png, EXTRA_STREAM, EXTRA_TEXT. WhatsApp share sets package to "com.whatsapp". Fallback intent does not set package.
+- `android/app/src/test/java/com/safeanot/app/util/ShareIntentFactoryTest.kt` -- Text share intent has ACTION_SEND, type text/plain, correct EXTRA_TEXT. Image share intent has type image/png, EXTRA_STREAM uri, EXTRA_TEXT, FLAG_GRANT_READ_URI_PERMISSION. WhatsApp text share sets package to "com.whatsapp". All factory methods are pure (no Context dependency).
 - `android/app/src/test/java/com/safeanot/app/util/ShareImageCacheTest.kt` -- saveBitmap writes file to correct directory (`shared_verdicts/`). cleanupOldFiles removes files older than threshold. cleanupOldFiles preserves recent files. Note: tests that require `Context` or `FileProvider` should use Robolectric (`@RunWith(RobolectricTestRunner::class)`) or be placed in `androidTest`. Prefer Robolectric for faster CI execution.
-- `android/app/src/test/java/com/safeanot/app/feature/check/CheckViewModelTest.kt` -- (extend) shareResult emits intent event via Channel instead of calling startActivity directly.
+- `android/app/src/test/java/com/safeanot/app/feature/check/CheckViewModelTest.kt` -- (extend) shareResult emits domain data (Bitmap + formatted text as SharePayload) via Channel, NOT intents. Verify ViewModel has no Context in constructor. Intent creation and package detection assertions belong in `androidTest` or UI integration tests, not ViewModel unit tests.
 
 ### Acceptance Criteria
 - Single `ShareIntentFactory` utility that handles text-only shares, image+text shares, and WhatsApp-targeted shares.
@@ -113,7 +113,7 @@
 
 - `android/app/src/test/java/com/safeanot/app/util/SecurityScoreCardGeneratorTest.kt` -- Square card generates 1080x1080 bitmap. Vertical card generates 1080x1920 bitmap. Score 0% uses red color. Score 50% uses amber. Score 100% uses green. Bitmap is not null and has correct config (ARGB_8888).
 - `android/app/src/test/java/com/safeanot/app/util/CardRenderUtilsTest.kt` -- wrapText splits long text into multiple lines. wrapText returns single line for short text. wrapText handles empty string.
-- `android/app/src/test/java/com/safeanot/app/feature/shield/ShieldViewModelTest.kt` -- (extend or create) shareScore emits bitmap via channel (not Intent). shareScore delegates to PrepareShareCardUseCase for correct format.
+- `android/app/src/test/java/com/safeanot/app/feature/shield/ShieldViewModelTest.kt` -- (extend or create) shareScore emits Bitmap domain data via channel (not Intent, not Uri). Verify ViewModel has no Context in constructor. shareScore delegates to PrepareShareCardUseCase for correct format. Intent/Uri/FileProvider tests belong in `androidTest` or UI integration tests.
 
 ### Acceptance Criteria
 - Bitmap card generator for security score with score percentage, color-coded ring, items secured count, branding, and download CTA.
@@ -148,25 +148,25 @@
 3. **Create WarningTemplatePicker composable**
    - File: `android/app/src/main/java/com/safeanot/app/feature/check/components/WarningTemplatePicker.kt`
    - Action: Create
-   - Details: Bottom sheet or dialog composable that displays the 3 warning templates as selectable cards. Each card shows: tone icon (handshake for polite, warning triangle for urgent, heart for elder-friendly), tone label, preview of the message text (truncated). On selection, calls `onTemplateSelected(template: WarningTemplate)` callback. Add a language toggle (EN/BM) that switches template preview text. Only shown when verdict is DANGEROUS or SUSPICIOUS.
+   - Details: Bottom sheet or dialog composable that displays the 3 warning templates as selectable cards. Each card shows: tone icon (handshake for polite, warning triangle for urgent, heart for elder-friendly), tone label, preview of the message text (truncated). On selection, calls `onTemplateSelected(template: WarningTemplate)` callback. Add a language toggle (EN/BM) that switches template preview text. Only shown when verdict is DANGEROUS (per spec -- SUSPICIOUS verdicts do not warrant contact warnings).
 
 4. **Add "Warn My Contacts" button to CheckScreen**
    - File: `android/app/src/main/java/com/safeanot/app/feature/check/CheckScreen.kt`
    - Action: Modify
-   - Details: When `checkState` is `Result` and verdict is DANGEROUS or SUSPICIOUS, show a "Warn My Contacts" `Button` below the `VerdictCard`. On click, show the `WarningTemplatePicker` bottom sheet. Style the button with a warning icon and amber/red tint matching the verdict color.
+   - Details: When `checkState` is `Result` and verdict is DANGEROUS only (per spec -- SUSPICIOUS verdicts are excluded), show a "Warn My Contacts" `Button` below the `VerdictCard`. On click, show the `WarningTemplatePicker` bottom sheet. Style the button with a warning icon and red tint matching the DANGEROUS verdict color.
 
 5. **Add warning share logic to CheckViewModel**
    - File: `android/app/src/main/java/com/safeanot/app/feature/check/CheckViewModel.kt`
    - Action: Modify
-   - Details: Add `fun shareWarning(template: WarningTemplate)` that formats the template via `WarningTemplateProvider.format()` and emits the formatted text via a `_warningShareEvent` channel. IMPORTANT: The ViewModel must NOT take `Context` -- the UI layer (`CheckScreen`) collects the formatted text, detects locale from `context.resources.configuration.locales[0]`, creates a WhatsApp-targeted intent via `ShareIntentFactory.createWhatsAppShare()` (falling back to generic if WhatsApp unavailable), and calls `startActivity`. Locale detection can be passed into the ViewModel via a `localeTag: String` parameter if the formatting needs to happen in the ViewModel.
+   - Details: Add `fun shareWarning(template: WarningTemplate, localeTag: String)` that formats the template via `WarningTemplateProvider.format()` and emits the formatted text via a `_warningShareEvent` channel of type `Channel<String>`. IMPORTANT: The ViewModel must NOT have `Context` or `@ApplicationContext` in its constructor -- it emits plain String text only. The UI layer (`CheckScreen`) detects locale from `context.resources.configuration.locales[0]` and passes the locale tag into the ViewModel method. The UI layer collects the formatted text, checks `WhatsAppUtils.isWhatsAppInstalled(context)`, creates the appropriate intent via `ShareIntentFactory.createWhatsAppTextShare(text)` or `ShareIntentFactory.createTextShare(text)` as fallback, and calls `startActivity` with try/catch.
 
 ### Tests
 
 - `android/app/src/test/java/com/safeanot/app/util/WarningTemplateProviderTest.kt` -- getTemplates returns 3 templates. format replaces {domain} and {verdict} placeholders. format appends download link. format uses MS text when locale is "ms". format uses EN text for unknown locales.
-- `android/app/src/test/java/com/safeanot/app/feature/check/CheckViewModelTest.kt` -- (extend) shareWarning emits intent for DANGEROUS verdict. shareWarning formats template with correct domain. shareWarning uses WhatsApp package when available.
+- `android/app/src/test/java/com/safeanot/app/feature/check/CheckViewModelTest.kt` -- (extend) shareWarning emits formatted text string (not Intent) for DANGEROUS verdict. shareWarning formats template with correct domain and verdict placeholders. Verify ViewModel does not reference Context or PackageManager. WhatsApp package selection tests belong in `androidTest` or UI integration tests.
 
 ### Acceptance Criteria
-- After a DANGEROUS verdict, show a "Warn My Contacts" button below the verdict card.
+- After a DANGEROUS verdict only (not SUSPICIOUS -- per spec), show a "Warn My Contacts" button below the verdict card.
 - Tapping opens a template picker with 3 pre-written messages in different tones.
 - Each template includes the domain name, verdict, and Safe Anot? app download link.
 - Templates available in English and Bahasa Malaysia.
@@ -271,7 +271,7 @@
 14. **Create backend route handler for share events**
     - File: `backend/workers/src/routes/share.ts`
     - Action: Create
-    - Details: Export `handleShareEvent` function matching the `RouteHandler` signature `(request: Request, env: Env, params: Record<string, string>) => Promise<Response>`. Validate request body is a JSON array of `{shareType: string, contentId: string, platform: string, timestamp: number}`. Insert each event into D1 `share_events` table. Return 200 with `{accepted: count}`. Return 400 for invalid body. Rate limit: 100 events per IP per day by querying D1 count before insert.
+    - Details: Export `handleShareEvent` function matching the `RouteHandler` signature `(request: Request, env: Env, params: Record<string, string>) => Promise<Response>`. Abuse controls: (1) enforce max request body size of 10KB via `Content-Length` header check before reading body (return 413 if exceeded), (2) parse body as JSON array and enforce max 50 events per batch (return 400 if exceeded), (3) validate each event shape `{shareType: string, contentId: string, platform: string, timestamp: number}`, (4) validate `shareType` against strict enum allowlist `["VERDICT", "SCORE", "ALERT", "WARNING_TEMPLATE", "RESCUE_CARD"]` (return 400 for unknown values), (5) validate `platform` against allowlist `["WHATSAPP", "GENERIC"]`, (6) reject timestamps in the future (> now + 60s tolerance) or older than 30 days (return 400), (7) rate limit: 100 events per IP per day by querying D1 count before insert. Insert valid events into D1 `share_events` table. Return 200 with `{accepted: count}`. Return 400 for invalid body.
 
 15. **Register share route in index.ts**
     - File: `backend/workers/src/index.ts`
@@ -287,7 +287,7 @@
 
 - `android/app/src/test/java/com/safeanot/app/data/repository/ShareEventRepositoryImplTest.kt` -- recordShare inserts event to local DB. recordShare attempts immediate API sync. recordShare queues event when offline. syncPendingEvents marks events as synced after successful API call. Rate limiting rejects after 100 events per day. Concurrent recordShare calls are thread-safe.
 - `android/app/src/androidTest/java/com/safeanot/app/data/local/MigrationTest.kt` -- (extend) Migration N to N+1 creates share_events table with correct schema. Existing data survives migration. Uses `MigrationTestHelper` from `room-testing`.
-- `backend/workers/test/score-share.test.ts` -- POST /api/score/share accepts valid events. POST /api/score/share rejects empty body. POST /api/score/share stores events in D1. POST /api/score/share returns 400 for invalid shareType.
+- `backend/workers/test/score-share.test.ts` -- POST /api/score/share accepts valid events. POST /api/score/share rejects empty body. POST /api/score/share stores events in D1. POST /api/score/share returns 400 for invalid shareType not in allowlist. POST /api/score/share returns 400 for invalid platform not in allowlist. POST /api/score/share returns 413 for request body exceeding 10KB. POST /api/score/share returns 400 for batch exceeding 50 events. POST /api/score/share rejects future timestamps. POST /api/score/share rejects timestamps older than 30 days.
 
 ### Acceptance Criteria
 - New `POST /api/score/share` backend endpoint accepting share event data.
@@ -321,12 +321,12 @@
 4. **Reorganize CheckScreen action buttons for 3 share options**
    - File: `android/app/src/main/java/com/safeanot/app/feature/check/CheckScreen.kt`
    - Action: Modify
-   - Details: For DANGEROUS verdicts, layout the action buttons in a vertical stack: primary "Share Result" button (existing), "Warn My Contacts" button (E07-003), "Protect Your Family" rescue card button (this issue). For SAFE/SUSPICIOUS/UNKNOWN verdicts, keep the existing two-button horizontal layout (Share Result + Check Another). Add "Check Another" as a text button at the bottom for all verdict types.
+   - Details: For DANGEROUS verdicts, layout the action buttons in a vertical stack: primary "Share Result" button (existing), "Warn My Contacts" button (E07-003, DANGEROUS only per spec), "Protect Your Family" rescue card button (this issue). For SAFE/SUSPICIOUS/UNKNOWN verdicts, keep the existing two-button horizontal layout (Share Result + Check Another). Add "Check Another" as a text button at the bottom for all verdict types.
 
 ### Tests
 
 - `android/app/src/test/java/com/safeanot/app/util/RescueCardGeneratorTest.kt` -- Generates 1080x1920 bitmap. Bitmap is non-null with ARGB_8888 config. Long domain names truncated. Card content includes verdict reason text.
-- `android/app/src/test/java/com/safeanot/app/feature/check/CheckViewModelTest.kt` -- (extend) shareRescueCard emits intent for DANGEROUS verdict. shareRescueCard records RESCUE_CARD share event. shareRescueCard includes domain in share text.
+- `android/app/src/test/java/com/safeanot/app/feature/check/CheckViewModelTest.kt` -- (extend) shareRescueCard emits Bitmap domain data (not Intent) for DANGEROUS verdict. shareRescueCard generates bitmap via RescueCardGenerator. Verify ViewModel has no Context in constructor. Share event tracking and intent creation assertions belong in `androidTest` or UI integration tests.
 
 ### Acceptance Criteria
 - After DANGEROUS verdict, show "Protect Your Family" share option alongside existing share buttons.
@@ -353,6 +353,7 @@
 |------|--------|--------|
 | `android/app/src/main/java/com/safeanot/app/util/ShareIntentFactory.kt` | Create | E07-001 |
 | `android/app/src/main/java/com/safeanot/app/util/ShareImageCache.kt` | Create | E07-001 |
+| `android/app/src/main/java/com/safeanot/app/util/WhatsAppUtils.kt` | Create | E07-001 |
 | `android/app/src/main/java/com/safeanot/app/feature/check/CheckViewModel.kt` | Modify | E07-001, E07-003, E07-004, E07-005 |
 | `android/app/src/main/java/com/safeanot/app/feature/check/CheckScreen.kt` | Modify | E07-003, E07-005 |
 | `android/app/src/main/java/com/safeanot/app/feature/profile/ShareHelper.kt` | Modify | E07-001 |
@@ -410,3 +411,4 @@
 | Round | Date | Findings | Fixed | Details |
 |-------|------|----------|-------|---------|
 | R1 | 2026-03-18 | 9 | 9 | [CRITICAL-1] Room entity @ColumnInfo mismatch with migration SQL -- added explicit `@ColumnInfo(name=...)` annotations to every ShareEventEntity field; [CRITICAL-2] Migration registration missing from DatabaseModule -- added explicit DatabaseModule.kt wiring task with `.addMigrations()`; [CRITICAL-3] Cache path `shared_images/` conflicts with FileProvider `shared_verdicts/` -- standardized to `shared_verdicts/` with file_paths.xml verification note; [WARNING-4] Architecture drift: VMs take Context and call repos directly -- added `PrepareShareCardUseCase` and `TrackShareEventUseCase`, removed Context params from VM methods, moved intent creation and startActivity to UI composable layer; [WARNING-5] ShareEventSyncWorker not wired in SafeAnotApp.kt -- added SafeAnotApp.kt modification task with periodic + one-time startup scheduling; [WARNING-6] Share analytics overcounting: recorded before launch not after -- moved tracking to UI layer post-startActivity via `onShareCompleted` callback; [WARNING-7] Alert share tracking missing from E07-004 task breakdown -- added AlertDetailScreen and AlertDetailViewModel tracking tasks; [WARNING-8] Tests incomplete for high-risk changes -- added migration instrumentation test in androidTest, noted Robolectric for Context-dependent unit tests; [INFO-9] WhatsApp `<queries>` may already exist in manifest -- changed to verification-only task (check before adding to avoid duplication) |
+| R2 | 2026-03-19 | 6 | 6 | [CRITICAL-RECURRING-1] ViewModel architecture drift in E07-001 task 3 -- removed ALL Context/@ApplicationContext from ViewModel constructors, VMs emit domain data only (Bitmap, String, SharePayload), all Context/FileProvider/Intent/startActivity work moved to UI composable layer (Screen files); [CRITICAL-2] ShareIntentFactory API inconsistency -- `createWhatsAppShare` needed PackageManager but had no Context param, fixed by making ShareIntentFactory purely Context-free with methods `createTextShare`, `createImageShare(uri, text)`, `createWhatsAppTextShare`, moved WhatsApp detection to separate `WhatsAppUtils.kt` called from UI layer only; [WARNING-3] DRY violation between ShareIntentFactory and ShareImageCache -- clarified separation: ShareImageCache handles bitmap→Uri (file I/O, needs Context), ShareIntentFactory handles Uri/text→Intent (pure, no Context), removed any bitmap-to-file logic from ShareIntentFactory; [WARNING-RECURRING-4] Test layer boundaries -- updated all VM test descriptions to assert domain data (Bitmap, formatted text, SharePayload) not intents/packages, moved intent/package assertions to androidTest/UI integration tests; [WARNING-5] Spec mismatch on warning template trigger -- plan said DANGEROUS or SUSPICIOUS, spec says DANGEROUS only, aligned all tasks and acceptance criteria to DANGEROUS only; [WARNING-6] Backend share endpoint missing abuse controls -- added max body size 10KB, max 50 events per batch, strict enum allowlists for shareType/platform, timestamp validation (reject future and >30 days old) |
