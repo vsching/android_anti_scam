@@ -188,14 +188,14 @@ Android App Links require a `/.well-known/assetlinks.json` file served from the 
 ### Tests
 - `website/tests/test_assetlinks.sh` -- Validate JSON syntax of assetlinks.json using `python3 -m json.tool`. Verify required fields are present (relation, target, namespace, package_name, sha256_cert_fingerprints).
 - Manual test: after deployment, `curl https://safeanot.com/.well-known/assetlinks.json` returns valid JSON with Content-Type `application/json`.
-- Manual test: Google Digital Asset Links API validator passes for the domain.
-- Manual test: Run `adb shell pm verify-app-links --re-verify com.safeanot.app` and verify with `adb shell pm get-app-links com.safeanot.app` that status shows `verified`.
+- Manual test (after release signing): Google Digital Asset Links API validator passes for the domain. Note: requires real release fingerprint, not placeholder — deferred until app signing is configured.
+- Manual test (after release signing): Run `adb shell pm verify-app-links --re-verify com.safeanot.app` and verify with `adb shell pm get-app-links com.safeanot.app` that status shows `verified`. Note: cannot pass with placeholder fingerprint — deferred until release build.
 
 ### Acceptance Criteria
 - [ ] `safeanot.com/.well-known/assetlinks.json` returns valid Digital Asset Links JSON
 - [ ] JSON contains correct package name and SHA-256 fingerprint placeholder
-- [ ] Deep links `safeanot.com/result?domain=xxx` verified by Android
 - [ ] File served with correct `Content-Type: application/json`
+- [ ] (Deferred until release signing) Deep links verified by Android with real fingerprint
 
 ---
 
