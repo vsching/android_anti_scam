@@ -9,7 +9,7 @@
 
 - [x] Dependencies complete: E01 (Backend API) = complete, E03 (Phone Shield) = complete
 - [x] Technical specs reviewed: BRAINSTORM_FEATURES (Guardian Mode section), product-context, existing backend router and D1 patterns
-- [ ] Plan reviewed by Codex
+- [x] Plan reviewed by Codex
 - [ ] Plan approved by user
 
 ---
@@ -24,14 +24,24 @@
    - Details: Create three tables. `guardian_pairing_codes`: columns `code TEXT PRIMARY KEY`, `ward_device_id TEXT NOT NULL`, `created_at INTEGER NOT NULL`, `expires_at INTEGER NOT NULL`, `claimed INTEGER NOT NULL DEFAULT 0`. `guardian_pairings`: columns `id INTEGER PRIMARY KEY AUTOINCREMENT`, `ward_device_id TEXT NOT NULL`, `guardian_device_id TEXT NOT NULL`, `ward_display_name TEXT DEFAULT ''`, `guardian_display_name TEXT DEFAULT ''`, `created_at INTEGER NOT NULL`, unique constraint on `(ward_device_id, guardian_device_id)`. `guardian_heartbeats`: columns `id INTEGER PRIMARY KEY AUTOINCREMENT`, `ward_device_id TEXT NOT NULL`, `security_score INTEGER NOT NULL`, `secured_items INTEGER NOT NULL`, `total_items INTEGER NOT NULL`, `play_protect_enabled INTEGER NOT NULL DEFAULT 1`, `timestamp INTEGER NOT NULL`. Add index on `guardian_heartbeats(ward_device_id, timestamp)`. Add index on `guardian_pairings(ward_device_id)` and `guardian_pairings(guardian_device_id)`.
 
 2. **Create guardian route handlers**
-   - File: `backend/workers/src/handlers/guardian.ts`
+   - File: `backend/workers/src/routes/guardian.ts`
    - Action: Create
-   - Details: Export handler functions following the existing pattern in the workers router. Functions: `handleGeneratePairingCode(request, env, params)` -- generates a random 6-char alphanumeric code (uppercase, no ambiguous chars like 0/O/1/I/L), inserts into `guardian_pairing_codes` with 15-min TTL, rate-limits to 10 per device per hour by querying recent codes for the same `ward_device_id`. `handleClaimPairingCode(request, env, params)` -- validates code exists and not expired/claimed, checks ward has fewer than 3 guardians, creates row in `guardian_pairings`, marks code as claimed, returns ward info. `handleGetWards(request, env, params)` -- queries `guardian_pairings` joined with latest `guardian_heartbeats` for the given guardian `device_id` (passed as query param). `handleGetGuardians(request, env, params)` -- queries `guardian_pairings` for the given ward `device_id`. `handleDeletePairing(request, env, params)` -- deletes pairing by ID, verifying the requester is either the ward or guardian in that pairing. All handlers return JSON with appropriate HTTP status codes and error messages.
+   - Details: Export handler functions following the existing pattern in `routes/alerts.ts`, `routes/check.ts`, etc. Functions: `handleGeneratePairingCode(request, env, params)` -- generates a random 6-char alphanumeric code (uppercase, no ambiguous chars like 0/O/1/I/L), inserts into `guardian_pairing_codes` with 15-min TTL, rate-limits to 10 per device per hour by querying recent codes for the same `ward_device_id`. Request body: `{ device_id: string, display_name: string }`. `handleClaimPairingCode(request, env, params)` -- validates code exists and not expired/claimed, checks ward has fewer than 3 guardians, creates row in `guardian_pairings`, marks code as claimed, returns ward info. `handleGetWards(request, env, params)` -- queries `guardian_pairings` joined with latest `guardian_heartbeats` for the given guardian `device_id` (passed as query param). `handleGetGuardians(request, env, params)` -- queries `guardian_pairings` for the given ward `device_id`. `handleDeletePairing(request, env, params)` -- deletes pairing by ID, verifying the requester is either the ward or guardian in that pairing. All handlers return JSON with appropriate HTTP status codes and error messages. All endpoints require a `X-Device-HMAC` header containing an HMAC-SHA256 signature of the request body using a per-device shared secret, verified via middleware before handler execution (see task 2b).
 
-3. **Register guardian routes in the router**
+2b. **Add `delete()` convenience method to Router class**
    - File: `backend/workers/src/router.ts`
+   - Action: Modify
+   - Details: Add a `delete()` convenience method to the `Router` class, following the existing `get()` and `post()` pattern: `delete(pattern: string, handler: RouteHandler): void { this.register('DELETE', pattern, handler); }`. This is a prerequisite for DELETE route registration below.
+
+2c. **Create guardian authentication middleware**
+   - File: `backend/workers/src/middleware/guardian-auth.ts`
+   - Action: Create
+   - Details: Export `verifyDeviceHmac(request, env)` middleware function. Reads the `X-Device-HMAC` header. Computes HMAC-SHA256 of the raw request body using `env.GUARDIAN_HMAC_SECRET`. Compares the computed digest with the header value using constant-time comparison. Returns 401 JSON error if missing or invalid. This middleware is applied to all `/api/guardian/*` endpoints.
+
+3. **Register guardian routes in index.ts**
+   - File: `backend/workers/src/index.ts`
    - Action: Modify (import handlers and register routes)
-   - Details: Add the following routes: `router.post('/api/guardian/pair/generate', handleGeneratePairingCode)`, `router.post('/api/guardian/pair/claim', handleClaimPairingCode)`, `router.get('/api/guardian/wards', handleGetWards)`, `router.get('/api/guardian/guardians', handleGetGuardians)`, `router.delete('/api/guardian/pair/:pairingId', handleDeletePairing)`. Import all handlers from `./handlers/guardian`.
+   - Details: Import all handlers from `./routes/guardian` and register the following routes (following the existing pattern where all route registrations live in `index.ts`): `router.post('/api/guardian/pair/generate', handleGeneratePairingCode)`, `router.post('/api/guardian/pair/claim', handleClaimPairingCode)`, `router.get('/api/guardian/wards', handleGetWards)`, `router.get('/api/guardian/guardians', handleGetGuardians)`, `router.delete('/api/guardian/pair/:pairingId', handleDeletePairing)`. Each handler internally calls `verifyDeviceHmac(request, env)` before processing.
 
 4. **Update Env type for guardian bindings**
    - File: `backend/workers/src/env.d.ts`
@@ -66,7 +76,7 @@
 2. **Create Room entity and DAO for guardian pairings**
    - File: `android/app/src/main/java/com/safeanot/app/data/local/entity/GuardianPairingEntity.kt`
    - Action: Create
-   - Details: `@Entity(tableName = "guardian_pairings") data class GuardianPairingEntity(@PrimaryKey val id: Long, val wardDeviceId: String, val guardianDeviceId: String, val wardDisplayName: String, val guardianDisplayName: String, val createdAt: Long, val lastHeartbeatAt: Long?, val lastSecurityScore: Int?)`. Include mapper extension functions `toGuardianPairing()` and `GuardianPairing.toEntity()`.
+   - Details: `@Entity(tableName = "guardian_pairings") data class GuardianPairingEntity(@PrimaryKey val id: Long, val wardDeviceId: String, val guardianDeviceId: String, val wardDisplayName: String, val guardianDisplayName: String, val createdAt: Long, val lastHeartbeatAt: Long?, val lastSecurityScore: Int?, val lastSyncedAt: Long?)`. Include mapper extension functions `toGuardianPairing()` and `GuardianPairing.toEntity()`.
 
 3. **Create GuardianDao**
    - File: `android/app/src/main/java/com/safeanot/app/data/local/GuardianDao.kt`
@@ -81,7 +91,7 @@
 5. **Create API DTOs for guardian endpoints**
    - File: `android/app/src/main/java/com/safeanot/app/data/remote/model/GuardianDto.kt`
    - Action: Create
-   - Details: `data class GeneratePairingCodeRequest(val device_id: String)`, `data class PairingCodeResponse(val code: String, val expires_at: Long)`, `data class ClaimPairingCodeRequest(val code: String, val device_id: String, val display_name: String)`, `data class ClaimPairingResponse(val pairing_id: Long, val ward_device_id: String, val ward_display_name: String)`, `data class WardDto(val pairing_id: Long, val ward_device_id: String, val display_name: String, val security_score: Int?, val last_heartbeat: Long?, val play_protect_enabled: Boolean?)`, `data class GuardianDto(val pairing_id: Long, val guardian_device_id: String, val display_name: String)`.
+   - Details: `data class GeneratePairingCodeRequest(val device_id: String, val display_name: String)`, `data class PairingCodeResponse(val code: String, val expires_at: Long)`, `data class ClaimPairingCodeRequest(val code: String, val device_id: String, val display_name: String)`, `data class ClaimPairingResponse(val pairing_id: Long, val ward_device_id: String, val ward_display_name: String)`, `data class WardDto(val pairing_id: Long, val ward_device_id: String, val display_name: String, val security_score: Int?, val last_heartbeat: Long?, val play_protect_enabled: Boolean?)`, `data class GuardianDto(val pairing_id: Long, val guardian_device_id: String, val display_name: String)`.
 
 6. **Create GuardianRepository interface**
    - File: `android/app/src/main/java/com/safeanot/app/domain/repository/GuardianRepository.kt`
@@ -96,7 +106,7 @@
 8. **Create DeviceIdProvider utility**
    - File: `android/app/src/main/java/com/safeanot/app/util/DeviceIdProvider.kt`
    - Action: Create
-   - Details: Singleton that generates a stable UUID on first launch and persists it in DataStore. `@Singleton class DeviceIdProvider @Inject constructor(private val dataStore: UserPreferencesDataStore)`. Method `suspend fun getDeviceId(): String` reads from DataStore, generates UUID if absent. This device ID is used for all guardian API calls. No Android device identifiers (ANDROID_ID, IMEI) are used -- privacy-first.
+   - Details: Singleton that generates a stable UUID on first launch and persists it in SharedPreferences (following the existing `ShareEventRepositoryImpl` pattern which uses `context.getSharedPreferences("safeanot_device", Context.MODE_PRIVATE)` for device ID storage). `@Singleton class DeviceIdProvider @Inject constructor(@ApplicationContext private val context: Context)`. Uses the same `"safeanot_device"` SharedPreferences file and `"device_id"` key so the device ID is shared with `ShareEventRepositoryImpl`. Method `fun getDeviceId(): String` reads from SharedPreferences, generates UUID if absent (synchronous -- SharedPreferences is non-blocking for reads). This device ID is used for all guardian API calls. No Android device identifiers (ANDROID_ID, IMEI) are used -- privacy-first.
 
 9. **Update Room database with guardian table**
    - File: `android/app/src/main/java/com/safeanot/app/data/local/SafeAnotDatabase.kt`
@@ -123,30 +133,45 @@
     - Action: Create
     - Details: `class ClaimPairingCodeUseCase @Inject constructor(private val guardianRepository: GuardianRepository, private val deviceIdProvider: DeviceIdProvider)`. Single `suspend operator fun invoke(code: String, displayName: String): Result<GuardianPairing>` that gets device ID then calls repository.
 
-14. **Create GuardianPairingViewModel**
+14. **Create DeletePairingUseCase**
+    - File: `android/app/src/main/java/com/safeanot/app/domain/usecase/DeletePairingUseCase.kt`
+    - Action: Create
+    - Details: `class DeletePairingUseCase @Inject constructor(private val guardianRepository: GuardianRepository)`. Single `suspend operator fun invoke(pairingId: Long): Result<Unit>` that calls `guardianRepository.deletePairing(pairingId)`.
+
+15. **Create GetPairingsUseCase**
+    - File: `android/app/src/main/java/com/safeanot/app/domain/usecase/GetPairingsUseCase.kt`
+    - Action: Create
+    - Details: `class GetPairingsUseCase @Inject constructor(private val guardianRepository: GuardianRepository, private val deviceIdProvider: DeviceIdProvider)`. Method `operator fun invoke(): Flow<List<GuardianPairing>>` that gets device ID then calls `guardianRepository.getGuardians(deviceId)`. Uses `flow { }` builder to call the suspend `deviceIdProvider.getDeviceId()` then `emitAll(guardianRepository.getGuardians(deviceId))`.
+
+16. **Create GuardianPairingViewModel**
     - File: `android/app/src/main/java/com/safeanot/app/feature/guardian/GuardianPairingViewModel.kt`
     - Action: Create
-    - Details: `@HiltViewModel class GuardianPairingViewModel @Inject constructor(private val generatePairingCodeUseCase: GeneratePairingCodeUseCase, private val claimPairingCodeUseCase: ClaimPairingCodeUseCase, private val guardianRepository: GuardianRepository, private val deviceIdProvider: DeviceIdProvider)`. State: `data class PairingUiState(val isLoading: Boolean, val generatedCode: String?, val codeExpiresAt: Long?, val claimError: String?, val claimSuccess: Boolean, val pairings: List<GuardianPairing>)`. Methods: `fun generateCode()`, `fun claimCode(code: String, displayName: String)`, `fun deletePairing(pairingId: Long)`. No Context in constructor. Countdown timer for code expiry via `tickerFlow` in viewModelScope.
+    - Details: `@HiltViewModel class GuardianPairingViewModel @Inject constructor(private val generatePairingCodeUseCase: GeneratePairingCodeUseCase, private val claimPairingCodeUseCase: ClaimPairingCodeUseCase, private val deletePairingUseCase: DeletePairingUseCase, private val getPairingsUseCase: GetPairingsUseCase)`. All data access goes through use cases -- no direct repository injection in ViewModel. State: `data class PairingUiState(val isLoading: Boolean, val generatedCode: String?, val codeExpiresAt: Long?, val claimError: String?, val claimSuccess: Boolean, val pairings: List<GuardianPairing>)`. Methods: `fun generateCode()`, `fun claimCode(code: String, displayName: String)`, `fun deletePairing(pairingId: Long)`. No Context in constructor. Countdown timer for code expiry via `tickerFlow` in viewModelScope.
 
-15. **Create PairingScreen composables**
+17. **Create PairingScreen composables**
     - File: `android/app/src/main/java/com/safeanot/app/feature/guardian/PairingScreen.kt`
     - Action: Create
     - Details: Two-tab layout: "Protect This Phone" (ward tab) and "Add Family Member" (guardian tab). Ward tab: shows generated code in large font with countdown timer, "Generate Code" button. Guardian tab: 6-character text input field, display name field, "Link" button. Both tabs show current pairings list below with unlink option. Confirmation dialog on unlink. Error/success snackbars. Follow Material 3 patterns from existing screens.
 
-16. **Add Guardian navigation routes**
+18. **Add Guardian navigation routes**
     - File: `android/app/src/main/java/com/safeanot/app/navigation/Screen.kt`
     - Action: Modify
     - Details: Add `data object GuardianPairing : Screen("guardian/pairing")` and `data object GuardianDashboard : Screen("guardian/dashboard")` and `data object GuardianWardDetail : Screen("guardian/ward/{deviceId}") { fun createRoute(deviceId: String): String = "guardian/ward/$deviceId" }`.
 
-17. **Register Guardian screens in NavGraph**
+19. **Register Guardian screens in NavGraph**
     - File: `android/app/src/main/java/com/safeanot/app/navigation/SafeAnotNavGraph.kt`
     - Action: Modify
     - Details: Add composable entries for `Screen.GuardianPairing`, `Screen.GuardianDashboard`, and `Screen.GuardianWardDetail`. Hide bottom bar for guardian sub-screens (add to the `showBottomBar` check). Add navigation from Profile screen to Guardian screens.
 
-18. **Add Guardian entry point in Profile screen**
+20. **Add Guardian entry point in Profile screen**
     - File: `android/app/src/main/java/com/safeanot/app/feature/profile/ProfileScreen.kt`
     - Action: Modify
     - Details: Add a "Family Guardian" card/section with two CTAs: "Protect This Phone" (navigate to pairing as ward) and "Monitor Family" (navigate to guardian dashboard). Show guardian count badge if active pairings exist.
+
+21. **Add guardian count state to ProfileViewModel**
+    - File: `android/app/src/main/java/com/safeanot/app/feature/profile/ProfileViewModel.kt`
+    - Action: Modify
+    - Details: Inject `GuardianRepository` and `DeviceIdProvider`. Add `val guardianCount: StateFlow<Int>` that observes `guardianRepository.getGuardianCount(deviceId)` (maps the DAO's `Flow<Int>`). This count is used by `ProfileScreen` to display the guardian count badge on the "Family Guardian" card. Add `guardianCount` field to the profile UI state if one exists, or expose as a separate `StateFlow`.
 
 ### Tests
 
@@ -157,7 +182,7 @@
 - `android/app/src/test/java/com/safeanot/app/testutil/FakeGuardianRepository.kt` -- Fake implementation for use in ViewModel tests.
 
 ### Acceptance Criteria
-- Ward flow: "Protect This Phone" button generates a 6-digit code displayed with countdown timer (15 min)
+- Ward flow: "Protect This Phone" button generates a 6-character alphanumeric code displayed with countdown timer (15 min)
 - Guardian flow: "Add Family Member" button opens code entry screen, validates and claims the code
 - Pairings stored locally in Room for offline display
 - Pairing screen accessible from Profile/Settings
@@ -171,14 +196,19 @@
 ### Tasks
 
 1. **Create heartbeat backend endpoint**
-   - File: `backend/workers/src/handlers/guardian.ts`
+   - File: `backend/workers/src/routes/guardian.ts`
    - Action: Modify (add heartbeat handler)
    - Details: Add `handlePostHeartbeat(request, env, params)` function. Accepts JSON body: `{ device_id, security_score, secured_items, total_items, play_protect_enabled, timestamp }`. Validates that the device_id has at least one guardian pairing. Inserts row into `guardian_heartbeats` table. Updates a `latest_heartbeat` view/query for fast dashboard reads. Returns 200 on success. Add retention cleanup: delete heartbeats older than 30 days (can be done lazily on each insert or via a scheduled task).
 
-2. **Register heartbeat route**
-   - File: `backend/workers/src/router.ts`
+1b. **Create ward heartbeat history endpoint**
+   - File: `backend/workers/src/routes/guardian.ts`
+   - Action: Modify (add handler)
+   - Details: Add `handleGetWardHeartbeats(request, env, params)`. Accepts path param `deviceId` and query param `days` (default 7, max 30). Validates that the requester (via `device_id` query param) is a guardian of the specified ward. Queries `guardian_heartbeats` for the given `ward_device_id` within the requested time range, ordered by timestamp descending. Returns `{ heartbeats: [{ security_score, secured_items, total_items, play_protect_enabled, timestamp }] }`. This endpoint provides the data consumed by `WardHeartbeatHistory` on the Android client.
+
+2. **Register heartbeat routes**
+   - File: `backend/workers/src/index.ts`
    - Action: Modify
-   - Details: Add `router.post('/api/guardian/heartbeat', handlePostHeartbeat)`. Import from `./handlers/guardian`.
+   - Details: Add `router.post('/api/guardian/heartbeat', handlePostHeartbeat)` and `router.get('/api/guardian/wards/:deviceId/heartbeats', handleGetWardHeartbeats)`. Import from `./routes/guardian`.
 
 3. **Create HeartbeatDto for API**
    - File: `android/app/src/main/java/com/safeanot/app/data/remote/model/GuardianDto.kt`
@@ -213,7 +243,7 @@
 9. **Schedule heartbeat worker on pairing creation**
    - File: `android/app/src/main/java/com/safeanot/app/feature/guardian/GuardianPairingViewModel.kt`
    - Action: Modify
-   - Details: Inject `GuardianHeartbeatScheduler`. After successful pairing claim or code generation (when device becomes a ward), call `heartbeatScheduler.schedule()`. After deleting the last pairing (when device has no more guardians), call `heartbeatScheduler.cancel()`.
+   - Details: Inject `GuardianHeartbeatScheduler` (which is `@Singleton` scoped and injected via Hilt -- this is acceptable since the scheduler only wraps `WorkManager` and holds no UI state). After successful pairing claim or code generation (when device becomes a ward), call `heartbeatScheduler.schedule()`. After deleting the last pairing (when device has no more guardians), call `heartbeatScheduler.cancel()`.
 
 ### Tests
 
@@ -222,7 +252,7 @@
 
 ### Acceptance Criteria
 - `POST /api/guardian/heartbeat` backend endpoint accepts: device_id, security_score, scored_items, total_items, play_protect_enabled, timestamp
-- WorkManager PeriodicWorkRequest runs every 6 hours (configurable)
+- WorkManager PeriodicWorkRequest runs every 6 hours (fixed interval for v1)
 - Heartbeat includes current security score, Play Protect status, and item counts
 - Backend stores heartbeat in D1, updates ward's latest status
 - Heartbeat only runs if device has at least one guardian pairing
@@ -238,7 +268,7 @@
 1. **Create GetWardsUseCase**
    - File: `android/app/src/main/java/com/safeanot/app/domain/usecase/GetWardsUseCase.kt`
    - Action: Create
-   - Details: `class GetWardsUseCase @Inject constructor(private val guardianRepository: GuardianRepository, private val deviceIdProvider: DeviceIdProvider)`. Method `operator fun invoke(): Flow<List<GuardianPairing>>` that gets device ID then calls `guardianRepository.getWards(deviceId)`.
+   - Details: `class GetWardsUseCase @Inject constructor(private val guardianRepository: GuardianRepository, private val deviceIdProvider: DeviceIdProvider)`. Method `operator fun invoke(): Flow<List<GuardianPairing>>` that uses the `flow { }` builder to call `deviceIdProvider.getDeviceId()` (which may be suspend) and then `emitAll(guardianRepository.getWards(deviceId))`. This avoids calling suspend functions from a non-suspend `invoke()` -- the `flow { }` builder provides the suspend context.
 
 2. **Create RefreshWardsUseCase**
    - File: `android/app/src/main/java/com/safeanot/app/domain/usecase/RefreshWardsUseCase.kt`
@@ -288,6 +318,7 @@
 ### Tests
 
 - `android/app/src/test/java/com/safeanot/app/feature/guardian/GuardianDashboardViewModelTest.kt` -- Loads wards on init, refresh updates ward list, stale detection works for >24h, empty list when no wards, error state on API failure.
+- `android/app/src/test/java/com/safeanot/app/feature/guardian/WardDetailViewModelTest.kt` -- Loads ward details by deviceId from SavedStateHandle, exposes heartbeat history, unlink calls deletePairing and navigates back, error state on missing ward.
 - `android/app/src/test/java/com/safeanot/app/util/RelativeTimeFormatterTest.kt` -- "Just now" for <60s, "5 min ago" for 5min, "2 hours ago" for 2h, "3 days ago" for 3d, "2 weeks ago" for 14d.
 
 ### Acceptance Criteria
@@ -306,17 +337,17 @@
 ### Tasks
 
 1. **Create alert comparison logic in heartbeat handler**
-   - File: `backend/workers/src/handlers/guardian.ts`
+   - File: `backend/workers/src/routes/guardian.ts`
    - Action: Modify (extend handlePostHeartbeat)
    - Details: After storing the new heartbeat, query the previous heartbeat for the same ward from D1. Compare: if `prev.security_score - current.security_score >= 20` (score drop), or `prev.play_protect_enabled && !current.play_protect_enabled` (Play Protect disabled), or `current.security_score < 50 && prev.security_score >= 50` (entering RED band), then trigger alert. Query all guardians for this ward and call `sendFcmNotification()` for each. Add daily alert counter in D1 to enforce max 3 alerts per ward per day.
 
 2. **Create FCM notification sender utility**
    - File: `backend/workers/src/lib/fcm.ts`
    - Action: Create
-   - Details: Export `async function sendFcmNotification(env: Env, fcmToken: string, title: string, body: string, data: Record<string, string>): Promise<boolean>`. Uses the FCM HTTP v1 API (or legacy API) with `env.FIREBASE_API_KEY`. Constructs notification payload with title, body, and data fields (for deep linking). Returns true on success, false on failure (log but don't crash).
+   - Details: Export `async function sendFcmNotification(env: Env, fcmToken: string, title: string, body: string, data: Record<string, string>): Promise<boolean>`. Uses the **FCM HTTP v1 API** (`https://fcm.googleapis.com/v1/projects/{project_id}/messages:send`). Authenticates via a service account JSON stored in `env.FIREBASE_SERVICE_ACCOUNT_JSON` (Cloudflare Worker secret). On each call, mints a short-lived OAuth2 access token by signing a JWT with the service account's private key (RS256) and exchanging it at `https://oauth2.googleapis.com/token` with scope `https://www.googleapis.com/auth/firebase.messaging`. Caches the access token in a module-level variable until 5 minutes before expiry to avoid repeated token exchanges. Constructs the v1 message payload: `{ message: { token: fcmToken, notification: { title, body }, data } }`. Returns true on 200, false on failure (log error but don't crash). The legacy `https://fcm.googleapis.com/fcm/send` API is deprecated and must NOT be used.
 
 3. **Create FCM token registration endpoint**
-   - File: `backend/workers/src/handlers/guardian.ts`
+   - File: `backend/workers/src/routes/guardian.ts`
    - Action: Modify (add handler)
    - Details: Add `handleRegisterFcmToken(request, env, params)`. Accepts `{ device_id, fcm_token }`. Upserts into a `guardian_fcm_tokens` table in D1 (columns: `device_id TEXT PRIMARY KEY`, `fcm_token TEXT NOT NULL`, `updated_at INTEGER NOT NULL`). Add this table to the migration.
 
@@ -326,9 +357,9 @@
    - Details: Add `guardian_fcm_tokens` table: `device_id TEXT PRIMARY KEY`, `fcm_token TEXT NOT NULL`, `updated_at INTEGER NOT NULL`. Add `guardian_daily_alerts` table: `ward_device_id TEXT NOT NULL`, `alert_date TEXT NOT NULL` (YYYY-MM-DD), `alert_count INTEGER NOT NULL DEFAULT 0`, `PRIMARY KEY (ward_device_id, alert_date)`.
 
 5. **Register FCM token route**
-   - File: `backend/workers/src/router.ts`
+   - File: `backend/workers/src/index.ts`
    - Action: Modify
-   - Details: Add `router.post('/api/guardian/fcm-token', handleRegisterFcmToken)`.
+   - Details: Add `router.post('/api/guardian/fcm-token', handleRegisterFcmToken)`. Import from `./routes/guardian`.
 
 6. **Add Firebase Cloud Messaging dependency to Android**
    - File: `android/app/build.gradle.kts`
@@ -376,14 +407,14 @@
 ### Tasks
 
 1. **Create help request backend endpoint**
-   - File: `backend/workers/src/handlers/guardian.ts`
+   - File: `backend/workers/src/routes/guardian.ts`
    - Action: Modify (add handler)
    - Details: Add `handleHelpRequest(request, env, params)`. Accepts `{ device_id, security_score, unfixed_items: string[] }`. Validates device has guardians. Rate-limits to 1 request per hour per ward (check D1 for recent requests). Queries all guardians' FCM tokens and sends push notification: title "{ward_name} needs help", body "They're asking for help securing their phone (score: {score}%)". Includes `ward_device_id` in data payload for deep linking.
 
 2. **Register help request route**
-   - File: `backend/workers/src/router.ts`
+   - File: `backend/workers/src/index.ts`
    - Action: Modify
-   - Details: Add `router.post('/api/guardian/help-request', handleHelpRequest)`.
+   - Details: Add `router.post('/api/guardian/help-request', handleHelpRequest)`. Import from `./routes/guardian`.
 
 3. **Create SendHelpRequestUseCase**
    - File: `android/app/src/main/java/com/safeanot/app/domain/usecase/SendHelpRequestUseCase.kt`
@@ -446,9 +477,11 @@ Recommended sequence (respects internal dependencies):
 | File | Action | Issues |
 |------|--------|--------|
 | `backend/workers/migrations/0004_guardian_tables.sql` | Create | E08-001, E08-005 |
-| `backend/workers/src/handlers/guardian.ts` | Create | E08-001, E08-003, E08-005, E08-006 |
+| `backend/workers/src/routes/guardian.ts` | Create | E08-001, E08-003, E08-005, E08-006 |
 | `backend/workers/src/lib/fcm.ts` | Create | E08-005 |
-| `backend/workers/src/router.ts` | Modify | E08-001, E08-003, E08-005, E08-006 |
+| `backend/workers/src/router.ts` | Modify | E08-001 (add `delete()` method) |
+| `backend/workers/src/index.ts` | Modify | E08-001, E08-003, E08-005, E08-006 |
+| `backend/workers/src/middleware/guardian-auth.ts` | Create | E08-001 |
 | `backend/workers/src/env.d.ts` | Verify | E08-001 |
 | `backend/workers/test/guardian.test.ts` | Create | E08-001, E08-003, E08-006 |
 | `backend/workers/test/guardian-alerts.test.ts` | Create | E08-005 |
@@ -468,6 +501,8 @@ Recommended sequence (respects internal dependencies):
 | `android/app/src/main/java/com/safeanot/app/domain/usecase/ClaimPairingCodeUseCase.kt` | Create | E08-002 |
 | `android/app/src/main/java/com/safeanot/app/domain/usecase/GetWardsUseCase.kt` | Create | E08-004 |
 | `android/app/src/main/java/com/safeanot/app/domain/usecase/RefreshWardsUseCase.kt` | Create | E08-004 |
+| `android/app/src/main/java/com/safeanot/app/domain/usecase/DeletePairingUseCase.kt` | Create | E08-002 |
+| `android/app/src/main/java/com/safeanot/app/domain/usecase/GetPairingsUseCase.kt` | Create | E08-002 |
 | `android/app/src/main/java/com/safeanot/app/domain/usecase/SendHelpRequestUseCase.kt` | Create | E08-006 |
 | `android/app/src/main/java/com/safeanot/app/di/DatabaseModule.kt` | Modify | E08-002 |
 | `android/app/src/main/java/com/safeanot/app/di/RepositoryModule.kt` | Modify | E08-002 |
@@ -484,6 +519,7 @@ Recommended sequence (respects internal dependencies):
 | `android/app/src/main/java/com/safeanot/app/feature/shield/ShieldScreen.kt` | Modify | E08-006 |
 | `android/app/src/main/java/com/safeanot/app/feature/shield/ShieldViewModel.kt` | Modify | E08-006 |
 | `android/app/src/main/java/com/safeanot/app/feature/profile/ProfileScreen.kt` | Modify | E08-002 |
+| `android/app/src/main/java/com/safeanot/app/feature/profile/ProfileViewModel.kt` | Modify | E08-002 |
 | `android/app/src/main/java/com/safeanot/app/navigation/Screen.kt` | Modify | E08-002 |
 | `android/app/src/main/java/com/safeanot/app/navigation/SafeAnotNavGraph.kt` | Modify | E08-002 |
 | `android/app/src/main/java/com/safeanot/app/worker/GuardianHeartbeatWorker.kt` | Create | E08-003 |
@@ -495,7 +531,31 @@ Recommended sequence (respects internal dependencies):
 | `android/app/src/test/java/com/safeanot/app/data/repository/GuardianRepositoryImplTest.kt` | Create | E08-002 |
 | `android/app/src/test/java/com/safeanot/app/testutil/FakeGuardianRepository.kt` | Create | E08-002 |
 | `android/app/src/test/java/com/safeanot/app/feature/guardian/GuardianDashboardViewModelTest.kt` | Create | E08-004 |
+| `android/app/src/test/java/com/safeanot/app/feature/guardian/WardDetailViewModelTest.kt` | Create | E08-004 |
 | `android/app/src/test/java/com/safeanot/app/util/RelativeTimeFormatterTest.kt` | Create | E08-004 |
 | `android/app/src/test/java/com/safeanot/app/worker/GuardianHeartbeatWorkerTest.kt` | Create | E08-003 |
 | `android/app/src/test/java/com/safeanot/app/data/remote/FcmTokenManagerTest.kt` | Create | E08-005 |
 | `android/app/src/test/java/com/safeanot/app/domain/usecase/SendHelpRequestUseCaseTest.kt` | Create | E08-006 |
+
+---
+
+## Codex Review Trace
+
+| # | Severity | Finding | Fix Applied | Issues |
+|---|----------|---------|-------------|--------|
+| 1 | HIGH | Backend handlers in wrong directory (`handlers/`) — project uses `routes/` | Changed all `handlers/guardian.ts` refs to `routes/guardian.ts` | E08-001, E08-003, E08-005, E08-006 |
+| 2 | HIGH | Router class lacks `delete()` method — only has `get()` and `post()` | Added prerequisite task 2b to add `delete()` convenience method to Router | E08-001 |
+| 3 | HIGH | Route registration in `router.ts` — project registers routes in `index.ts` | Changed all route registration tasks from `router.ts` to `index.ts` | E08-001, E08-003, E08-005, E08-006 |
+| 4 | MEDIUM | DeviceIdProvider incorrectly uses `UserPreferencesDataStore` — project uses SharedPreferences | Changed to SharedPreferences pattern matching `ShareEventRepositoryImpl`, reuses same prefs file/key | E08-002 |
+| 5 | MEDIUM | ViewModel injects both UseCases AND Repository directly — breaks clean architecture | Added `DeletePairingUseCase` and `GetPairingsUseCase`; removed direct repo/deviceIdProvider injection from VM | E08-002 |
+| 6 | MEDIUM | HeartbeatScheduler injected into VM without noting it is @Singleton | Added note that scheduler is `@Singleton` injected via Hilt (acceptable — wraps WorkManager only) | E08-003 |
+| 7 | MEDIUM | No authentication on guardian API endpoints | Added task 2c for `guardian-auth.ts` middleware with device-specific HMAC-SHA256 verification | E08-001 |
+| 8 | MEDIUM | FCM uses deprecated legacy API (`fcm.googleapis.com/fcm/send`) | Updated to FCM HTTP v1 API with service account JSON + OAuth2 access token + token caching | E08-005 |
+| 9 | MEDIUM | `GetWardsUseCase.invoke()` calls suspend `getDeviceId()` in non-suspend function | Changed to `flow { }` builder with `emitAll()` pattern to provide suspend context | E08-004 |
+| 10 | MEDIUM | Missing `WardDetailViewModelTest` — WardDetailViewModel has no test coverage | Added test file to E08-004 Tests section and Files Summary | E08-004 |
+| 11 | LOW | Acceptance criteria says "6-digit" but code generates "6-char alphanumeric" | Aligned acceptance criteria to "6-character alphanumeric" | E08-002 |
+| 12 | LOW | `GeneratePairingCodeRequest` missing `display_name` field — backend stores it | Added `display_name: String` to `GeneratePairingCodeRequest` DTO and backend handler description | E08-001, E08-002 |
+| 13 | LOW | `WardHeartbeatHistory` has no backend endpoint to fetch historical heartbeats | Added `GET /api/guardian/wards/:deviceId/heartbeats?days=7` endpoint (task 1b in E08-003) | E08-003 |
+| 14 | LOW | No sync staleness tracking — can't tell when local data was last refreshed | Added `lastSyncedAt: Long?` field to `GuardianPairingEntity` | E08-002 |
+| 15 | LOW | Heartbeat interval described as "(configurable)" but no config mechanism exists | Changed to "(fixed interval for v1)" — configurability deferred to future version | E08-003 |
+| 16 | LOW | ProfileScreen shows guardian count badge but ProfileViewModel has no guardian state | Added task 19 to modify `ProfileViewModel` to inject `GuardianRepository` and expose `guardianCount` | E08-002 |
