@@ -46,6 +46,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.safeanot.app.domain.model.VerdictType
 import com.safeanot.app.feature.check.components.VerdictCard
 import com.safeanot.app.feature.check.components.WarningTemplatePicker
+import com.safeanot.app.domain.model.SharePlatform
+import com.safeanot.app.domain.model.ShareType
 import com.safeanot.app.ui.theme.BlueAccent
 import com.safeanot.app.ui.theme.DarkBorder
 import com.safeanot.app.ui.theme.DarkCard
@@ -74,15 +76,30 @@ fun CheckScreen(
                         val uri = ShareImageCache.saveBitmap(context, event.bitmap)
                         val intent = ShareIntentFactory.createImageShare(uri, event.text)
                         context.startActivity(intent)
+                        viewModel.onShareCompleted(
+                            ShareType.VERDICT,
+                            urlInput,
+                            SharePlatform.GENERIC,
+                        )
                     }
                     is ShareEvent.BitmapOnly -> {
                         val uri = ShareImageCache.saveBitmap(context, event.bitmap)
                         val intent = ShareIntentFactory.createImageShare(uri)
                         context.startActivity(intent)
+                        viewModel.onShareCompleted(
+                            ShareType.VERDICT,
+                            urlInput,
+                            SharePlatform.GENERIC,
+                        )
                     }
                     is ShareEvent.TextOnly -> {
                         val intent = ShareIntentFactory.createTextShare(event.text)
                         context.startActivity(intent)
+                        viewModel.onShareCompleted(
+                            ShareType.VERDICT,
+                            urlInput,
+                            SharePlatform.GENERIC,
+                        )
                     }
                 }
             } catch (e: Exception) {
@@ -95,12 +112,18 @@ fun CheckScreen(
     LaunchedEffect(Unit) {
         viewModel.warningShareEvent.collect { text ->
             try {
-                val intent = if (WhatsAppUtils.isWhatsAppInstalled(context)) {
+                val isWhatsApp = WhatsAppUtils.isWhatsAppInstalled(context)
+                val intent = if (isWhatsApp) {
                     ShareIntentFactory.createWhatsAppTextShare(text)
                 } else {
                     ShareIntentFactory.createTextShare(text)
                 }
                 context.startActivity(intent)
+                viewModel.onShareCompleted(
+                    ShareType.WARNING_TEMPLATE,
+                    urlInput,
+                    if (isWhatsApp) SharePlatform.WHATSAPP else SharePlatform.GENERIC,
+                )
             } catch (e: Exception) {
                 Log.e("CheckScreen", "Failed to share warning", e)
             }

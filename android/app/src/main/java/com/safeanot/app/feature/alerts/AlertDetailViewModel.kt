@@ -6,11 +6,15 @@ package com.safeanot.app.feature.alerts
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.safeanot.app.domain.model.AlertRegionFilter
 import com.safeanot.app.domain.model.AlertSeverity
 import com.safeanot.app.domain.model.ScamAlert
+import com.safeanot.app.domain.model.ShareEventModel
+import com.safeanot.app.domain.model.SharePlatform
+import com.safeanot.app.domain.model.ShareType
 import com.safeanot.app.domain.usecase.GetAlertByIdUseCase
 import com.safeanot.app.domain.usecase.RefreshAlertsUseCase
-import com.safeanot.app.domain.model.AlertRegionFilter
+import com.safeanot.app.domain.usecase.TrackShareEventUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +36,7 @@ class AlertDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getAlertByIdUseCase: GetAlertByIdUseCase,
     private val refreshAlertsUseCase: RefreshAlertsUseCase,
+    private val trackShareEventUseCase: TrackShareEventUseCase,
 ) : ViewModel() {
 
     private val alertId: String = savedStateHandle.get<String>("alertId") ?: ""
@@ -140,5 +145,21 @@ class AlertDetailViewModel @Inject constructor(
         tips.add("Report suspicious activity to the relevant authorities in your country.")
 
         return tips
+    }
+
+    /**
+     * Called by the UI after a share intent has been successfully launched.
+     * Tracks the share event for analytics.
+     */
+    fun onShareCompleted(platform: SharePlatform) {
+        viewModelScope.launch {
+            trackShareEventUseCase(
+                ShareEventModel(
+                    shareType = ShareType.ALERT,
+                    contentId = alertId,
+                    platform = platform,
+                )
+            )
+        }
     }
 }

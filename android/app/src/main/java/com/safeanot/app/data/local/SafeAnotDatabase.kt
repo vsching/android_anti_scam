@@ -14,6 +14,7 @@ import com.safeanot.app.data.local.entity.CheckResultCacheEntity
 import com.safeanot.app.data.local.entity.ReminderConfigEntity
 import com.safeanot.app.data.local.entity.ScamDomainEntity
 import com.safeanot.app.data.local.entity.SecurityScoreEntity
+import com.safeanot.app.data.local.entity.ShareEventEntity
 import com.safeanot.app.data.local.entity.SyncMetadataEntity
 
 @Database(
@@ -25,8 +26,9 @@ import com.safeanot.app.data.local.entity.SyncMetadataEntity
         CheckResultCacheEntity::class,
         AlertEntity::class,
         ReminderConfigEntity::class,
+        ShareEventEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 abstract class SafeAnotDatabase : RoomDatabase() {
@@ -34,12 +36,30 @@ abstract class SafeAnotDatabase : RoomDatabase() {
     abstract fun scamDomainDao(): ScamDomainDao
     abstract fun alertsDao(): AlertsDao
     abstract fun reminderConfigDao(): ReminderConfigDao
+    abstract fun shareEventDao(): ShareEventDao
 
     companion object {
         val MIGRATION_4_5 = object : Migration(4, 5) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE security_scores ADD COLUMN audit_count INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE security_scores ADD COLUMN last_full_audit_at INTEGER")
+            }
+        }
+
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS share_events (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        share_type TEXT NOT NULL,
+                        content_id TEXT NOT NULL,
+                        platform TEXT NOT NULL,
+                        timestamp INTEGER NOT NULL,
+                        synced INTEGER NOT NULL DEFAULT 0
+                    )
+                    """.trimIndent()
+                )
             }
         }
     }

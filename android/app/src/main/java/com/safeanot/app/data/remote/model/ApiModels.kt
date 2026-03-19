@@ -44,3 +44,15 @@ data class AlertDto(
     @SerializedName("report_count") val reportCount: Int,
     @SerializedName("created_at") val createdAt: String,
 )
+
+data class ShareEventDto(
+    @SerializedName("share_type") val shareType: String,
+    @SerializedName("content_id") val contentId: String,
+    @SerializedName("platform") val platform: String,
+    @SerializedName("timestamp") val timestamp: Long,
+)
+
+data class ShareEventBatchRequest(
+    @SerializedName("device_id") val deviceId: String,
+    @SerializedName("events") val events: List<ShareEventDto>,
+)

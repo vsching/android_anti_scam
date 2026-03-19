@@ -10,6 +10,7 @@ import com.safeanot.app.data.local.AuditDao
 import com.safeanot.app.data.local.ReminderConfigDao
 import com.safeanot.app.data.local.SafeAnotDatabase
 import com.safeanot.app.data.local.ScamDomainDao
+import com.safeanot.app.data.local.ShareEventDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,7 +30,7 @@ object DatabaseModule {
             SafeAnotDatabase::class.java,
             "safeanot_database",
         )
-            .addMigrations(SafeAnotDatabase.MIGRATION_4_5)
+            .addMigrations(SafeAnotDatabase.MIGRATION_4_5, SafeAnotDatabase.MIGRATION_5_6)
             .fallbackToDestructiveMigrationFrom(1, 2, 3)
             .build()
     }
@@ -56,5 +57,11 @@ object DatabaseModule {
     @Singleton
     fun provideReminderConfigDao(database: SafeAnotDatabase): ReminderConfigDao {
         return database.reminderConfigDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideShareEventDao(database: SafeAnotDatabase): ShareEventDao {
+        return database.shareEventDao()
     }
 }

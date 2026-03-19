@@ -159,6 +159,8 @@ class AlertsRepositoryImplTest {
         override suspend fun getBloomFilter() = throw NotImplementedError()
         override suspend fun checkDomain(request: com.safeanot.app.data.remote.model.CheckRequest) =
             throw NotImplementedError()
+        override suspend fun postShareEvents(request: com.safeanot.app.data.remote.model.ShareEventBatchRequest) =
+            throw NotImplementedError()
     }
 
     private class FakeAlertsDao : AlertsDao {

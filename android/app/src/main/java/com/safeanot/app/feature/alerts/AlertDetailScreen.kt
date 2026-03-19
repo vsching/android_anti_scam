@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.safeanot.app.domain.model.AlertSeverity
+import com.safeanot.app.domain.model.SharePlatform
 import com.safeanot.app.feature.alerts.components.formatRelativeTime
 import com.safeanot.app.ui.theme.BlueAccent
 import com.safeanot.app.ui.theme.DarkBackground
@@ -247,6 +248,7 @@ fun AlertDetailScreen(
                             try {
                                 val shareIntent = ShareIntentFactory.createTextShare(shareText)
                                 context.startActivity(shareIntent)
+                                viewModel.onShareCompleted(SharePlatform.GENERIC)
                             } catch (e: Exception) {
                                 Log.e("AlertDetailScreen", "Failed to share alert", e)
                             }

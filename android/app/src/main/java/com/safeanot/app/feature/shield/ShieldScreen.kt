@@ -43,6 +43,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.safeanot.app.domain.model.AppCategory
 import com.safeanot.app.domain.model.CardFormat
+import com.safeanot.app.domain.model.SharePlatform
+import com.safeanot.app.domain.model.ShareType
 import com.safeanot.app.feature.check.ShareEvent
 import com.safeanot.app.feature.shield.components.AppCard
 import com.safeanot.app.feature.shield.components.PlayProtectCard
@@ -84,6 +86,11 @@ fun ShieldScreen(
                         context.startActivity(intent)
                     }
                 }
+                viewModel.onShareCompleted(
+                    ShareType.SCORE,
+                    "security_score",
+                    SharePlatform.GENERIC,
+                )
             } catch (e: Exception) {
                 Log.e("ShieldScreen", "Failed to share", e)
             }

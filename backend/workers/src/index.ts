@@ -10,6 +10,7 @@ import { addSecurityHeaders } from './middleware/security-headers';
 import { handleRetention } from './lib/retention';
 import { handleAlerts } from './routes/alerts';
 import { handleCheck } from './routes/check';
+import { handleShare } from './routes/share';
 import {
   handleDataLatest,
   handleDataFull,
@@ -24,6 +25,9 @@ router.get('/api/alerts', handleAlerts);
 
 // Link checker
 router.post('/api/check', handleCheck);
+
+// Share event analytics
+router.post('/api/score/share', handleShare);
 
 // Data download endpoints (R2 artifacts)
 router.get('/api/data/latest', handleDataLatest);

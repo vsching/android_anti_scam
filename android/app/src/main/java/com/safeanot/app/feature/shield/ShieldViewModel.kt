@@ -11,10 +11,14 @@ import com.safeanot.app.domain.model.AuditItem
 import com.safeanot.app.domain.model.AuditStatus
 import com.safeanot.app.domain.model.CardFormat
 import com.safeanot.app.domain.model.SecurityScore
+import com.safeanot.app.domain.model.ShareEventModel
+import com.safeanot.app.domain.model.SharePlatform
+import com.safeanot.app.domain.model.ShareType
 import com.safeanot.app.domain.repository.AuditRepository
 import com.safeanot.app.domain.usecase.GenerateScoreCardUseCase
 import com.safeanot.app.domain.usecase.GetSecurityScoreUseCase
 import com.safeanot.app.domain.usecase.RunAuditUseCase
+import com.safeanot.app.domain.usecase.TrackShareEventUseCase
 import com.safeanot.app.feature.check.ShareEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -40,6 +44,7 @@ class ShieldViewModel @Inject constructor(
     private val getSecurityScoreUseCase: GetSecurityScoreUseCase,
     private val generateScoreCardUseCase: GenerateScoreCardUseCase,
     private val repository: AuditRepository,
+    private val trackShareEventUseCase: TrackShareEventUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ShieldUiState())
@@ -117,6 +122,22 @@ class ShieldViewModel @Inject constructor(
             } catch (_: Exception) {
                 // Silently handle bitmap generation failures
             }
+        }
+    }
+
+    /**
+     * Called by the UI after a share intent has been successfully launched.
+     * Tracks the share event for analytics.
+     */
+    fun onShareCompleted(shareType: ShareType, contentId: String, platform: SharePlatform) {
+        viewModelScope.launch {
+            trackShareEventUseCase(
+                ShareEventModel(
+                    shareType = shareType,
+                    contentId = contentId,
+                    platform = platform,
+                )
+            )
         }
     }
 }

@@ -19,6 +19,7 @@ import com.safeanot.app.domain.repository.SyncRepository
 import com.safeanot.app.util.Constants
 import com.safeanot.app.worker.AuditReminderScheduler
 import com.safeanot.app.worker.DatabaseSyncWorker
+import com.safeanot.app.worker.ShareEventSyncWorker
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +51,7 @@ class SafeAnotApp : Application(), Configuration.Provider {
         super.onCreate()
         scheduleDatabaseSync()
         scheduleAuditReminders()
+        scheduleShareEventSync()
     }
 
     private fun scheduleDatabaseSync() {
@@ -89,6 +91,36 @@ class SafeAnotApp : Application(), Configuration.Provider {
                 )
             }
         }
+    }
+
+    private fun scheduleShareEventSync() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        // Periodic sync every 6 hours
+        val periodicRequest = PeriodicWorkRequestBuilder<ShareEventSyncWorker>(
+            6, TimeUnit.HOURS,
+        )
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "safeanot_share_event_sync",
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodicRequest,
+        )
+
+        // Immediate startup sync for any queued events
+        val immediateRequest = OneTimeWorkRequestBuilder<ShareEventSyncWorker>()
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniqueWork(
+            "safeanot_share_event_sync_startup",
+            ExistingWorkPolicy.KEEP,
+            immediateRequest,
+        )
     }
 
     private fun scheduleAuditReminders() {

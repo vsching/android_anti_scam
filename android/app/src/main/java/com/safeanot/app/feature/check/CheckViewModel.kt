@@ -9,7 +9,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.safeanot.app.domain.model.LinkVerdict
 import com.safeanot.app.domain.model.WarningTemplate
+import com.safeanot.app.domain.model.ShareEventModel
+import com.safeanot.app.domain.model.SharePlatform
+import com.safeanot.app.domain.model.ShareType
 import com.safeanot.app.domain.usecase.CheckLinkUseCase
+import com.safeanot.app.domain.usecase.TrackShareEventUseCase
 import com.safeanot.app.util.VerdictCardGenerator
 import com.safeanot.app.util.WarningTemplateProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,6 +35,7 @@ sealed class CheckUiState {
 @HiltViewModel
 class CheckViewModel @Inject constructor(
     private val checkLinkUseCase: CheckLinkUseCase,
+    private val trackShareEventUseCase: TrackShareEventUseCase,
 ) : ViewModel() {
 
     private val _urlInput = MutableStateFlow("")
@@ -117,6 +122,22 @@ class CheckViewModel @Inject constructor(
             } catch (_: Exception) {
                 // Silently handle bitmap generation failures
             }
+        }
+    }
+
+    /**
+     * Called by the UI after a share intent has been successfully launched.
+     * Tracks the share event for analytics.
+     */
+    fun onShareCompleted(shareType: ShareType, contentId: String, platform: SharePlatform) {
+        viewModelScope.launch {
+            trackShareEventUseCase(
+                ShareEventModel(
+                    shareType = shareType,
+                    contentId = contentId,
+                    platform = platform,
+                )
+            )
         }
     }
 }

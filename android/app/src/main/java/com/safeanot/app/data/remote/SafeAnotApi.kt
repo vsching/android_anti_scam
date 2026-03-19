@@ -8,6 +8,8 @@ import com.safeanot.app.data.remote.model.CheckResponse
 import com.safeanot.app.data.remote.model.LatestMetadataResponse
 import okhttp3.ResponseBody
 import com.safeanot.app.data.remote.model.AlertDto
+import com.safeanot.app.data.remote.model.ShareEventBatchRequest
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -36,4 +38,7 @@ interface SafeAnotApi {
 
     @GET("api/alerts")
     suspend fun getAlerts(@Query("region") region: String? = null): List<AlertDto>
+
+    @POST("api/score/share")
+    suspend fun postShareEvents(@Body request: ShareEventBatchRequest): Response<Unit>
 }
