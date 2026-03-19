@@ -196,14 +196,17 @@ export async function handleShare(
 
   // 7. Per-device rate limiting (100/day)
   const deviceId = body.device_id.trim();
-  const oneDayAgoISO = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+  // Use datetime() in SQL to normalize comparison — created_at is stored as
+  // datetime('now') format (YYYY-MM-DD HH:MM:SS), so we use the same format.
+  const oneDayAgoMs = now - 24 * 60 * 60 * 1000;
+  const oneDayAgoSql = new Date(oneDayAgoMs).toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, '');
 
   let todayCount: number;
   try {
     const result = await env.DB.prepare(
       'SELECT COUNT(*) as cnt FROM share_events WHERE device_id = ? AND created_at >= ?',
     )
-      .bind(deviceId, oneDayAgoISO)
+      .bind(deviceId, oneDayAgoSql)
       .first<{ cnt: number }>();
     todayCount = result?.cnt ?? 0;
   } catch {

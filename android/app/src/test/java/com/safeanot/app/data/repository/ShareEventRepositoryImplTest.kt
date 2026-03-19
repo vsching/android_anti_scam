@@ -214,6 +214,11 @@ class ShareEventRepositoryImplTest {
         override suspend fun deleteOldSynced(beforeTimestamp: Long) {
             allEntities.removeAll { it.synced && it.timestamp < beforeTimestamp }
         }
+
+        override suspend fun deleteStaleUnsynced(beforeTimestamp: Long) {
+            unsyncedEntities.removeAll { !it.synced && it.timestamp < beforeTimestamp }
+            allEntities.removeAll { !it.synced && it.timestamp < beforeTimestamp }
+        }
     }
 
     private class FakeShareApi : SafeAnotApi {
