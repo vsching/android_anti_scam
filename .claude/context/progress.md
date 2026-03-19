@@ -7,7 +7,7 @@ author: Claude Code PM System
 
 # Project Progress
 
-## Phase 1 MVP — 5/7 Epics Complete
+## Phase 1 MVP — 6/7 Epics Complete
 
 | Epic | Name | Status | Notes |
 |------|------|--------|-------|
@@ -18,16 +18,16 @@ author: Claude Code PM System
 | E04 | Scam Alerts Feed | Done | News feed from D1, pull-to-refresh |
 | E05 | Profile + Settings | Done | Real stats, region prefs, emergency contacts |
 | E06 | Website Deployment | Not Started | Cloudflare Pages, 4 issues |
-| E07 | Share & Viral Loops | Not Started | Verdict cards, deep links, 5 issues |
+| E07 | Share & Viral Loops | Done | Share infra, score card, warning templates, analytics, rescue card |
 
 ## Review History
 
 - E01-E04 built and reviewed with **78 total findings** fixed across plan and code reviews.
 - E05 plan reviewed with **17 findings** fixed across 3 Codex review rounds.
+- E07 plan reviewed with **24 findings** fixed across 4 Codex review rounds.
 - Reviews covered: security, error handling, edge cases, architecture compliance.
 
 ## Next Priorities
 
 1. E01B — Pipeline deployment (enables live data)
-2. E07 — Share & Viral Loops (depends on E02, E03)
-3. E06 — Website (depends on E01)
+2. E06 — Website (depends on E01)
