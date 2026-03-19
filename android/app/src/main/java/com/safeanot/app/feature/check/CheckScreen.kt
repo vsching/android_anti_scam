@@ -64,17 +64,18 @@ fun CheckScreen(
     // Collect share events from the ViewModel and handle intent creation in UI
     LaunchedEffect(Unit) {
         viewModel.shareEvents.collect { event ->
+            // Use stable domain from result state, not mutable urlInput
+            val stableDomain = (checkState as? CheckState.Result)?.verdict?.domain ?: urlInput
             try {
                 when (event) {
                     is ShareEvent.ImageWithText -> {
                         val uri = ShareImageCache.saveBitmap(context, event.bitmap)
                         val intent = ShareIntentFactory.createImageShare(uri, event.text)
                         context.startActivity(intent)
-                        // Rescue cards include the Play Store download link
                         val isRescueCard = event.text.contains("play.google.com")
                         viewModel.onShareCompleted(
                             if (isRescueCard) ShareType.RESCUE_CARD else ShareType.VERDICT,
-                            urlInput,
+                            stableDomain,
                             SharePlatform.GENERIC,
                         )
                     }
@@ -84,7 +85,7 @@ fun CheckScreen(
                         context.startActivity(intent)
                         viewModel.onShareCompleted(
                             ShareType.VERDICT,
-                            urlInput,
+                            stableDomain,
                             SharePlatform.GENERIC,
                         )
                     }
@@ -93,7 +94,7 @@ fun CheckScreen(
                         context.startActivity(intent)
                         viewModel.onShareCompleted(
                             ShareType.VERDICT,
-                            urlInput,
+                            stableDomain,
                             SharePlatform.GENERIC,
                         )
                     }

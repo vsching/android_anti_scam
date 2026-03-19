@@ -57,6 +57,11 @@ class ShareEventRepositoryImpl @Inject constructor(
     }
 
     override suspend fun syncPendingEvents(): Boolean {
+        // Purge stale unsynced events older than backend's 30-day window
+        // to prevent sync deadlock (backend rejects, same rows retried forever)
+        val thirtyDaysAgo = System.currentTimeMillis() - (30 * MILLIS_PER_DAY)
+        shareEventDao.deleteStaleUnsynced(thirtyDaysAgo)
+
         val unsynced = shareEventDao.getUnsynced()
         if (unsynced.isEmpty()) return true
 

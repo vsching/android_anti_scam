@@ -26,4 +26,7 @@ interface ShareEventDao {
 
     @Query("DELETE FROM share_events WHERE synced = 1 AND timestamp < :beforeTimestamp")
     suspend fun deleteOldSynced(beforeTimestamp: Long)
+
+    @Query("DELETE FROM share_events WHERE synced = 0 AND timestamp < :beforeTimestamp")
+    suspend fun deleteStaleUnsynced(beforeTimestamp: Long)
 }

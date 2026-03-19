@@ -171,9 +171,9 @@ export async function handleShare(
       );
     }
 
-    if (typeof event.timestamp !== 'number') {
+    if (typeof event.timestamp !== 'number' || !Number.isFinite(event.timestamp)) {
       return jsonResponse(
-        { error: `events[${i}].timestamp must be a number` },
+        { error: `events[${i}].timestamp must be a finite number` },
         400,
       );
     }
