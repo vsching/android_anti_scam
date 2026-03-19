@@ -366,10 +366,10 @@ footer .tiktok {
 <!-- ====== HEADER ====== -->
 <header class="site-header">
   <div class="wrap" style="display:flex;align-items:center;gap:12px;">
-    <a href="index.html" class="nav-back">
+    <a href="/" class="nav-back">
       <span class="material-symbols-rounded" style="font-size:22px">arrow_back</span>
     </a>
-    <a href="index.html" class="nav-logo">
+    <a href="/" class="nav-logo">
       <div class="nav-shield">
         <span class="material-symbols-rounded">shield</span>
       </div>
@@ -417,9 +417,9 @@ footer .tiktok {
   <div class="wrap">
     <p>Made with <span class="heart">❤️</span> in Malaysia to fight scams</p>
     <div class="footer-links">
-      <a href="index.html">Home</a>
-      <a href="check.html">Check Links</a>
-      <a href="challenge.html">Quiz</a>
+      <a href="/">Home</a>
+      <a href="/check">Check Links</a>
+      <a href="/challenge">Quiz</a>
       <a href="#">Privacy</a>
       <a href="#">Terms</a>
     </div>
@@ -476,7 +476,7 @@ if (verdict === 'dangerous') {
 function goCheck() {
   const url = document.getElementById('urlInput').value.trim();
   if (url) {
-    window.location.href = `check.html?url=${encodeURIComponent(url)}`;
+    window.location.href = `/check?url=${encodeURIComponent(url)}`;
   }
 }
 

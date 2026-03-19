@@ -514,10 +514,10 @@ footer .tiktok {
 <!-- ====== HEADER ====== -->
 <header class="site-header">
   <div class="wrap" style="display:flex;align-items:center;gap:12px;">
-    <a href="index.html" class="nav-back">
+    <a href="/" class="nav-back">
       <span class="material-symbols-rounded" style="font-size:22px">arrow_back</span>
     </a>
-    <a href="index.html" class="nav-logo">
+    <a href="/" class="nav-logo">
       <div class="nav-shield">
         <span class="material-symbols-rounded">shield</span>
       </div>
@@ -578,8 +578,8 @@ footer .tiktok {
   <div class="wrap">
     <p>Made with <span class="heart">❤️</span> in Malaysia to fight scams</p>
     <div class="footer-links">
-      <a href="index.html">Home</a>
-      <a href="challenge.html">Spot the Fake Quiz</a>
+      <a href="/">Home</a>
+      <a href="/challenge">Spot the Fake Quiz</a>
       <a href="#">Privacy</a>
       <a href="#">Terms</a>
     </div>
@@ -701,13 +701,13 @@ function showResult(domain, verdict, reason, real) {
   const labels = { dangerous: 'DANGEROUS', safe: 'SAFE', suspicious: 'SUSPICIOUS' };
 
   const shareText = verdict === 'dangerous'
-    ? `⚠️ WARNING: ${domain} is a SCAM site! Check before you click: ${window.location.origin}/check.html`
+    ? `⚠️ WARNING: ${domain} is a SCAM site! Check before you click: ${window.location.origin}/check`
     : verdict === 'suspicious'
-    ? `⚠️ ${domain} looks suspicious. Check your links here: ${window.location.origin}/check.html`
-    : `✅ ${domain} is safe. Check any link here: ${window.location.origin}/check.html`;
+    ? `⚠️ ${domain} looks suspicious. Check your links here: ${window.location.origin}/check`
+    : `✅ ${domain} is safe. Check any link here: ${window.location.origin}/check`;
 
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
-  const resultUrl = `${window.location.origin}/result.html?domain=${encodeURIComponent(domain)}&verdict=${verdict}`;
+  const resultUrl = `${window.location.origin}/result?domain=${encodeURIComponent(domain)}&verdict=${verdict}`;
 
   let html = `
     <div class="result-card ${verdict}">
