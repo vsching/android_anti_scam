@@ -1,24 +1,22 @@
 /**
  * ViewModel for the Link Checker screen.
  * Delegates URL checking to CheckLinkUseCase and manages UI state.
+ * Emits share events as domain data — NO Context dependency.
  */
 package com.safeanot.app.feature.check
 
-import android.content.Context
-import android.content.Intent
-import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.safeanot.app.domain.model.LinkVerdict
 import com.safeanot.app.domain.usecase.CheckLinkUseCase
 import com.safeanot.app.util.VerdictCardGenerator
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
 import javax.inject.Inject
 
 sealed class CheckUiState {
@@ -38,6 +36,9 @@ class CheckViewModel @Inject constructor(
 
     private val _checkState = MutableStateFlow<CheckUiState>(CheckUiState.Idle)
     val checkState: StateFlow<CheckUiState> = _checkState.asStateFlow()
+
+    private val _shareEvents = Channel<ShareEvent>(Channel.BUFFERED)
+    val shareEvents = _shareEvents.receiveAsFlow()
 
     fun onUrlChanged(url: String) {
         _urlInput.value = url
@@ -70,7 +71,11 @@ class CheckViewModel @Inject constructor(
         _urlInput.value = url
     }
 
-    fun shareResult(context: Context) {
+    /**
+     * Generates a verdict card bitmap and emits a ShareEvent.
+     * The UI layer handles saving the bitmap to cache and starting the share intent.
+     */
+    fun shareResult() {
         val state = _checkState.value
         if (state !is CheckUiState.Result) return
 
@@ -79,36 +84,13 @@ class CheckViewModel @Inject constructor(
                 val verdict = state.verdict
                 val bitmap = VerdictCardGenerator.generate(verdict)
 
-                val sharedDir = File(context.cacheDir, "shared_verdicts")
-                sharedDir.mkdirs()
-                val file = File(sharedDir, "verdict_${System.currentTimeMillis()}.png")
-                FileOutputStream(file).use { out ->
-                    bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
-                }
-
-                val uri = FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.fileprovider",
-                    file,
-                )
-
                 val deepLink = "https://safeanot.com/result?domain=${verdict.domain}"
-                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                    type = "image/png"
-                    putExtra(Intent.EXTRA_STREAM, uri)
-                    putExtra(
-                        Intent.EXTRA_TEXT,
-                        "I checked \"${verdict.domain}\" on Safe Anot? " +
-                            "Verdict: ${verdict.verdict.name}. $deepLink"
-                    )
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
+                val shareText = "I checked \"${verdict.domain}\" on Safe Anot? " +
+                    "Verdict: ${verdict.verdict.name}. $deepLink"
 
-                context.startActivity(
-                    Intent.createChooser(shareIntent, "Share Verdict")
-                )
+                _shareEvents.send(ShareEvent.ImageWithText(bitmap, shareText))
             } catch (_: Exception) {
-                // Silently handle share failures
+                // Silently handle bitmap generation failures
             }
         }
     }

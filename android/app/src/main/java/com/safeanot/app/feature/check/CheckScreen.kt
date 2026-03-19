@@ -4,6 +4,7 @@
  */
 package com.safeanot.app.feature.check
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +41,8 @@ import com.safeanot.app.ui.theme.DarkCard
 import com.safeanot.app.ui.theme.RedAccent
 import com.safeanot.app.ui.theme.TextPrimary
 import com.safeanot.app.ui.theme.TextSecondary
+import com.safeanot.app.util.ShareImageCache
+import com.safeanot.app.util.ShareIntentFactory
 
 @Composable
 fun CheckScreen(
@@ -47,6 +51,32 @@ fun CheckScreen(
     val urlInput by viewModel.urlInput.collectAsStateWithLifecycle()
     val checkState by viewModel.checkState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    // Collect share events from the ViewModel and handle intent creation in UI
+    LaunchedEffect(Unit) {
+        viewModel.shareEvents.collect { event ->
+            try {
+                when (event) {
+                    is ShareEvent.ImageWithText -> {
+                        val uri = ShareImageCache.saveBitmap(context, event.bitmap)
+                        val intent = ShareIntentFactory.createImageShare(uri, event.text)
+                        context.startActivity(intent)
+                    }
+                    is ShareEvent.BitmapOnly -> {
+                        val uri = ShareImageCache.saveBitmap(context, event.bitmap)
+                        val intent = ShareIntentFactory.createImageShare(uri)
+                        context.startActivity(intent)
+                    }
+                    is ShareEvent.TextOnly -> {
+                        val intent = ShareIntentFactory.createTextShare(event.text)
+                        context.startActivity(intent)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("CheckScreen", "Failed to share", e)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -135,7 +165,7 @@ fun CheckScreen(
 
                 VerdictCard(
                     verdict = state.verdict,
-                    onShareClick = { viewModel.shareResult(context) },
+                    onShareClick = { viewModel.shareResult() },
                     onCheckAnotherClick = { viewModel.clearResults() },
                 )
             }

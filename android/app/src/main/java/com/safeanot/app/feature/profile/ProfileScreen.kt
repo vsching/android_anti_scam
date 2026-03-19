@@ -4,7 +4,6 @@
 package com.safeanot.app.feature.profile
 
 import android.content.ActivityNotFoundException
-import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -60,7 +59,7 @@ fun ProfileScreen(
         viewModel.shareEvent.collect {
             try {
                 val intent = ShareHelper.createShareIntent()
-                context.startActivity(Intent.createChooser(intent, "Share Safe Anot?"))
+                context.startActivity(intent)
             } catch (_: ActivityNotFoundException) {
                 // No activity available to handle share intent
             }

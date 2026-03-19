@@ -3,7 +3,7 @@
  */
 package com.safeanot.app.feature.alerts
 
-import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,6 +53,7 @@ import com.safeanot.app.ui.theme.OrangeAccent
 import com.safeanot.app.ui.theme.RedAccent
 import com.safeanot.app.ui.theme.TextPrimary
 import com.safeanot.app.ui.theme.TextSecondary
+import com.safeanot.app.util.ShareIntentFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -243,13 +244,12 @@ fun AlertDetailScreen(
                     Button(
                         onClick = {
                             val shareText = uiState.shareText ?: return@Button
-                            val sendIntent = Intent().apply {
-                                action = Intent.ACTION_SEND
-                                putExtra(Intent.EXTRA_TEXT, shareText)
-                                type = "text/plain"
+                            try {
+                                val shareIntent = ShareIntentFactory.createTextShare(shareText)
+                                context.startActivity(shareIntent)
+                            } catch (e: Exception) {
+                                Log.e("AlertDetailScreen", "Failed to share alert", e)
                             }
-                            val shareIntent = Intent.createChooser(sendIntent, "Share Alert")
-                            context.startActivity(shareIntent)
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(

@@ -1,9 +1,10 @@
 /**
- * Helper object for creating share intents. Kept as a pure object for testability.
+ * Helper object for creating share intents. Delegates to ShareIntentFactory.
  */
 package com.safeanot.app.feature.profile
 
 import android.content.Intent
+import com.safeanot.app.util.ShareIntentFactory
 
 object ShareHelper {
 
@@ -12,9 +13,6 @@ object ShareHelper {
             "Check it out: https://play.google.com/store/apps/details?id=com.safeanot.app"
 
     fun createShareIntent(): Intent {
-        return Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, SHARE_TEXT)
-        }
+        return ShareIntentFactory.createTextShare(SHARE_TEXT)
     }
 }
