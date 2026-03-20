@@ -16,6 +16,8 @@ const App: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [viewportSize, setViewportSize] = useState({ w: 1200, h: 800 });
 
+  const hasAutoFit = useRef(false);
+
   useEffect(() => {
     const update = () => {
       if (containerRef.current) {
@@ -29,6 +31,27 @@ const App: React.FC = () => {
     window.addEventListener('resize', update);
     return () => window.removeEventListener('resize', update);
   }, []);
+
+  // Auto fit-all on first render once viewport size is known
+  useEffect(() => {
+    if (hasAutoFit.current || viewportSize.w <= 0 || viewportSize.h <= 0) return;
+    hasAutoFit.current = true;
+    // Compute fit-all
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const s of screens) {
+      minX = Math.min(minX, s.position.x);
+      minY = Math.min(minY, s.position.y);
+      maxX = Math.max(maxX, s.position.x + SCREEN_W);
+      maxY = Math.max(maxY, s.position.y + SCREEN_H);
+    }
+    const pad = 80;
+    const worldW = maxX - minX + pad * 2;
+    const worldH = maxY - minY + pad * 2;
+    const initZoom = Math.min(viewportSize.w / worldW, viewportSize.h / worldH, 1.5);
+    setPanX((viewportSize.w - worldW * initZoom) / 2 - (minX - pad) * initZoom);
+    setPanY((viewportSize.h - worldH * initZoom) / 2 - (minY - pad) * initZoom);
+    setZoom(initZoom);
+  }, [viewportSize]);
 
   const handleZoomIn = useCallback(() => {
     setZoom(z => Math.min(3, z * 1.2));

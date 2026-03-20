@@ -139,10 +139,14 @@ const Canvas: React.FC<CanvasProps> = ({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       style={{
-        flex: 1,
+        width: '100%',
+        height: '100%',
         overflow: 'hidden',
         cursor: isDragging.current ? 'grabbing' : 'grab',
-        position: 'relative',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        background: '#f0f0f0',
       }}
     >
       <div
