@@ -83,7 +83,11 @@ class GuardianPairingViewModel @Inject constructor(
                 claimPairingCodeUseCase(code, label)
                 _uiState.update { it.copy(claimSuccess = true, isLoading = false) }
                 heartbeatScheduler.schedule()
-                unlockBadgeUseCase(BadgeType.FAMILY_PROTECTOR)
+                try {
+                    unlockBadgeUseCase(BadgeType.FAMILY_PROTECTOR)
+                } catch (_: Exception) {
+                    // Badge unlock is non-critical; don't fail the main flow
+                }
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message ?: "Failed to claim code", isLoading = false) }
             }

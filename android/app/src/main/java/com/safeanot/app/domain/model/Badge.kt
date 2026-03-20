@@ -63,7 +63,7 @@ enum class BadgeType {
             BadgeInfo(
                 type = LINK_CHECKER,
                 title = "Link Checker",
-                description = "Checked your first suspicious link",
+                description = "Check your first link",
                 conditionHint = "Check a link",
                 icon = "link",
             ),

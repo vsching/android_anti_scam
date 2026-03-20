@@ -137,11 +137,10 @@ class UpdateStreakUseCaseTest {
     }
 
     @Test
-    fun `day comparison uses millis divided by MILLIS_PER_DAY`() = runTest {
-        // Set lastCheckDate just before midnight boundary (same day as now in day units)
+    fun `day comparison uses local date for same-day detection`() = runTest {
+        // Set lastCheckDate earlier today (same local date)
         val now = System.currentTimeMillis()
-        val today = now / MILLIS_PER_DAY
-        val sameDayEarlier = today * MILLIS_PER_DAY + 1000L // early in the same day
+        val sameDayEarlier = now - 1000L // 1 second ago, same local date
 
         fakeStreakRepo.currentStreak = Streak(
             currentStreak = 3,

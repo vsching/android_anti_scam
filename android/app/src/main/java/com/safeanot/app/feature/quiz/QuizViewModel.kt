@@ -12,7 +12,7 @@ import com.safeanot.app.domain.model.BadgeType
 import com.safeanot.app.domain.model.QuizQuestion
 import com.safeanot.app.domain.model.QuizQuestionBank
 import com.safeanot.app.domain.model.ShareType
-import com.safeanot.app.domain.repository.QuizRepository
+import com.safeanot.app.domain.usecase.SaveQuizResultUseCase
 import com.safeanot.app.domain.usecase.UnlockBadgeUseCase
 import com.safeanot.app.feature.check.ShareEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,7 +37,7 @@ data class QuizUiState(
 
 @HiltViewModel
 class QuizViewModel @Inject constructor(
-    private val quizRepository: QuizRepository,
+    private val saveQuizResultUseCase: SaveQuizResultUseCase,
     private val unlockBadgeUseCase: UnlockBadgeUseCase,
 ) : ViewModel() {
 
@@ -97,7 +97,7 @@ class QuizViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
-            quizRepository.saveResult(
+            saveQuizResultUseCase(
                 sessionId = current.sessionId,
                 scorePercent = scorePercent,
                 correctCount = correctCount,
@@ -105,9 +105,13 @@ class QuizViewModel @Inject constructor(
             )
 
             if (scorePercent == 100) {
-                val newlyUnlocked = unlockBadgeUseCase(BadgeType.SCAM_SPOTTER)
-                if (newlyUnlocked) {
-                    _badgeUnlockEvent.send(BadgeType.SCAM_SPOTTER)
+                try {
+                    val newlyUnlocked = unlockBadgeUseCase(BadgeType.SCAM_SPOTTER)
+                    if (newlyUnlocked) {
+                        _badgeUnlockEvent.send(BadgeType.SCAM_SPOTTER)
+                    }
+                } catch (_: Exception) {
+                    // Badge unlock is non-critical; don't fail the quiz flow
                 }
             }
         }

@@ -50,6 +50,7 @@ abstract class SafeAnotDatabase : RoomDatabase() {
     abstract fun badgeDao(): BadgeDao
     abstract fun quizDao(): QuizDao
 
+    // TODO: Add androidTest migration tests (MigrationTestHelper) for MIGRATION_4_5 through MIGRATION_8_9
     companion object {
         val MIGRATION_4_5 = object : Migration(4, 5) {
             override fun migrate(db: SupportSQLiteDatabase) {

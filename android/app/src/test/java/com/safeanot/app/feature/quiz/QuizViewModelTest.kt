@@ -3,6 +3,7 @@ package com.safeanot.app.feature.quiz
 import com.safeanot.app.domain.model.BadgeType
 import com.safeanot.app.domain.model.QuizResult
 import com.safeanot.app.domain.repository.QuizRepository
+import com.safeanot.app.domain.usecase.SaveQuizResultUseCase
 import com.safeanot.app.domain.usecase.UnlockBadgeUseCase
 import com.safeanot.app.feature.check.ShareEvent
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +29,7 @@ class QuizViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var fakeRepository: FakeQuizRepository
+    private lateinit var fakeSaveQuizResult: SaveQuizResultUseCase
     private lateinit var fakeUnlockBadge: FakeUnlockBadgeUseCase
     private lateinit var viewModel: QuizViewModel
 
@@ -35,8 +37,9 @@ class QuizViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         fakeRepository = FakeQuizRepository()
+        fakeSaveQuizResult = SaveQuizResultUseCase(fakeRepository)
         fakeUnlockBadge = FakeUnlockBadgeUseCase()
-        viewModel = QuizViewModel(fakeRepository, fakeUnlockBadge)
+        viewModel = QuizViewModel(fakeSaveQuizResult, fakeUnlockBadge)
     }
 
     @After

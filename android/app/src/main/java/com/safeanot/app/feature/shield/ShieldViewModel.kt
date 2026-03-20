@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -92,7 +93,9 @@ class ShieldViewModel @Inject constructor(
             try {
                 runAuditUseCase()
                 _uiState.value = _uiState.value.copy(isLoading = false, hasScanned = true)
-                updateStreakUseCase(securityScore.value.scorePercent)
+                // Collect fresh score from repository after audit completes
+                val freshScore = getSecurityScoreUseCase().first()
+                updateStreakUseCase(freshScore.scorePercent)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -112,7 +115,9 @@ class ShieldViewModel @Inject constructor(
                     isRefreshing = false,
                     hasScanned = true,
                 )
-                updateStreakUseCase(securityScore.value.scorePercent)
+                // Collect fresh score from repository after audit completes
+                val freshScore = getSecurityScoreUseCase().first()
+                updateStreakUseCase(freshScore.scorePercent)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isRefreshing = false,

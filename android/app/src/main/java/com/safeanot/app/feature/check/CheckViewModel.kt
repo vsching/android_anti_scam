@@ -70,7 +70,11 @@ class CheckViewModel @Inject constructor(
             try {
                 val verdict = checkLinkUseCase(trimmed)
                 _checkState.value = CheckUiState.Result(verdict)
-                unlockBadgeUseCase(BadgeType.LINK_CHECKER)
+                try {
+                    unlockBadgeUseCase(BadgeType.LINK_CHECKER)
+                } catch (_: Exception) {
+                    // Badge unlock is non-critical; don't fail the main flow
+                }
             } catch (e: Exception) {
                 _checkState.value = CheckUiState.Error(
                     e.message ?: "An unexpected error occurred."
