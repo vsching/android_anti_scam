@@ -58,29 +58,29 @@ class GuardianRepositoryImplTest {
     @Test
     fun `claimPairingCode calls API and inserts into Room`() = runTest {
         fakeApi.claimResult = GuardianPairingDto(
-            id = "pair-1",
-            deviceId = "test-device-id",
-            pairedDeviceId = "other-device",
-            role = "GUARDIAN",
-            label = "Ward's Phone",
+            id = 1L,
+            wardDeviceId = "other-device",
+            guardianDeviceId = "test-device-id",
+            wardDisplayName = "Ward's Phone",
+            guardianDisplayName = "My Phone",
             createdAt = 5000L,
         )
 
         val result = repository.claimPairingCode("CODE-123", "My Phone")
 
-        assertEquals("pair-1", result.id)
+        assertEquals("1", result.id)
         assertEquals(GuardianRole.GUARDIAN, result.role)
         assertEquals(1, fakeDao.allEntities.size)
-        assertEquals("pair-1", fakeDao.allEntities[0].id)
+        assertEquals("1", fakeDao.allEntities[0].id)
     }
 
     @Test
     fun `refreshPairings syncs from API to Room`() = runTest {
         fakeApi.wardsResult = listOf(
-            GuardianPairingDto("w1", "d1", "d2", "WARD", "Ward 1", 1000L),
+            GuardianPairingDto(id = 1L, wardDeviceId = "d2", guardianDeviceId = "test-device-id", wardDisplayName = "Ward 1", guardianDisplayName = "", createdAt = 1000L),
         )
         fakeApi.guardiansResult = listOf(
-            GuardianPairingDto("g1", "d1", "d3", "GUARDIAN", "Guardian 1", 2000L),
+            GuardianPairingDto(id = 2L, wardDeviceId = "test-device-id", guardianDeviceId = "d3", wardDisplayName = "", guardianDisplayName = "Guardian 1", createdAt = 2000L),
         )
 
         repository.refreshPairings()
@@ -93,13 +93,14 @@ class GuardianRepositoryImplTest {
     fun `deletePairing calls API and removes from Room`() = runTest {
         fakeApi.deleteResponse = Response.success(Unit)
         fakeDao.allEntities.add(
-            GuardianPairingEntity("pair-1", "d1", "d2", "WARD", "Test", 1000L),
+            GuardianPairingEntity("1", "d1", "d2", "WARD", "Test", 1000L),
         )
 
-        repository.deletePairing("pair-1")
+        repository.deletePairing("1")
 
-        assertEquals("pair-1", fakeApi.lastDeleteRequest?.pairingId)
-        assertTrue(fakeDao.deletedIds.contains("pair-1"))
+        assertEquals(1L, fakeApi.lastDeletePairingId)
+        assertEquals("test-device-id", fakeApi.lastDeleteRequest?.deviceId)
+        assertTrue(fakeDao.deletedIds.contains("1"))
     }
 
     @Test
@@ -158,7 +159,7 @@ class GuardianRepositoryImplTest {
                 label = label,
             )
             val dto = api.claimPairingCode(request)
-            val pairing = dto.toDomain()
+            val pairing = dto.toDomain(deviceId)
             dao.insertAll(listOf(GuardianPairingEntity.fromDomain(pairing)))
             return pairing
         }
@@ -170,11 +171,11 @@ class GuardianRepositoryImplTest {
         }
 
         override suspend fun deletePairing(pairingId: String) {
-            val request = DeletePairingRequest(
-                deviceId = deviceId,
-                pairingId = pairingId,
-            )
-            api.deletePairing(request)
+            val request = DeletePairingRequest(deviceId = deviceId)
+            val response = api.deletePairing(pairingId.toLong(), request)
+            if (!response.isSuccessful) {
+                throw RuntimeException("Failed to delete pairing: HTTP ${response.code()}")
+            }
             dao.deleteById(pairingId)
         }
 
@@ -182,7 +183,7 @@ class GuardianRepositoryImplTest {
             val wards = api.getWards(deviceId)
             val guardians = api.getGuardians(deviceId)
             val allPairings = (wards + guardians).map { dto ->
-                GuardianPairingEntity.fromDomain(dto.toDomain())
+                GuardianPairingEntity.fromDomain(dto.toDomain(deviceId))
             }
             dao.deleteAll()
             dao.insertAll(allPairings)
@@ -239,13 +240,14 @@ class GuardianRepositoryImplTest {
 
     private class FakeGuardianApi : SafeAnotApi {
         var generateResult = PairingCodeResponse("DEFAULT", 0L)
-        var claimResult = GuardianPairingDto("id", "d1", "d2", "WARD", "label", 0L)
+        var claimResult = GuardianPairingDto(id = 0L, wardDeviceId = "d1", guardianDeviceId = "d2", wardDisplayName = "", guardianDisplayName = "label", createdAt = 0L)
         var wardsResult = emptyList<GuardianPairingDto>()
         var guardiansResult = emptyList<GuardianPairingDto>()
         var deleteResponse: Response<Unit> = Response.success(Unit)
 
         var lastGenerateRequest: GeneratePairingCodeRequest? = null
         var lastDeleteRequest: DeletePairingRequest? = null
+        var lastDeletePairingId: Long? = null
 
         override suspend fun generatePairingCode(request: GeneratePairingCodeRequest): PairingCodeResponse {
             lastGenerateRequest = request
@@ -260,7 +262,8 @@ class GuardianRepositoryImplTest {
 
         override suspend fun getGuardians(deviceId: String): List<GuardianPairingDto> = guardiansResult
 
-        override suspend fun deletePairing(request: DeletePairingRequest): Response<Unit> {
+        override suspend fun deletePairing(pairingId: Long, request: DeletePairingRequest): Response<Unit> {
+            lastDeletePairingId = pairingId
             lastDeleteRequest = request
             return deleteResponse
         }
@@ -273,5 +276,9 @@ class GuardianRepositoryImplTest {
         override suspend fun checkDomain(request: CheckRequest): CheckResponse = throw NotImplementedError()
         override suspend fun getAlerts(region: String?): List<AlertDto> = throw NotImplementedError()
         override suspend fun postShareEvents(request: ShareEventBatchRequest): Response<Unit> = throw NotImplementedError()
+        override suspend fun postHeartbeat(request: com.safeanot.app.data.remote.model.HeartbeatRequest): Response<Unit> = throw NotImplementedError()
+        override suspend fun registerFcmToken(request: com.safeanot.app.data.remote.model.RegisterFcmTokenRequest): Response<Unit> = throw NotImplementedError()
+        override suspend fun getWardHeartbeats(wardDeviceId: String, days: Int, guardianDeviceId: String): List<com.safeanot.app.data.remote.model.WardHeartbeatDto> = throw NotImplementedError()
+        override suspend fun sendHelpRequest(request: com.safeanot.app.data.remote.model.HelpRequestBody): Response<Unit> = throw NotImplementedError()
     }
 }

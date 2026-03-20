@@ -64,8 +64,11 @@ interface SafeAnotApi {
     @GET("api/guardian/guardians")
     suspend fun getGuardians(@Query("device_id") deviceId: String): List<GuardianPairingDto>
 
-    @HTTP(method = "DELETE", path = "api/guardian/pair/{pairingId}", hasBody = false)
-    suspend fun deletePairing(@retrofit2.http.Path("pairingId") pairingId: Long): Response<Unit>
+    @HTTP(method = "DELETE", path = "api/guardian/pair/{pairingId}", hasBody = true)
+    suspend fun deletePairing(
+        @retrofit2.http.Path("pairingId") pairingId: Long,
+        @Body request: DeletePairingRequest,
+    ): Response<Unit>
 
     @POST("api/guardian/heartbeat")
     suspend fun postHeartbeat(@Body request: HeartbeatRequest): Response<Unit>

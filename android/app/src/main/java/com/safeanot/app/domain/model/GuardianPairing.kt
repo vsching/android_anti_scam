@@ -22,7 +22,7 @@ data class PairingCode(
     val expiresAt: Long,
 ) {
     val isExpired: Boolean
-        get() = System.currentTimeMillis() > expiresAt
+        get() = System.currentTimeMillis() / 1000 > expiresAt
 }
 
 /**

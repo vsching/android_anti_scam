@@ -48,7 +48,7 @@ class GuardianRepositoryImpl @Inject constructor(
             label = label,
         )
         val dto = api.claimPairingCode(request)
-        val pairing = dto.toDomain()
+        val pairing = dto.toDomain(deviceId)
         guardianDao.insertAll(listOf(GuardianPairingEntity.fromDomain(pairing)))
         return pairing
     }
@@ -60,7 +60,12 @@ class GuardianRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deletePairing(pairingId: String) {
-        api.deletePairing(pairingId.toLong())
+        val deviceId = deviceIdProvider.getOrCreateDeviceId()
+        val request = DeletePairingRequest(deviceId = deviceId)
+        val response = api.deletePairing(pairingId.toLong(), request)
+        if (!response.isSuccessful) {
+            throw RuntimeException("Failed to delete pairing: HTTP ${response.code()}")
+        }
         guardianDao.deleteById(pairingId)
     }
 
@@ -69,7 +74,7 @@ class GuardianRepositoryImpl @Inject constructor(
         val wards = api.getWards(deviceId)
         val guardians = api.getGuardians(deviceId)
         val allPairings = (wards + guardians).map { dto ->
-            GuardianPairingEntity.fromDomain(dto.toDomain())
+            GuardianPairingEntity.fromDomain(dto.toDomain(deviceId))
         }
         guardianDao.deleteAll()
         guardianDao.insertAll(allPairings)
@@ -98,7 +103,10 @@ class GuardianRepositoryImpl @Inject constructor(
             playProtectEnabled = playProtectEnabled,
             timestamp = System.currentTimeMillis() / 1000,
         )
-        api.postHeartbeat(request)
+        val response = api.postHeartbeat(request)
+        if (!response.isSuccessful) {
+            throw RuntimeException("Failed to post heartbeat: HTTP ${response.code()}")
+        }
     }
 
     override fun getWards(deviceId: String): Flow<List<GuardianPairing>> {
@@ -111,13 +119,13 @@ class GuardianRepositoryImpl @Inject constructor(
     override suspend fun refreshWards(deviceId: String) {
         val wards = api.getWards(deviceId)
         val wardEntities = wards.map { dto ->
-            GuardianPairingEntity.fromDomain(dto.toDomain())
+            GuardianPairingEntity.fromDomain(dto.toDomain(deviceId))
         }
         // Update only ward pairings, preserving guardian pairings
         guardianDao.deleteAll()
         val guardians = api.getGuardians(deviceId)
         val allEntities = wardEntities + guardians.map { dto ->
-            GuardianPairingEntity.fromDomain(dto.toDomain())
+            GuardianPairingEntity.fromDomain(dto.toDomain(deviceId))
         }
         guardianDao.insertAll(allEntities)
     }
@@ -129,7 +137,10 @@ class GuardianRepositoryImpl @Inject constructor(
             securityScore = securityScore,
             unfixedItems = unfixedItems,
         )
-        api.sendHelpRequest(request)
+        val response = api.sendHelpRequest(request)
+        if (!response.isSuccessful) {
+            throw RuntimeException("Failed to send help request: HTTP ${response.code()}")
+        }
     }
 
     override suspend fun getPairingIdByPairedDeviceId(pairedDeviceId: String): String? {
@@ -141,10 +152,11 @@ class GuardianRepositoryImpl @Inject constructor(
         days: Int,
     ): WardHeartbeatHistory {
         val myDeviceId = deviceIdProvider.getOrCreateDeviceId()
+        // TODO: Add HMAC auth for heartbeat-history GET in production
         val dtos = api.getWardHeartbeats(wardDeviceId, days, myDeviceId)
         return WardHeartbeatHistory(
             deviceId = wardDeviceId,
-            displayName = dtos.firstOrNull()?.displayName ?: "",
+            displayName = "",
             heartbeats = dtos.map { dto ->
                 HeartbeatEntry(
                     securityScore = dto.securityScore,

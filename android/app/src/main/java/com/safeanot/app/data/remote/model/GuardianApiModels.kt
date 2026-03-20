@@ -31,32 +31,44 @@ data class ClaimPairingCodeRequest(
 )
 
 data class GuardianPairingDto(
-    @SerializedName("id") val id: String,
-    @SerializedName("device_id") val deviceId: String,
-    @SerializedName("paired_device_id") val pairedDeviceId: String,
-    @SerializedName("role") val role: String,
-    @SerializedName("label") val label: String,
+    @SerializedName("id") val id: Long,
+    @SerializedName("ward_device_id") val wardDeviceId: String? = null,
+    @SerializedName("guardian_device_id") val guardianDeviceId: String? = null,
+    @SerializedName("ward_display_name") val wardDisplayName: String? = null,
+    @SerializedName("guardian_display_name") val guardianDisplayName: String? = null,
     @SerializedName("created_at") val createdAt: Long,
     @SerializedName("security_score") val securityScore: Int? = null,
     @SerializedName("heartbeat_timestamp") val heartbeatTimestamp: Long? = null,
     @SerializedName("play_protect_enabled") val playProtectEnabled: Boolean? = null,
 ) {
-    fun toDomain(): GuardianPairing = GuardianPairing(
-        id = id,
-        deviceId = deviceId,
-        pairedDeviceId = pairedDeviceId,
-        role = GuardianRole.valueOf(role),
-        label = label,
-        createdAt = createdAt,
-        lastSecurityScore = securityScore,
-        lastHeartbeatAt = heartbeatTimestamp,
-        playProtectEnabled = playProtectEnabled,
-    )
+    /**
+     * Maps DTO to domain model. [myDeviceId] is used to derive the role:
+     * if my device is the ward_device_id, I am the WARD; otherwise I am the GUARDIAN.
+     */
+    fun toDomain(myDeviceId: String): GuardianPairing {
+        val role = if (myDeviceId == wardDeviceId) GuardianRole.WARD else GuardianRole.GUARDIAN
+        val pairedDeviceId = if (role == GuardianRole.WARD) guardianDeviceId else wardDeviceId
+        val label = if (role == GuardianRole.WARD) {
+            guardianDisplayName ?: ""
+        } else {
+            wardDisplayName ?: ""
+        }
+        return GuardianPairing(
+            id = id.toString(),
+            deviceId = myDeviceId,
+            pairedDeviceId = pairedDeviceId ?: "",
+            role = role,
+            label = label,
+            createdAt = createdAt,
+            lastSecurityScore = securityScore,
+            lastHeartbeatAt = heartbeatTimestamp,
+            playProtectEnabled = playProtectEnabled,
+        )
+    }
 }
 
 data class DeletePairingRequest(
     @SerializedName("device_id") val deviceId: String,
-    @SerializedName("pairing_id") val pairingId: String,
 )
 
 data class HeartbeatRequest(
@@ -80,8 +92,6 @@ data class HelpRequestBody(
 )
 
 data class WardHeartbeatDto(
-    @SerializedName("device_id") val deviceId: String,
-    @SerializedName("display_name") val displayName: String,
     @SerializedName("security_score") val securityScore: Int,
     @SerializedName("secured_items") val securedItems: Int,
     @SerializedName("total_items") val totalItems: Int,
