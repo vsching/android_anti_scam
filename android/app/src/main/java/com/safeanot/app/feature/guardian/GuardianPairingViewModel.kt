@@ -13,6 +13,7 @@ import com.safeanot.app.domain.usecase.ClaimPairingCodeUseCase
 import com.safeanot.app.domain.usecase.DeletePairingUseCase
 import com.safeanot.app.domain.usecase.GeneratePairingCodeUseCase
 import com.safeanot.app.domain.usecase.GetPairingsUseCase
+import com.safeanot.app.worker.GuardianHeartbeatScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,6 +37,7 @@ class GuardianPairingViewModel @Inject constructor(
     private val claimPairingCodeUseCase: ClaimPairingCodeUseCase,
     private val deletePairingUseCase: DeletePairingUseCase,
     private val getPairingsUseCase: GetPairingsUseCase,
+    private val heartbeatScheduler: GuardianHeartbeatScheduler,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GuardianUiState())
@@ -45,6 +47,12 @@ class GuardianPairingViewModel @Inject constructor(
         viewModelScope.launch {
             getPairingsUseCase().collect { pairings ->
                 _uiState.update { it.copy(pairings = pairings, isLoading = false) }
+                // Keep heartbeat schedule in sync with pairings
+                if (pairings.isNotEmpty()) {
+                    heartbeatScheduler.schedule()
+                } else {
+                    heartbeatScheduler.cancel()
+                }
             }
         }
     }
@@ -71,6 +79,7 @@ class GuardianPairingViewModel @Inject constructor(
             try {
                 claimPairingCodeUseCase(code, label)
                 _uiState.update { it.copy(claimSuccess = true, isLoading = false) }
+                heartbeatScheduler.schedule()
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message ?: "Failed to claim code", isLoading = false) }
             }
@@ -81,6 +90,11 @@ class GuardianPairingViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 deletePairingUseCase(pairingId)
+                // Cancel heartbeat scheduler when last pairing is deleted
+                val remaining = _uiState.value.pairings.size
+                if (remaining == 0) {
+                    heartbeatScheduler.cancel()
+                }
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message ?: "Failed to delete pairing") }
             }

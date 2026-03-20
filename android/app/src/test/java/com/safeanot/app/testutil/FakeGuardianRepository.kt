@@ -23,6 +23,8 @@ class FakeGuardianRepository : GuardianRepository {
     var shouldThrow: Boolean = false
     var deletedPairingIds = mutableListOf<String>()
     var refreshCalled = false
+    var heartbeatSent = false
+    var lastHeartbeatScore: Int? = null
 
     override suspend fun generatePairingCode(role: String, label: String): PairingCode {
         if (shouldThrow) throw RuntimeException("Test error")
@@ -52,4 +54,15 @@ class FakeGuardianRepository : GuardianRepository {
     override fun getGuardianCount(): Flow<Int> = pairingsFlow.map { it.size }
 
     override suspend fun getDeviceId(): String = "test-device-id"
+
+    override suspend fun sendHeartbeat(
+        securityScore: Int,
+        securedItems: Int,
+        totalItems: Int,
+        playProtectEnabled: Boolean,
+    ) {
+        if (shouldThrow) throw RuntimeException("Test error")
+        heartbeatSent = true
+        lastHeartbeatScore = securityScore
+    }
 }

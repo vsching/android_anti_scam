@@ -10,6 +10,7 @@ import com.safeanot.app.data.remote.SafeAnotApi
 import com.safeanot.app.data.remote.model.ClaimPairingCodeRequest
 import com.safeanot.app.data.remote.model.DeletePairingRequest
 import com.safeanot.app.data.remote.model.GeneratePairingCodeRequest
+import com.safeanot.app.data.remote.model.HeartbeatRequest
 import com.safeanot.app.domain.model.GuardianPairing
 import com.safeanot.app.domain.model.PairingCode
 import com.safeanot.app.domain.repository.GuardianRepository
@@ -81,5 +82,23 @@ class GuardianRepositoryImpl @Inject constructor(
 
     override suspend fun getDeviceId(): String {
         return deviceIdProvider.getOrCreateDeviceId()
+    }
+
+    override suspend fun sendHeartbeat(
+        securityScore: Int,
+        securedItems: Int,
+        totalItems: Int,
+        playProtectEnabled: Boolean,
+    ) {
+        val deviceId = deviceIdProvider.getOrCreateDeviceId()
+        val request = HeartbeatRequest(
+            deviceId = deviceId,
+            securityScore = securityScore,
+            securedItems = securedItems,
+            totalItems = totalItems,
+            playProtectEnabled = playProtectEnabled,
+            timestamp = System.currentTimeMillis() / 1000,
+        )
+        api.postHeartbeat(request)
     }
 }

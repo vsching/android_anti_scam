@@ -52,3 +52,12 @@ data class DeletePairingRequest(
     @SerializedName("device_id") val deviceId: String,
     @SerializedName("pairing_id") val pairingId: String,
 )
+
+data class HeartbeatRequest(
+    @SerializedName("device_id") val deviceId: String,
+    @SerializedName("security_score") val securityScore: Int,
+    @SerializedName("secured_items") val securedItems: Int,
+    @SerializedName("total_items") val totalItems: Int,
+    @SerializedName("play_protect_enabled") val playProtectEnabled: Boolean,
+    @SerializedName("timestamp") val timestamp: Long,
+)

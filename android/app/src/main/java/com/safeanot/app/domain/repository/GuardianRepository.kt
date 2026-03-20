@@ -48,4 +48,18 @@ interface GuardianRepository {
      * Get the device ID for the current device.
      */
     suspend fun getDeviceId(): String
+
+    /**
+     * Send a security score heartbeat to the backend.
+     * @param securityScore The overall security score (0-100).
+     * @param securedItems Number of items that are secured.
+     * @param totalItems Total number of audited items.
+     * @param playProtectEnabled Whether Play Protect is enabled on the device.
+     */
+    suspend fun sendHeartbeat(
+        securityScore: Int,
+        securedItems: Int,
+        totalItems: Int,
+        playProtectEnabled: Boolean,
+    )
 }

@@ -8,6 +8,12 @@ import { verifyDeviceHmac } from '../middleware/guardian-auth';
 /** Maximum request body size in bytes (10 KB). */
 const MAX_BODY_SIZE = 10 * 1024;
 
+/** Maximum heartbeat history days that can be requested. */
+const MAX_HEARTBEAT_DAYS = 30;
+
+/** Default heartbeat history days. */
+const DEFAULT_HEARTBEAT_DAYS = 7;
+
 /** Pairing code TTL in seconds (15 minutes). */
 const CODE_TTL_SECONDS = 15 * 60;
 
@@ -365,4 +371,129 @@ export async function handleDeletePairing(
     .run();
 
   return jsonResponse({ status: 'deleted' }, 200);
+}
+
+/**
+ * POST /api/guardian/heartbeat
+ * Accepts a security score heartbeat from a ward device.
+ * Validates the device has guardian pairings and cleans up old heartbeats.
+ */
+export async function handlePostHeartbeat(
+  request: Request,
+  env: Env,
+  _params: Record<string, string>,
+): Promise<Response> {
+  const result = await readBody(request);
+  if (result instanceof Response) return result;
+  const [bodyText, body] = result;
+
+  // Verify HMAC
+  const hmacError = await verifyDeviceHmac(request, bodyText, env);
+  if (hmacError) return hmacError;
+
+  // Validate required fields
+  const deviceId = body.device_id;
+  if (typeof deviceId !== 'string' || !deviceId.trim()) {
+    return jsonResponse({ error: 'Missing or invalid device_id' }, 400);
+  }
+
+  const securityScore = body.security_score;
+  if (typeof securityScore !== 'number' || securityScore < 0 || securityScore > 100) {
+    return jsonResponse({ error: 'Missing or invalid security_score (0-100)' }, 400);
+  }
+
+  const securedItems = body.secured_items;
+  if (typeof securedItems !== 'number' || securedItems < 0) {
+    return jsonResponse({ error: 'Missing or invalid secured_items' }, 400);
+  }
+
+  const totalItems = body.total_items;
+  if (typeof totalItems !== 'number' || totalItems < 0) {
+    return jsonResponse({ error: 'Missing or invalid total_items' }, 400);
+  }
+
+  const playProtectEnabled = body.play_protect_enabled;
+  if (typeof playProtectEnabled !== 'boolean') {
+    return jsonResponse({ error: 'Missing or invalid play_protect_enabled' }, 400);
+  }
+
+  const timestamp = body.timestamp;
+  if (typeof timestamp !== 'number' || timestamp <= 0) {
+    return jsonResponse({ error: 'Missing or invalid timestamp' }, 400);
+  }
+
+  // Verify device has at least one guardian pairing (device must be a ward)
+  const pairingCount = await env.DB.prepare(
+    'SELECT COUNT(*) as cnt FROM guardian_pairings WHERE ward_device_id = ?',
+  )
+    .bind(deviceId)
+    .first<{ cnt: number }>();
+
+  if (!pairingCount || pairingCount.cnt === 0) {
+    return jsonResponse({ error: 'Device has no guardian pairings' }, 403);
+  }
+
+  // Insert heartbeat
+  await env.DB.prepare(
+    `INSERT INTO guardian_heartbeats (ward_device_id, security_score, secured_items, total_items, play_protect_enabled, timestamp)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+  )
+    .bind(deviceId, securityScore, securedItems, totalItems, playProtectEnabled ? 1 : 0, timestamp)
+    .run();
+
+  // Cleanup heartbeats older than 30 days
+  const cutoff = Math.floor(Date.now() / 1000) - MAX_HEARTBEAT_DAYS * 24 * 60 * 60;
+  await env.DB.prepare(
+    'DELETE FROM guardian_heartbeats WHERE timestamp < ?',
+  )
+    .bind(cutoff)
+    .run();
+
+  return jsonResponse({ status: 'ok' }, 200);
+}
+
+/**
+ * GET /api/guardian/wards/:deviceId/heartbeats?days=7
+ * Returns heartbeat history for a ward device.
+ */
+export async function handleGetWardHeartbeats(
+  request: Request,
+  env: Env,
+  params: Record<string, string>,
+): Promise<Response> {
+  const wardDeviceId = params.deviceId;
+  if (!wardDeviceId) {
+    return jsonResponse({ error: 'Missing deviceId path parameter' }, 400);
+  }
+
+  const url = new URL(request.url);
+
+  // Verify HMAC — for GET, we use the wardDeviceId as the body for HMAC
+  const hmacError = await verifyDeviceHmac(request, wardDeviceId, env);
+  if (hmacError) return hmacError;
+
+  // Parse days parameter
+  const daysParam = url.searchParams.get('days');
+  let days = DEFAULT_HEARTBEAT_DAYS;
+  if (daysParam !== null) {
+    days = parseInt(daysParam, 10);
+    if (isNaN(days) || days < 1) {
+      days = DEFAULT_HEARTBEAT_DAYS;
+    } else if (days > MAX_HEARTBEAT_DAYS) {
+      days = MAX_HEARTBEAT_DAYS;
+    }
+  }
+
+  const since = Math.floor(Date.now() / 1000) - days * 24 * 60 * 60;
+
+  const heartbeats = await env.DB.prepare(
+    `SELECT security_score, secured_items, total_items, play_protect_enabled, timestamp
+     FROM guardian_heartbeats
+     WHERE ward_device_id = ? AND timestamp >= ?
+     ORDER BY timestamp DESC`,
+  )
+    .bind(wardDeviceId, since)
+    .all();
+
+  return jsonResponse({ heartbeats: heartbeats.results ?? [] }, 200);
 }

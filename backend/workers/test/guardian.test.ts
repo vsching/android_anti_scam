@@ -475,4 +475,197 @@ describe('Guardian Pairing API', () => {
       expect(res.status).toBe(404);
     });
   });
+
+  describe('POST /api/guardian/heartbeat', () => {
+    it('stores heartbeat data for a ward with pairings', async () => {
+      const now = Math.floor(Date.now() / 1000);
+
+      // Create a pairing so the ward has guardians
+      await env.DB.prepare(
+        'INSERT INTO guardian_pairings (ward_device_id, guardian_device_id, created_at) VALUES (?, ?, ?)',
+      )
+        .bind('ward-hb-post', 'guardian-hb-post', now)
+        .run();
+
+      const res = await postWithHmac('http://localhost/api/guardian/heartbeat', {
+        device_id: 'ward-hb-post',
+        security_score: 85,
+        secured_items: 7,
+        total_items: 8,
+        play_protect_enabled: true,
+        timestamp: now,
+      });
+      expect(res.status).toBe(200);
+      const body = await res.json<{ status: string }>();
+      expect(body.status).toBe('ok');
+
+      // Verify heartbeat stored in DB
+      const heartbeat = await env.DB.prepare(
+        'SELECT * FROM guardian_heartbeats WHERE ward_device_id = ?',
+      )
+        .bind('ward-hb-post')
+        .first<{ security_score: number; secured_items: number; total_items: number }>();
+      expect(heartbeat).not.toBeNull();
+      expect(heartbeat!.security_score).toBe(85);
+      expect(heartbeat!.secured_items).toBe(7);
+      expect(heartbeat!.total_items).toBe(8);
+    });
+
+    it('rejects heartbeat from device with no pairings', async () => {
+      const now = Math.floor(Date.now() / 1000);
+
+      const res = await postWithHmac('http://localhost/api/guardian/heartbeat', {
+        device_id: 'unlinked-device',
+        security_score: 90,
+        secured_items: 5,
+        total_items: 5,
+        play_protect_enabled: true,
+        timestamp: now,
+      });
+      expect(res.status).toBe(403);
+      const body = await res.json<{ error: string }>();
+      expect(body.error).toContain('no guardian pairings');
+    });
+
+    it('cleans up heartbeats older than 30 days', async () => {
+      const now = Math.floor(Date.now() / 1000);
+      const thirtyOneDaysAgo = now - 31 * 24 * 60 * 60;
+
+      // Create a pairing
+      await env.DB.prepare(
+        'INSERT INTO guardian_pairings (ward_device_id, guardian_device_id, created_at) VALUES (?, ?, ?)',
+      )
+        .bind('ward-cleanup', 'guardian-cleanup', now)
+        .run();
+
+      // Insert an old heartbeat
+      await env.DB.prepare(
+        'INSERT INTO guardian_heartbeats (ward_device_id, security_score, secured_items, total_items, play_protect_enabled, timestamp) VALUES (?, ?, ?, ?, ?, ?)',
+      )
+        .bind('ward-cleanup', 50, 3, 8, 1, thirtyOneDaysAgo)
+        .run();
+
+      // Post a new heartbeat (triggers cleanup)
+      await postWithHmac('http://localhost/api/guardian/heartbeat', {
+        device_id: 'ward-cleanup',
+        security_score: 90,
+        secured_items: 7,
+        total_items: 8,
+        play_protect_enabled: true,
+        timestamp: now,
+      });
+
+      // Verify old heartbeat was cleaned up
+      const oldHeartbeat = await env.DB.prepare(
+        'SELECT * FROM guardian_heartbeats WHERE ward_device_id = ? AND timestamp = ?',
+      )
+        .bind('ward-cleanup', thirtyOneDaysAgo)
+        .first();
+      expect(oldHeartbeat).toBeNull();
+
+      // Verify new heartbeat exists
+      const newHeartbeat = await env.DB.prepare(
+        'SELECT * FROM guardian_heartbeats WHERE ward_device_id = ? AND timestamp = ?',
+      )
+        .bind('ward-cleanup', now)
+        .first();
+      expect(newHeartbeat).not.toBeNull();
+    });
+
+    it('rejects heartbeat with missing fields', async () => {
+      const res = await postWithHmac('http://localhost/api/guardian/heartbeat', {
+        device_id: 'some-device',
+      });
+      expect(res.status).toBe(400);
+    });
+
+    it('rejects heartbeat with invalid security_score', async () => {
+      const now = Math.floor(Date.now() / 1000);
+      const res = await postWithHmac('http://localhost/api/guardian/heartbeat', {
+        device_id: 'some-device',
+        security_score: 150,
+        secured_items: 5,
+        total_items: 5,
+        play_protect_enabled: true,
+        timestamp: now,
+      });
+      expect(res.status).toBe(400);
+    });
+  });
+
+  describe('GET /api/guardian/wards/:deviceId/heartbeats', () => {
+    it('returns heartbeat history for a ward', async () => {
+      const now = Math.floor(Date.now() / 1000);
+
+      // Insert heartbeats
+      await env.DB.batch([
+        env.DB.prepare(
+          'INSERT INTO guardian_heartbeats (ward_device_id, security_score, secured_items, total_items, play_protect_enabled, timestamp) VALUES (?, ?, ?, ?, ?, ?)',
+        ).bind('ward-history', 70, 5, 8, 1, now - 3600),
+        env.DB.prepare(
+          'INSERT INTO guardian_heartbeats (ward_device_id, security_score, secured_items, total_items, play_protect_enabled, timestamp) VALUES (?, ?, ?, ?, ?, ?)',
+        ).bind('ward-history', 85, 7, 8, 1, now),
+      ]);
+
+      const res = await getWithHmac(
+        'http://localhost/api/guardian/wards/ward-history/heartbeats',
+        'ward-history',
+      );
+      expect(res.status).toBe(200);
+      const body = await res.json<{
+        heartbeats: Array<{ security_score: number; timestamp: number }>;
+      }>();
+      expect(body.heartbeats).toHaveLength(2);
+      // Should be ordered by timestamp DESC
+      expect(body.heartbeats[0].security_score).toBe(85);
+      expect(body.heartbeats[1].security_score).toBe(70);
+    });
+
+    it('respects days query parameter', async () => {
+      const now = Math.floor(Date.now() / 1000);
+      const twoDaysAgo = now - 2 * 24 * 60 * 60;
+      const eightDaysAgo = now - 8 * 24 * 60 * 60;
+
+      await env.DB.batch([
+        env.DB.prepare(
+          'INSERT INTO guardian_heartbeats (ward_device_id, security_score, secured_items, total_items, play_protect_enabled, timestamp) VALUES (?, ?, ?, ?, ?, ?)',
+        ).bind('ward-days', 70, 5, 8, 1, eightDaysAgo),
+        env.DB.prepare(
+          'INSERT INTO guardian_heartbeats (ward_device_id, security_score, secured_items, total_items, play_protect_enabled, timestamp) VALUES (?, ?, ?, ?, ?, ?)',
+        ).bind('ward-days', 90, 7, 8, 1, twoDaysAgo),
+      ]);
+
+      // Default 7 days - should only return the recent one
+      const res = await getWithHmac(
+        'http://localhost/api/guardian/wards/ward-days/heartbeats',
+        'ward-days',
+      );
+      expect(res.status).toBe(200);
+      const body = await res.json<{
+        heartbeats: Array<{ security_score: number }>;
+      }>();
+      expect(body.heartbeats).toHaveLength(1);
+      expect(body.heartbeats[0].security_score).toBe(90);
+
+      // 30 days - should return both
+      const res30 = await getWithHmac(
+        'http://localhost/api/guardian/wards/ward-days/heartbeats?days=30',
+        'ward-days',
+      );
+      const body30 = await res30.json<{
+        heartbeats: Array<{ security_score: number }>;
+      }>();
+      expect(body30.heartbeats).toHaveLength(2);
+    });
+
+    it('returns empty array when no heartbeats exist', async () => {
+      const res = await getWithHmac(
+        'http://localhost/api/guardian/wards/no-heartbeats/heartbeats',
+        'no-heartbeats',
+      );
+      expect(res.status).toBe(200);
+      const body = await res.json<{ heartbeats: unknown[] }>();
+      expect(body.heartbeats).toHaveLength(0);
+    });
+  });
 });

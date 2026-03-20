@@ -23,6 +23,8 @@ import {
   handleGetWards,
   handleGetGuardians,
   handleDeletePairing,
+  handlePostHeartbeat,
+  handleGetWardHeartbeats,
 } from './routes/guardian';
 
 const router = new Router();
@@ -42,6 +44,8 @@ router.post('/api/guardian/pair/claim', handleClaimPairingCode);
 router.get('/api/guardian/wards', handleGetWards);
 router.get('/api/guardian/guardians', handleGetGuardians);
 router.delete('/api/guardian/pair/:pairingId', handleDeletePairing);
+router.post('/api/guardian/heartbeat', handlePostHeartbeat);
+router.get('/api/guardian/wards/:deviceId/heartbeats', handleGetWardHeartbeats);
 
 // Data download endpoints (R2 artifacts)
 router.get('/api/data/latest', handleDataLatest);

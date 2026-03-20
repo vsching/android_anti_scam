@@ -8,6 +8,7 @@ import com.safeanot.app.data.remote.model.CheckResponse
 import com.safeanot.app.data.remote.model.ClaimPairingCodeRequest
 import com.safeanot.app.data.remote.model.DeletePairingRequest
 import com.safeanot.app.data.remote.model.GeneratePairingCodeRequest
+import com.safeanot.app.data.remote.model.HeartbeatRequest
 import com.safeanot.app.data.remote.model.GuardianPairingDto
 import com.safeanot.app.data.remote.model.LatestMetadataResponse
 import com.safeanot.app.data.remote.model.PairingCodeResponse
@@ -62,4 +63,7 @@ interface SafeAnotApi {
 
     @HTTP(method = "DELETE", path = "api/guardian/delete", hasBody = true)
     suspend fun deletePairing(@Body request: DeletePairingRequest): Response<Unit>
+
+    @POST("api/guardian/heartbeat")
+    suspend fun postHeartbeat(@Body request: HeartbeatRequest): Response<Unit>
 }

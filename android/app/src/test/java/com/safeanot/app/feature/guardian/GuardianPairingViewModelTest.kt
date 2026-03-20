@@ -8,6 +8,7 @@ import com.safeanot.app.domain.usecase.DeletePairingUseCase
 import com.safeanot.app.domain.usecase.GeneratePairingCodeUseCase
 import com.safeanot.app.domain.usecase.GetPairingsUseCase
 import com.safeanot.app.testutil.FakeGuardianRepository
+import com.safeanot.app.testutil.FakeGuardianHeartbeatScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -46,6 +47,7 @@ class GuardianPairingViewModelTest {
             claimPairingCodeUseCase = ClaimPairingCodeUseCase(fakeRepo),
             deletePairingUseCase = DeletePairingUseCase(fakeRepo),
             getPairingsUseCase = GetPairingsUseCase(fakeRepo),
+            heartbeatScheduler = FakeGuardianHeartbeatScheduler.create(),
         )
     }
 
