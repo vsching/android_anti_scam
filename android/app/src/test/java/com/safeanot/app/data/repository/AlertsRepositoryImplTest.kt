@@ -4,6 +4,12 @@ import com.safeanot.app.data.local.AlertsDao
 import com.safeanot.app.data.local.entity.AlertEntity
 import com.safeanot.app.data.remote.SafeAnotApi
 import com.safeanot.app.data.remote.model.AlertDto
+import com.safeanot.app.data.remote.model.ClaimPairingCodeRequest
+import com.safeanot.app.data.remote.model.DeletePairingRequest
+import com.safeanot.app.data.remote.model.GeneratePairingCodeRequest
+import com.safeanot.app.data.remote.model.GuardianPairingDto
+import com.safeanot.app.data.remote.model.PairingCodeResponse
+import retrofit2.Response
 import com.safeanot.app.domain.model.AlertRegionFilter
 import com.safeanot.app.domain.model.AlertSeverity
 import kotlinx.coroutines.flow.Flow
@@ -161,6 +167,11 @@ class AlertsRepositoryImplTest {
             throw NotImplementedError()
         override suspend fun postShareEvents(request: com.safeanot.app.data.remote.model.ShareEventBatchRequest) =
             throw NotImplementedError()
+        override suspend fun generatePairingCode(request: GeneratePairingCodeRequest): PairingCodeResponse = throw NotImplementedError()
+        override suspend fun claimPairingCode(request: ClaimPairingCodeRequest): GuardianPairingDto = throw NotImplementedError()
+        override suspend fun getWards(deviceId: String): List<GuardianPairingDto> = throw NotImplementedError()
+        override suspend fun getGuardians(deviceId: String): List<GuardianPairingDto> = throw NotImplementedError()
+        override suspend fun deletePairing(request: DeletePairingRequest): Response<Unit> = throw NotImplementedError()
     }
 
     private class FakeAlertsDao : AlertsDao {

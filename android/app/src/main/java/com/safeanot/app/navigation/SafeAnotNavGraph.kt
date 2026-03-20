@@ -37,6 +37,7 @@ import com.safeanot.app.feature.alerts.AlertsScreen
 import com.safeanot.app.feature.check.CheckScreen
 import com.safeanot.app.feature.check.CheckViewModel
 import com.safeanot.app.feature.fix.FixScreen
+import com.safeanot.app.feature.guardian.PairingScreen
 import com.safeanot.app.feature.profile.ProfileScreen
 import com.safeanot.app.feature.shield.ShieldScreen
 
@@ -78,7 +79,7 @@ fun SafeAnotNavGraph(pendingUrl: String? = null) {
 
     // Hide bottom bar on the Fix flow and Alert Detail
     val showBottomBar = currentDestination?.route?.let { route ->
-        !route.startsWith("fix/") && !route.startsWith("alerts/")
+        !route.startsWith("fix/") && !route.startsWith("alerts/") && !route.startsWith("guardian/")
     } ?: true
 
     Scaffold(
@@ -142,7 +143,11 @@ fun SafeAnotNavGraph(pendingUrl: String? = null) {
             }
 
             composable(Screen.Profile.route) {
-                ProfileScreen()
+                ProfileScreen(
+                    onNavigateToGuardian = {
+                        navController.navigate(Screen.GuardianPairing.route)
+                    },
+                )
             }
 
             composable(
@@ -164,6 +169,12 @@ fun SafeAnotNavGraph(pendingUrl: String? = null) {
                 ),
             ) {
                 AlertDetailScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
+
+            composable(Screen.GuardianPairing.route) {
+                PairingScreen(
                     onNavigateBack = { navController.popBackStack() },
                 )
             }

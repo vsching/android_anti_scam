@@ -17,6 +17,7 @@ import com.safeanot.app.domain.model.EmergencyContact
 import com.safeanot.app.domain.model.EmergencyContacts
 import com.safeanot.app.domain.repository.UserPreferencesRepository
 import com.safeanot.app.util.Constants
+import com.safeanot.app.domain.repository.GuardianRepository
 import com.safeanot.app.domain.usecase.GetAuditStatsUseCase
 import com.safeanot.app.domain.usecase.GetPreferredRegionUseCase
 import com.safeanot.app.domain.usecase.SetPreferredRegionUseCase
@@ -41,6 +42,7 @@ data class ProfileUiState(
     val securityScore: Int = 0,
     val selectedRegion: AlertRegionFilter = AlertRegionFilter.ALL,
     val scamAlertsEnabled: Boolean = true,
+    val guardianCount: Int = 0,
     val emergencyContacts: List<EmergencyContact> = emptyList(),
     val legalLinks: Map<String, String> = mapOf(
         "Privacy Policy" to Constants.PRIVACY_POLICY_URL,
@@ -56,6 +58,7 @@ class ProfileViewModel @Inject constructor(
     private val getPreferredRegionUseCase: GetPreferredRegionUseCase,
     private val setPreferredRegionUseCase: SetPreferredRegionUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
+    private val guardianRepository: GuardianRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -98,6 +101,12 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             userPreferencesRepository.getScamAlertsEnabled().collect { enabled ->
                 _uiState.update { it.copy(scamAlertsEnabled = enabled) }
+            }
+        }
+
+        viewModelScope.launch {
+            guardianRepository.getGuardianCount().collect { count ->
+                _uiState.update { it.copy(guardianCount = count) }
             }
         }
     }

@@ -5,13 +5,19 @@ package com.safeanot.app.data.remote
 
 import com.safeanot.app.data.remote.model.CheckRequest
 import com.safeanot.app.data.remote.model.CheckResponse
+import com.safeanot.app.data.remote.model.ClaimPairingCodeRequest
+import com.safeanot.app.data.remote.model.DeletePairingRequest
+import com.safeanot.app.data.remote.model.GeneratePairingCodeRequest
+import com.safeanot.app.data.remote.model.GuardianPairingDto
 import com.safeanot.app.data.remote.model.LatestMetadataResponse
+import com.safeanot.app.data.remote.model.PairingCodeResponse
 import okhttp3.ResponseBody
 import com.safeanot.app.data.remote.model.AlertDto
 import com.safeanot.app.data.remote.model.ShareEventBatchRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.POST
 import retrofit2.http.Query
 import retrofit2.http.Streaming
@@ -41,4 +47,19 @@ interface SafeAnotApi {
 
     @POST("api/score/share")
     suspend fun postShareEvents(@Body request: ShareEventBatchRequest): Response<Unit>
+
+    @POST("api/guardian/generate")
+    suspend fun generatePairingCode(@Body request: GeneratePairingCodeRequest): PairingCodeResponse
+
+    @POST("api/guardian/claim")
+    suspend fun claimPairingCode(@Body request: ClaimPairingCodeRequest): GuardianPairingDto
+
+    @GET("api/guardian/wards")
+    suspend fun getWards(@Query("device_id") deviceId: String): List<GuardianPairingDto>
+
+    @GET("api/guardian/guardians")
+    suspend fun getGuardians(@Query("device_id") deviceId: String): List<GuardianPairingDto>
+
+    @HTTP(method = "DELETE", path = "api/guardian/delete", hasBody = true)
+    suspend fun deletePairing(@Body request: DeletePairingRequest): Response<Unit>
 }

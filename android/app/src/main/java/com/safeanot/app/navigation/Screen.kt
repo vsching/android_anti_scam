@@ -29,4 +29,7 @@ sealed class Screen(val route: String) {
         fun createRoute(alertId: String): String =
             "alerts/${Uri.encode(alertId)}"
     }
+
+    /** Guardian pairing screen. */
+    data object GuardianPairing : Screen("guardian/pairing")
 }

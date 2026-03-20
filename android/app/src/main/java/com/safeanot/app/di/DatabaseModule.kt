@@ -7,6 +7,7 @@ import android.content.Context
 import androidx.room.Room
 import com.safeanot.app.data.local.AlertsDao
 import com.safeanot.app.data.local.AuditDao
+import com.safeanot.app.data.local.GuardianDao
 import com.safeanot.app.data.local.ReminderConfigDao
 import com.safeanot.app.data.local.SafeAnotDatabase
 import com.safeanot.app.data.local.ScamDomainDao
@@ -30,7 +31,7 @@ object DatabaseModule {
             SafeAnotDatabase::class.java,
             "safeanot_database",
         )
-            .addMigrations(SafeAnotDatabase.MIGRATION_4_5, SafeAnotDatabase.MIGRATION_5_6)
+            .addMigrations(SafeAnotDatabase.MIGRATION_4_5, SafeAnotDatabase.MIGRATION_5_6, SafeAnotDatabase.MIGRATION_6_7)
             .fallbackToDestructiveMigrationFrom(1, 2, 3)
             .build()
     }
@@ -63,5 +64,11 @@ object DatabaseModule {
     @Singleton
     fun provideShareEventDao(database: SafeAnotDatabase): ShareEventDao {
         return database.shareEventDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideGuardianDao(database: SafeAnotDatabase): GuardianDao {
+        return database.guardianDao()
     }
 }

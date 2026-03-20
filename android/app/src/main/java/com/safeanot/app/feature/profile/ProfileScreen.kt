@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -50,6 +51,7 @@ import com.safeanot.app.util.Constants
 
 @Composable
 fun ProfileScreen(
+    onNavigateToGuardian: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -116,24 +118,42 @@ fun ProfileScreen(
             }
         }
 
-        // Guardian setup placeholder
+        // Guardian Mode
         item {
             Card(
+                onClick = onNavigateToGuardian,
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = DarkCard),
                 shape = RoundedCornerShape(12.dp),
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Guardian Mode",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Help protect your family members. Coming soon in a future update.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = TextSecondary,
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Guardian Mode",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = if (uiState.guardianCount > 0) {
+                                "${uiState.guardianCount} active pairing(s)"
+                            } else {
+                                "Help protect your family members"
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextSecondary,
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = "Open Guardian Mode",
+                        tint = TextSecondary,
                     )
                 }
             }

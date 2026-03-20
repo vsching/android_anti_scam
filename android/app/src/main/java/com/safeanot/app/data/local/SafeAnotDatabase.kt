@@ -14,6 +14,7 @@ import com.safeanot.app.data.local.entity.CheckResultCacheEntity
 import com.safeanot.app.data.local.entity.ReminderConfigEntity
 import com.safeanot.app.data.local.entity.ScamDomainEntity
 import com.safeanot.app.data.local.entity.SecurityScoreEntity
+import com.safeanot.app.data.local.entity.GuardianPairingEntity
 import com.safeanot.app.data.local.entity.ShareEventEntity
 import com.safeanot.app.data.local.entity.SyncMetadataEntity
 
@@ -27,8 +28,9 @@ import com.safeanot.app.data.local.entity.SyncMetadataEntity
         AlertEntity::class,
         ReminderConfigEntity::class,
         ShareEventEntity::class,
+        GuardianPairingEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 abstract class SafeAnotDatabase : RoomDatabase() {
@@ -37,6 +39,7 @@ abstract class SafeAnotDatabase : RoomDatabase() {
     abstract fun alertsDao(): AlertsDao
     abstract fun reminderConfigDao(): ReminderConfigDao
     abstract fun shareEventDao(): ShareEventDao
+    abstract fun guardianDao(): GuardianDao
 
     companion object {
         val MIGRATION_4_5 = object : Migration(4, 5) {
@@ -57,6 +60,23 @@ abstract class SafeAnotDatabase : RoomDatabase() {
                         platform TEXT NOT NULL,
                         timestamp INTEGER NOT NULL,
                         synced INTEGER NOT NULL DEFAULT 0
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS guardian_pairings (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        device_id TEXT NOT NULL,
+                        paired_device_id TEXT NOT NULL,
+                        role TEXT NOT NULL,
+                        label TEXT NOT NULL,
+                        created_at INTEGER NOT NULL
                     )
                     """.trimIndent()
                 )

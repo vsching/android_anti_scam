@@ -6,7 +6,12 @@ import com.safeanot.app.data.remote.SafeAnotApi
 import com.safeanot.app.data.remote.model.CheckRequest
 import com.safeanot.app.data.remote.model.CheckResponse
 import com.safeanot.app.data.remote.model.AlertDto
+import com.safeanot.app.data.remote.model.ClaimPairingCodeRequest
+import com.safeanot.app.data.remote.model.DeletePairingRequest
+import com.safeanot.app.data.remote.model.GeneratePairingCodeRequest
+import com.safeanot.app.data.remote.model.GuardianPairingDto
 import com.safeanot.app.data.remote.model.LatestMetadataResponse
+import com.safeanot.app.data.remote.model.PairingCodeResponse
 import com.safeanot.app.data.remote.model.ShareEventBatchRequest
 import com.safeanot.app.domain.model.ShareEventModel
 import com.safeanot.app.domain.model.SharePlatform
@@ -239,5 +244,10 @@ class ShareEventRepositoryImplTest {
         override suspend fun getBloomFilter(): ResponseBody = throw NotImplementedError()
         override suspend fun checkDomain(request: CheckRequest): CheckResponse = throw NotImplementedError()
         override suspend fun getAlerts(region: String?): List<AlertDto> = throw NotImplementedError()
+        override suspend fun generatePairingCode(request: GeneratePairingCodeRequest): PairingCodeResponse = throw NotImplementedError()
+        override suspend fun claimPairingCode(request: ClaimPairingCodeRequest): GuardianPairingDto = throw NotImplementedError()
+        override suspend fun getWards(deviceId: String): List<GuardianPairingDto> = throw NotImplementedError()
+        override suspend fun getGuardians(deviceId: String): List<GuardianPairingDto> = throw NotImplementedError()
+        override suspend fun deletePairing(request: DeletePairingRequest): Response<Unit> = throw NotImplementedError()
     }
 }

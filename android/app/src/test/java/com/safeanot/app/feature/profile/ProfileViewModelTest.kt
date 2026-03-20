@@ -11,6 +11,7 @@ import com.safeanot.app.domain.usecase.GetAuditStatsUseCase
 import com.safeanot.app.domain.usecase.GetPreferredRegionUseCase
 import com.safeanot.app.domain.usecase.SetPreferredRegionUseCase
 import com.safeanot.app.testutil.FakeAuditReminderScheduler
+import com.safeanot.app.testutil.FakeGuardianRepository
 import com.safeanot.app.testutil.FakeReminderConfigDao
 import com.safeanot.app.testutil.FakeUserPreferencesRepository
 import kotlinx.coroutines.Dispatchers
@@ -36,12 +37,14 @@ class ProfileViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var fakeAuditRepo: FakeAuditRepository
     private lateinit var fakePrefs: FakeUserPreferencesRepository
+    private lateinit var fakeGuardianRepo: FakeGuardianRepository
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         fakeAuditRepo = FakeAuditRepository()
         fakePrefs = FakeUserPreferencesRepository()
+        fakeGuardianRepo = FakeGuardianRepository()
     }
 
     @After
@@ -57,6 +60,7 @@ class ProfileViewModelTest {
             getPreferredRegionUseCase = GetPreferredRegionUseCase(fakePrefs),
             setPreferredRegionUseCase = SetPreferredRegionUseCase(fakePrefs),
             userPreferencesRepository = fakePrefs,
+            guardianRepository = fakeGuardianRepo,
         )
     }
 
@@ -75,6 +79,7 @@ class ProfileViewModelTest {
         assertEquals(AlertRegionFilter.ALL, state.selectedRegion)
         assertTrue(state.scamAlertsEnabled)
         assertTrue(state.emergencyContacts.isEmpty())
+        assertEquals(0, state.guardianCount)
     }
 
     @Test
