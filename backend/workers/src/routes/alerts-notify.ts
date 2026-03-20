@@ -51,6 +51,10 @@ async function timingSafeEqual(a: string, b: string): Promise<boolean> {
 /**
  * KV-based rate limiter. Uses a counter key with TTL.
  * Returns true if the request is allowed, false if rate limited.
+ *
+ * Note: The get-then-put is non-atomic, so concurrent requests could race past
+ * the limit. This is acceptable here because the endpoint is called by the
+ * pipeline at most once per weekly batch, not by end users.
  */
 async function checkRateLimit(kv: KVNamespace, clientIp: string): Promise<boolean> {
   const key = `ratelimit:notify:${clientIp}`;
@@ -145,13 +149,21 @@ export async function handleAlertsNotify(
   const results: boolean[] = [];
   for (const topic of topics) {
     const sent = await sendFcmTopicMessage(env, topic, alert.title, notificationBody, {
+      type: 'scam_alert',
       alert_id: alert.id,
+      title: alert.title,
+      body: notificationBody,
       deep_link: deepLink,
     });
     results.push(sent);
   }
 
-  return jsonResponse({ sent: true, topics });
+  const anySucceeded = results.some((r) => r);
+  if (!anySucceeded) {
+    return jsonResponse({ sent: false, topics, results }, 502);
+  }
+
+  return jsonResponse({ sent: anySucceeded, topics, results });
 }
 
 function jsonResponse(data: unknown, status = 200): Response {

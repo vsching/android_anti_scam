@@ -160,9 +160,8 @@ describe('POST /api/alerts/notify', () => {
 
   describe('region-to-topic mapping', () => {
     it('maps MY region to scam_alerts_MY topic', async () => {
-      // This will fail at FCM sending (no real credentials) but we can verify
-      // the response structure indicates correct topic mapping.
-      // The endpoint returns topics even if FCM send fails.
+      // FCM sending fails in tests (no real credentials), so the endpoint
+      // returns 502 with sent: false. We verify the topic mapping is correct.
       const response = await SELF.fetch(
         notifyRequest(
           { alert_id: 'alert-001' },
@@ -170,9 +169,12 @@ describe('POST /api/alerts/notify', () => {
         ),
       );
 
-      // FCM will fail in tests but the response should still indicate topics
-      const body = await response.json<{ sent: boolean; topics: string[] }>();
+      const body = await response.json<{ sent: boolean; topics: string[]; results: boolean[] }>();
       expect(body.topics).toEqual(['scam_alerts_MY']);
+      // FCM fails in test env — verify failure is reported correctly
+      expect(response.status).toBe(502);
+      expect(body.sent).toBe(false);
+      expect(body.results).toEqual([false]);
     });
 
     it('maps SG region to scam_alerts_SG topic', async () => {
@@ -183,8 +185,11 @@ describe('POST /api/alerts/notify', () => {
         ),
       );
 
-      const body = await response.json<{ sent: boolean; topics: string[] }>();
+      const body = await response.json<{ sent: boolean; topics: string[]; results: boolean[] }>();
       expect(body.topics).toEqual(['scam_alerts_SG']);
+      expect(response.status).toBe(502);
+      expect(body.sent).toBe(false);
+      expect(body.results).toEqual([false]);
     });
 
     it('maps both region to both topics', async () => {
@@ -195,8 +200,11 @@ describe('POST /api/alerts/notify', () => {
         ),
       );
 
-      const body = await response.json<{ sent: boolean; topics: string[] }>();
+      const body = await response.json<{ sent: boolean; topics: string[]; results: boolean[] }>();
       expect(body.topics).toEqual(['scam_alerts_MY', 'scam_alerts_SG']);
+      expect(response.status).toBe(502);
+      expect(body.sent).toBe(false);
+      expect(body.results).toEqual([false, false]);
     });
   });
 

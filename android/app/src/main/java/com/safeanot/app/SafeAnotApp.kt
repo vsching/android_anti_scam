@@ -103,7 +103,14 @@ class SafeAnotApp : Application(), Configuration.Provider {
             ) { enabled, region ->
                 Pair(enabled, region)
             }.collect { (enabled, region) ->
-                fcmTokenManager.updateSubscription(enabled, region)
+                // regionFlow emits enum names ("MALAYSIA", "SINGAPORE") but
+                // FcmTokenManager expects ISO codes ("MY", "SG").
+                val mappedRegion = when (region) {
+                    "MALAYSIA" -> "MY"
+                    "SINGAPORE" -> "SG"
+                    else -> null
+                }
+                fcmTokenManager.updateSubscription(enabled, mappedRegion)
             }
         }
     }
