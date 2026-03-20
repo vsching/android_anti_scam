@@ -3,6 +3,7 @@ package com.safeanot.app.feature.alerts
 import com.safeanot.app.domain.model.AlertRegionFilter
 import com.safeanot.app.domain.model.ScamAlert
 import com.safeanot.app.domain.repository.AlertsRepository
+import com.safeanot.app.domain.usecase.GetFeaturedAlertUseCase
 import com.safeanot.app.domain.usecase.GetPreferredRegionUseCase
 import com.safeanot.app.domain.usecase.ObserveAlertsUseCase
 import com.safeanot.app.domain.usecase.RefreshAlertsUseCase
@@ -45,6 +46,10 @@ class AlertsViewModelTest {
             observeAlertsUseCase = ObserveAlertsUseCase(fakeRepository),
             refreshAlertsUseCase = RefreshAlertsUseCase(fakeRepository),
             getPreferredRegionUseCase = GetPreferredRegionUseCase(fakePrefsRepository),
+            getFeaturedAlertUseCase = GetFeaturedAlertUseCase(
+                fakeRepository,
+                fakePrefsRepository,
+            ),
         )
     }
 

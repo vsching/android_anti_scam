@@ -3,8 +3,13 @@
  */
 package com.safeanot.app.feature.profile
 
+import android.Manifest
 import android.content.ActivityNotFoundException
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -26,12 +31,16 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -48,6 +57,7 @@ import com.safeanot.app.ui.theme.GreenAccent
 import com.safeanot.app.ui.theme.TextPrimary
 import com.safeanot.app.ui.theme.TextSecondary
 import com.safeanot.app.util.Constants
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(
@@ -57,6 +67,24 @@ fun ProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    // POST_NOTIFICATIONS permission launcher for Android 13+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.toggleScamAlerts(true)
+        } else {
+            viewModel.toggleScamAlerts(false)
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    "Notification permission is required to receive scam alerts"
+                )
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.shareEvent.collect {
@@ -69,6 +97,7 @@ fun ProfileScreen(
         }
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -334,7 +363,15 @@ fun ProfileScreen(
                         }
                         Switch(
                             checked = uiState.scamAlertsEnabled,
-                            onCheckedChange = { viewModel.toggleScamAlerts(it) },
+                            onCheckedChange = { enabled ->
+                                if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    notificationPermissionLauncher.launch(
+                                        Manifest.permission.POST_NOTIFICATIONS
+                                    )
+                                } else {
+                                    viewModel.toggleScamAlerts(enabled)
+                                }
+                            },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = GreenAccent,
                                 checkedTrackColor = GreenAccent.copy(alpha = 0.3f),
@@ -397,5 +434,10 @@ fun ProfileScreen(
         item {
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier.align(Alignment.BottomCenter),
+    )
     }
 }

@@ -9,6 +9,8 @@ import { handlePreflight, addCorsHeaders } from './middleware/cors';
 import { addSecurityHeaders } from './middleware/security-headers';
 import { handleRetention } from './lib/retention';
 import { handleAlerts } from './routes/alerts';
+import { handleAlertsLatest } from './routes/alerts-latest';
+import { handleAlertsNotify } from './routes/alerts-notify';
 import { handleCheck } from './routes/check';
 import { handleShare } from './routes/share';
 import {
@@ -33,6 +35,8 @@ const router = new Router();
 
 // Scam alerts feed
 router.get('/api/alerts', handleAlerts);
+router.get('/api/alerts/latest', handleAlertsLatest);
+router.post('/api/alerts/notify', handleAlertsNotify);
 
 // Link checker
 router.post('/api/check', handleCheck);

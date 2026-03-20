@@ -1,14 +1,16 @@
 /**
  * Unit tests for FcmTokenManager.
- * Verifies that registerToken calls the API with correct device ID and token.
+ * Verifies token registration and topic subscription logic.
  */
 package com.safeanot.app.data.remote
 
 import com.safeanot.app.data.remote.model.RegisterFcmTokenRequest
+import com.safeanot.app.util.Constants
 import com.safeanot.app.util.DeviceIdProvider
 import kotlinx.coroutines.test.runTest
-import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import retrofit2.Response
 
@@ -71,5 +73,33 @@ class FcmTokenManagerTest {
         assertEquals(true, response.isSuccessful)
         assertEquals("test-device-id-123", fakeApi.lastFcmTokenRequest?.deviceId)
         assertEquals("fake-fcm-token-xyz", fakeApi.lastFcmTokenRequest?.fcmToken)
+    }
+
+    @Test
+    fun `ALL_SCAM_ALERT_TOPICS contains MY and SG topics`() {
+        val topics = FcmTokenManager.ALL_SCAM_ALERT_TOPICS
+        assertEquals(2, topics.size)
+        assertTrue(topics.contains(Constants.FCM_TOPIC_SCAM_ALERTS_MY))
+        assertTrue(topics.contains(Constants.FCM_TOPIC_SCAM_ALERTS_SG))
+    }
+
+    @Test
+    fun `topic names follow expected format`() {
+        assertEquals("scam_alerts_MY", Constants.FCM_TOPIC_SCAM_ALERTS_MY)
+        assertEquals("scam_alerts_SG", Constants.FCM_TOPIC_SCAM_ALERTS_SG)
+        assertEquals("scam_alerts_", Constants.FCM_TOPIC_PREFIX)
+
+        // Verify region maps to correct topic name
+        val myTopic = "${Constants.FCM_TOPIC_PREFIX}MY"
+        assertEquals(Constants.FCM_TOPIC_SCAM_ALERTS_MY, myTopic)
+
+        val sgTopic = "${Constants.FCM_TOPIC_PREFIX}SG"
+        assertEquals(Constants.FCM_TOPIC_SCAM_ALERTS_SG, sgTopic)
+    }
+
+    @Test
+    fun `scam alerts channel constants are defined`() {
+        assertEquals("scam_alerts", Constants.SCAM_ALERTS_CHANNEL_ID)
+        assertEquals("Scam Alerts", Constants.SCAM_ALERTS_CHANNEL_NAME)
     }
 }

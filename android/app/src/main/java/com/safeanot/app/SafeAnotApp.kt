@@ -1,10 +1,14 @@
 /**
  * Application class for Safe Anot? — the Hilt entry point for dependency injection.
- * Schedules periodic database sync and triggers immediate sync on first run.
+ * Schedules periodic database sync, triggers immediate sync on first run,
+ * creates notification channels, and initializes FCM topic subscriptions.
  */
 package com.safeanot.app
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.Constraints
@@ -15,6 +19,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.safeanot.app.data.local.ReminderConfigDao
+import com.safeanot.app.data.local.UserPreferencesDataStore
 import com.safeanot.app.data.remote.FcmTokenManager
 import com.safeanot.app.domain.repository.SyncRepository
 import com.safeanot.app.util.Constants
@@ -24,6 +29,7 @@ import com.safeanot.app.worker.ShareEventSyncWorker
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -46,6 +52,9 @@ class SafeAnotApp : Application(), Configuration.Provider {
     @Inject
     lateinit var fcmTokenManager: FcmTokenManager
 
+    @Inject
+    lateinit var userPreferencesDataStore: UserPreferencesDataStore
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
@@ -53,10 +62,50 @@ class SafeAnotApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        createNotificationChannels()
         scheduleDatabaseSync()
         scheduleAuditReminders()
         scheduleShareEventSync()
         registerFcmToken()
+        initializeFcmSubscription()
+    }
+
+    /**
+     * Create all notification channels at app startup. This is idempotent on API 26+.
+     * Channels are created here (single place) rather than scattered across services.
+     */
+    private fun createNotificationChannels() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationManager = getSystemService(NotificationManager::class.java)
+
+            // Scam alerts channel
+            val scamAlertsChannel = NotificationChannel(
+                Constants.SCAM_ALERTS_CHANNEL_ID,
+                Constants.SCAM_ALERTS_CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_HIGH,
+            ).apply {
+                description = "Push notifications for new scam alerts in your region"
+            }
+            notificationManager.createNotificationChannel(scamAlertsChannel)
+        }
+    }
+
+    /**
+     * Observe scam alert notification preference and region preference,
+     * and reactively manage FCM topic subscriptions.
+     * When either preference changes, the subscription is updated accordingly.
+     */
+    private fun initializeFcmSubscription() {
+        CoroutineScope(Dispatchers.IO).launch {
+            combine(
+                userPreferencesDataStore.scamAlertsNotificationsEnabledFlow,
+                userPreferencesDataStore.regionFlow,
+            ) { enabled, region ->
+                Pair(enabled, region)
+            }.collect { (enabled, region) ->
+                fcmTokenManager.updateSubscription(enabled, region)
+            }
+        }
     }
 
     private fun scheduleDatabaseSync() {

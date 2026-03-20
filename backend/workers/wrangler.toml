@@ -44,3 +44,9 @@ name = "RATE_LIMITER_REPORT"
 type = "ratelimit"
 namespace_id = "1"
 simple = { limit = 10, period = 60 }
+
+# Secrets (set via `wrangler secret put`, NOT stored in this file):
+# - PIPELINE_SECRET: Authentication key for /api/alerts/notify (pipeline → worker)
+# - FIREBASE_SERVICE_ACCOUNT_JSON: Service account JSON for FCM HTTP v1 API
+# - FIREBASE_PROJECT_ID: Firebase project ID for FCM URL construction
+# - FIREBASE_API_KEY: Firebase API key

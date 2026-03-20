@@ -1,6 +1,8 @@
 /**
  * Firebase Cloud Messaging service for receiving push notifications.
- * Handles guardian alert notifications and FCM token refresh.
+ * Handles guardian alert notifications, scam alert notifications, and FCM token refresh.
+ *
+ * Notification channels are created in SafeAnotApp.onCreate() — NOT here.
  */
 package com.safeanot.app.service
 
@@ -8,6 +10,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -15,6 +18,7 @@ import com.google.firebase.messaging.RemoteMessage
 import com.safeanot.app.MainActivity
 import com.safeanot.app.R
 import com.safeanot.app.data.remote.FcmTokenManager
+import com.safeanot.app.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +35,7 @@ class SafeAnotMessagingService : FirebaseMessagingService() {
         private const val CHANNEL_ID_GUARDIAN = "guardian_alerts"
         private const val CHANNEL_NAME_GUARDIAN = "Guardian Alerts"
         private const val NOTIFICATION_ID_BASE = 5000
+        private const val SCAM_ALERT_NOTIFICATION_ID_BASE = 6000
     }
 
     override fun onNewToken(token: String) {
@@ -49,6 +54,7 @@ class SafeAnotMessagingService : FirebaseMessagingService() {
         when (type) {
             "guardian_alert" -> showGuardianAlertNotification(data)
             "help_request" -> showGuardianAlertNotification(data)
+            "scam_alert" -> showScamAlertNotification(data)
         }
     }
 
@@ -98,6 +104,46 @@ class SafeAnotMessagingService : FirebaseMessagingService() {
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.notify(
             NOTIFICATION_ID_BASE + wardDeviceId.hashCode(),
+            notification,
+        )
+    }
+
+    /**
+     * Show a scam alert push notification.
+     * Deep-links to the alert detail screen via safeanot.com/alert/{alertId}.
+     */
+    private fun showScamAlertNotification(data: Map<String, String>) {
+        val alertId = data["alert_id"] ?: return
+        val title = sanitize(data["title"] ?: "New Scam Alert")
+        val body = sanitize(data["body"] ?: "A new scam alert has been reported in your region.", 200)
+
+        // Deep link to alert detail screen
+        val deepLinkUri = Uri.parse("https://safeanot.com/alert/$alertId")
+        val intent = Intent(Intent.ACTION_VIEW, deepLinkUri).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            setPackage(packageName)
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            alertId.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+
+        val notification = NotificationCompat.Builder(this, Constants.SCAM_ALERTS_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.notify(
+            SCAM_ALERT_NOTIFICATION_ID_BASE + alertId.hashCode(),
             notification,
         )
     }

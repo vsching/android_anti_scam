@@ -23,4 +23,7 @@ interface Env {
 
   // Guardian pairing HMAC secret
   GUARDIAN_HMAC_SECRET: string;
+
+  // Pipeline authentication secret (for /api/alerts/notify)
+  PIPELINE_SECRET: string;
 }

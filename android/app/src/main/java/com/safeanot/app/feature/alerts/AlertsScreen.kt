@@ -34,6 +34,7 @@ import com.safeanot.app.feature.alerts.components.AlertFeedCard
 import com.safeanot.app.feature.alerts.components.AlertRegionChips
 import com.safeanot.app.feature.alerts.components.AlertsEmptyState
 import com.safeanot.app.feature.alerts.components.AlertsLoadingSkeleton
+import com.safeanot.app.feature.alerts.components.FeaturedAlertCard
 import com.safeanot.app.ui.theme.RedAccent
 import com.safeanot.app.ui.theme.TextSecondary
 
@@ -81,6 +82,18 @@ fun AlertsScreen(
                     color = TextSecondary,
                 )
                 Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            // Featured "Scam of the Week" card
+            if (uiState.featuredAlert != null && !uiState.isFeaturedDismissed) {
+                item {
+                    FeaturedAlertCard(
+                        alert = uiState.featuredAlert!!,
+                        onDismiss = viewModel::onDismissFeatured,
+                        onClick = { viewModel.onAlertClick(uiState.featuredAlert!!) },
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
             }
 
             // Filter chips

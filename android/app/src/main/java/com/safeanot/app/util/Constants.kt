@@ -19,6 +19,15 @@ object Constants {
     const val NOTIFICATION_CHANNEL_ID = "audit_reminders"
     const val NOTIFICATION_CHANNEL_NAME = "Audit Reminders"
 
+    /** Notification channel for scam alerts (push notifications). */
+    const val SCAM_ALERTS_CHANNEL_ID = "scam_alerts"
+    const val SCAM_ALERTS_CHANNEL_NAME = "Scam Alerts"
+
+    /** FCM topic prefixes and known region topics. */
+    const val FCM_TOPIC_PREFIX = "scam_alerts_"
+    const val FCM_TOPIC_SCAM_ALERTS_MY = "scam_alerts_MY"
+    const val FCM_TOPIC_SCAM_ALERTS_SG = "scam_alerts_SG"
+
     /** WorkManager unique work name. */
     const val AUDIT_WORK_NAME = "audit_reminder"
 
