@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.safeanot.app.domain.model.AuditItem
 import com.safeanot.app.domain.model.AuditStatus
+import com.safeanot.app.domain.model.BadgeType
 import com.safeanot.app.domain.model.CardFormat
 import com.safeanot.app.domain.model.SecurityScore
 import com.safeanot.app.domain.model.ShareEventModel
@@ -23,6 +24,7 @@ import com.safeanot.app.domain.usecase.GetSecurityScoreUseCase
 import com.safeanot.app.domain.usecase.RunAuditUseCase
 import com.safeanot.app.domain.usecase.SendHelpRequestUseCase
 import com.safeanot.app.domain.usecase.TrackShareEventUseCase
+import com.safeanot.app.domain.usecase.UnlockBadgeUseCase
 import com.safeanot.app.domain.usecase.UpdateStreakUseCase
 import com.safeanot.app.feature.check.ShareEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -58,6 +60,7 @@ class ShieldViewModel @Inject constructor(
     private val guardianRepository: GuardianRepository,
     private val updateStreakUseCase: UpdateStreakUseCase,
     private val getCurrentStreakUseCase: GetCurrentStreakUseCase,
+    private val unlockBadgeUseCase: UnlockBadgeUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ShieldUiState())
@@ -164,6 +167,7 @@ class ShieldViewModel @Inject constructor(
                     platform = platform,
                 )
             )
+            unlockBadgeUseCase(BadgeType.SHARE_GUARDIAN)
         }
     }
 

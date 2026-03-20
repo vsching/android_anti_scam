@@ -1,14 +1,20 @@
 package com.safeanot.app.feature.guardian
 
+import com.safeanot.app.domain.model.BadgeProgress
+import com.safeanot.app.domain.model.BadgeType
 import com.safeanot.app.domain.model.GuardianPairing
 import com.safeanot.app.domain.model.GuardianRole
 import com.safeanot.app.domain.model.PairingCode
+import com.safeanot.app.domain.repository.BadgeRepository
 import com.safeanot.app.domain.usecase.ClaimPairingCodeUseCase
 import com.safeanot.app.domain.usecase.DeletePairingUseCase
 import com.safeanot.app.domain.usecase.GeneratePairingCodeUseCase
 import com.safeanot.app.domain.usecase.GetPairingsUseCase
+import com.safeanot.app.domain.usecase.UnlockBadgeUseCase
 import com.safeanot.app.testutil.FakeGuardianRepository
 import com.safeanot.app.testutil.FakeGuardianHeartbeatScheduler
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -42,12 +48,18 @@ class GuardianPairingViewModelTest {
     }
 
     private fun createViewModel(): GuardianPairingViewModel {
+        val fakeBadgeRepo = object : BadgeRepository {
+            override fun observeAllBadges(): Flow<List<BadgeProgress>> = flowOf(emptyList())
+            override fun observeUnlockedCount(): Flow<Int> = flowOf(0)
+            override suspend fun unlockBadge(type: BadgeType): Boolean = true
+        }
         return GuardianPairingViewModel(
             generatePairingCodeUseCase = GeneratePairingCodeUseCase(fakeRepo),
             claimPairingCodeUseCase = ClaimPairingCodeUseCase(fakeRepo),
             deletePairingUseCase = DeletePairingUseCase(fakeRepo),
             getPairingsUseCase = GetPairingsUseCase(fakeRepo),
             heartbeatScheduler = FakeGuardianHeartbeatScheduler.create(),
+            unlockBadgeUseCase = UnlockBadgeUseCase(fakeBadgeRepo),
         )
     }
 

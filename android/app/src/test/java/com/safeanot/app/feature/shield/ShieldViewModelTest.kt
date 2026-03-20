@@ -3,17 +3,31 @@ package com.safeanot.app.feature.shield
 import com.safeanot.app.domain.model.AuditChangeSummary
 import com.safeanot.app.domain.model.AuditItem
 import com.safeanot.app.domain.model.AuditStatus
+import com.safeanot.app.domain.model.BadgeProgress
+import com.safeanot.app.domain.model.BadgeType
 import com.safeanot.app.domain.model.CardFormat
+import com.safeanot.app.domain.model.GuardianPairing
+import com.safeanot.app.domain.model.PairingCode
 import com.safeanot.app.domain.model.SecurityScore
 import com.safeanot.app.domain.model.ShareEventModel
 import com.safeanot.app.domain.model.SharePlatform
 import com.safeanot.app.domain.model.ShareType
+import com.safeanot.app.domain.model.Streak
+import com.safeanot.app.domain.model.WardHeartbeatHistory
 import com.safeanot.app.domain.repository.AuditRepository
+import com.safeanot.app.domain.repository.BadgeRepository
+import com.safeanot.app.domain.repository.GuardianRepository
 import com.safeanot.app.domain.repository.ShareEventRepository
+import com.safeanot.app.domain.repository.StreakRepository
+import com.safeanot.app.domain.usecase.EvaluateBadgesUseCase
 import com.safeanot.app.domain.usecase.GenerateScoreCardUseCase
+import com.safeanot.app.domain.usecase.GetCurrentStreakUseCase
 import com.safeanot.app.domain.usecase.GetSecurityScoreUseCase
 import com.safeanot.app.domain.usecase.RunAuditUseCase
+import com.safeanot.app.domain.usecase.SendHelpRequestUseCase
 import com.safeanot.app.domain.usecase.TrackShareEventUseCase
+import com.safeanot.app.domain.usecase.UnlockBadgeUseCase
+import com.safeanot.app.domain.usecase.UpdateStreakUseCase
 import com.safeanot.app.feature.check.ShareEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -97,12 +111,21 @@ class ShieldViewModelTest {
         shareRepo: ShareEventRepository = FakeShareEventRepository(),
     ): ShieldViewModel {
         val fakeRepo = FakeAuditRepository()
+        val fakeGuardianRepo = FakeGuardianRepository()
+        val fakeBadgeRepo = FakeBadgeRepository()
+        val fakeStreakRepo = FakeStreakRepository()
+        val fakeEvaluateBadges = EvaluateBadgesUseCase(fakeBadgeRepo, fakeStreakRepo, fakeRepo)
         return ShieldViewModel(
             runAuditUseCase = RunAuditUseCase(fakeRepo),
             getSecurityScoreUseCase = GetSecurityScoreUseCase(fakeRepo),
             generateScoreCardUseCase = GenerateScoreCardUseCase(),
             repository = fakeRepo,
             trackShareEventUseCase = TrackShareEventUseCase(shareRepo),
+            sendHelpRequestUseCase = SendHelpRequestUseCase(fakeGuardianRepo, fakeRepo),
+            guardianRepository = fakeGuardianRepo,
+            updateStreakUseCase = UpdateStreakUseCase(fakeStreakRepo, fakeEvaluateBadges),
+            getCurrentStreakUseCase = GetCurrentStreakUseCase(fakeStreakRepo),
+            unlockBadgeUseCase = UnlockBadgeUseCase(fakeBadgeRepo),
         )
     }
 
@@ -131,5 +154,34 @@ class ShieldViewModelTest {
         override suspend fun recalculateScore() {}
         override fun getCompletedAuditCount(): Flow<Int> = flowOf(0)
         override fun getLastAuditTimestamp(): Flow<Long?> = flowOf(null)
+    }
+
+    private class FakeGuardianRepository : GuardianRepository {
+        override suspend fun generatePairingCode(role: String, label: String): PairingCode = PairingCode("TEST", Long.MAX_VALUE)
+        override suspend fun claimPairingCode(code: String, label: String): GuardianPairing = throw UnsupportedOperationException()
+        override fun getAllPairings(): Flow<List<GuardianPairing>> = flowOf(emptyList())
+        override suspend fun deletePairing(pairingId: String) {}
+        override suspend fun refreshPairings() {}
+        override fun getGuardianCount(): Flow<Int> = flowOf(0)
+        override fun getWardRoleCount(): Flow<Int> = flowOf(0)
+        override suspend fun getDeviceId(): String = "test-device"
+        override suspend fun sendHeartbeat(securityScore: Int, securedItems: Int, totalItems: Int, playProtectEnabled: Boolean) {}
+        override fun getWards(deviceId: String): Flow<List<GuardianPairing>> = flowOf(emptyList())
+        override suspend fun refreshWards(deviceId: String) {}
+        override suspend fun sendHelpRequest(securityScore: Int, unfixedItems: List<String>) {}
+        override suspend fun getWardHeartbeatHistory(wardDeviceId: String, days: Int): WardHeartbeatHistory = WardHeartbeatHistory("", "", emptyList())
+        override suspend fun getPairingIdByPairedDeviceId(pairedDeviceId: String): String? = null
+    }
+
+    private class FakeBadgeRepository : BadgeRepository {
+        override fun observeAllBadges(): Flow<List<BadgeProgress>> = flowOf(emptyList())
+        override fun observeUnlockedCount(): Flow<Int> = flowOf(0)
+        override suspend fun unlockBadge(type: BadgeType): Boolean = true
+    }
+
+    private class FakeStreakRepository : StreakRepository {
+        override fun observeStreak(): Flow<Streak> = flowOf(Streak())
+        override suspend fun getStreak(): Streak = Streak()
+        override suspend fun updateStreak(streak: Streak) {}
     }
 }

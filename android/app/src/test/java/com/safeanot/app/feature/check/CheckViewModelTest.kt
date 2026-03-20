@@ -1,20 +1,26 @@
 package com.safeanot.app.feature.check
 
+import com.safeanot.app.domain.model.BadgeType
 import com.safeanot.app.domain.model.LinkVerdict
 import com.safeanot.app.domain.model.ShareEventModel
 import com.safeanot.app.domain.model.ShareType
 import com.safeanot.app.domain.model.VerdictType
 import com.safeanot.app.domain.model.WarningTone
+import com.safeanot.app.domain.repository.BadgeRepository
 import com.safeanot.app.domain.repository.LinkCheckRepository
 import com.safeanot.app.domain.repository.ShareEventRepository
+import com.safeanot.app.domain.model.BadgeProgress
 import com.safeanot.app.domain.usecase.CheckLinkUseCase
 import com.safeanot.app.domain.usecase.GenerateRescueCardUseCase
 import com.safeanot.app.domain.usecase.TrackShareEventUseCase
+import com.safeanot.app.domain.usecase.UnlockBadgeUseCase
 import com.safeanot.app.util.WarningTemplateProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -253,10 +259,16 @@ class CheckViewModelTest {
             override suspend fun trackEvent(event: ShareEventModel): Boolean = true
             override suspend fun syncPendingEvents(): Boolean = true
         }
+        val badgeRepo = object : BadgeRepository {
+            override fun observeAllBadges(): Flow<List<BadgeProgress>> = flowOf(emptyList())
+            override fun observeUnlockedCount(): Flow<Int> = flowOf(0)
+            override suspend fun unlockBadge(type: BadgeType): Boolean = true
+        }
         return CheckViewModel(
             checkLinkUseCase = CheckLinkUseCase(repo),
             trackShareEventUseCase = TrackShareEventUseCase(shareRepo),
             generateRescueCardUseCase = GenerateRescueCardUseCase(),
+            unlockBadgeUseCase = UnlockBadgeUseCase(badgeRepo),
         )
     }
 }

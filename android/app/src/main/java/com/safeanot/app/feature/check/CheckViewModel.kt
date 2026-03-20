@@ -7,6 +7,7 @@ package com.safeanot.app.feature.check
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.safeanot.app.domain.model.BadgeType
 import com.safeanot.app.domain.model.LinkVerdict
 import com.safeanot.app.domain.model.WarningTemplate
 import com.safeanot.app.domain.model.ShareEventModel
@@ -15,6 +16,7 @@ import com.safeanot.app.domain.model.ShareType
 import com.safeanot.app.domain.usecase.CheckLinkUseCase
 import com.safeanot.app.domain.usecase.GenerateRescueCardUseCase
 import com.safeanot.app.domain.usecase.TrackShareEventUseCase
+import com.safeanot.app.domain.usecase.UnlockBadgeUseCase
 import com.safeanot.app.util.VerdictCardGenerator
 import com.safeanot.app.util.WarningTemplateProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,6 +40,7 @@ class CheckViewModel @Inject constructor(
     private val checkLinkUseCase: CheckLinkUseCase,
     private val trackShareEventUseCase: TrackShareEventUseCase,
     private val generateRescueCardUseCase: GenerateRescueCardUseCase,
+    private val unlockBadgeUseCase: UnlockBadgeUseCase,
 ) : ViewModel() {
 
     private val _urlInput = MutableStateFlow("")
@@ -67,6 +70,7 @@ class CheckViewModel @Inject constructor(
             try {
                 val verdict = checkLinkUseCase(trimmed)
                 _checkState.value = CheckUiState.Result(verdict)
+                unlockBadgeUseCase(BadgeType.LINK_CHECKER)
             } catch (e: Exception) {
                 _checkState.value = CheckUiState.Error(
                     e.message ?: "An unexpected error occurred."

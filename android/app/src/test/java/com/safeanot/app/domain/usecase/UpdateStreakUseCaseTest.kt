@@ -1,10 +1,18 @@
 package com.safeanot.app.domain.usecase
 
+import com.safeanot.app.domain.model.AuditChangeSummary
+import com.safeanot.app.domain.model.AuditItem
+import com.safeanot.app.domain.model.AuditStatus
+import com.safeanot.app.domain.model.BadgeProgress
 import com.safeanot.app.domain.model.BadgeType
+import com.safeanot.app.domain.model.SecurityScore
 import com.safeanot.app.domain.model.Streak
+import com.safeanot.app.domain.repository.AuditRepository
+import com.safeanot.app.domain.repository.BadgeRepository
 import com.safeanot.app.domain.repository.StreakRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -178,7 +186,11 @@ class UpdateStreakUseCaseTest {
         }
     }
 
-    private class FakeEvaluateBadgesUseCase : EvaluateBadgesUseCase() {
+    private class FakeEvaluateBadgesUseCase : EvaluateBadgesUseCase(
+        badgeRepository = NoOpBadgeRepository(),
+        streakRepository = NoOpStreakRepository(),
+        auditRepository = NoOpAuditRepository(),
+    ) {
         var result: List<BadgeType> = emptyList()
         var callCount = 0
 
@@ -186,5 +198,30 @@ class UpdateStreakUseCaseTest {
             callCount++
             return result
         }
+    }
+
+    private class NoOpBadgeRepository : BadgeRepository {
+        override fun observeAllBadges(): Flow<List<BadgeProgress>> = flowOf(emptyList())
+        override fun observeUnlockedCount(): Flow<Int> = flowOf(0)
+        override suspend fun unlockBadge(type: BadgeType): Boolean = false
+    }
+
+    private class NoOpStreakRepository : StreakRepository {
+        override fun observeStreak(): Flow<Streak> = flowOf(Streak())
+        override suspend fun getStreak(): Streak = Streak()
+        override suspend fun updateStreak(streak: Streak) {}
+    }
+
+    private class NoOpAuditRepository : AuditRepository {
+        override fun getAllAuditItems(): Flow<List<AuditItem>> = flowOf(emptyList())
+        override fun getAuditItemsByCategory(category: String): Flow<List<AuditItem>> = flowOf(emptyList())
+        override fun getSecurityScore(): Flow<SecurityScore?> = flowOf(null)
+        override suspend fun runAudit() {}
+        override suspend fun runAuditAndDetectChanges(): AuditChangeSummary = AuditChangeSummary(emptyList(), emptyList())
+        override suspend fun updateItemStatus(id: Int, status: AuditStatus) {}
+        override suspend fun updateItemStatusByPackage(packageName: String, status: AuditStatus) {}
+        override suspend fun recalculateScore() {}
+        override fun getCompletedAuditCount(): Flow<Int> = flowOf(0)
+        override fun getLastAuditTimestamp(): Flow<Long?> = flowOf(null)
     }
 }

@@ -7,12 +7,14 @@ package com.safeanot.app.feature.guardian
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.safeanot.app.domain.model.BadgeType
 import com.safeanot.app.domain.model.GuardianPairing
 import com.safeanot.app.domain.model.PairingCode
 import com.safeanot.app.domain.usecase.ClaimPairingCodeUseCase
 import com.safeanot.app.domain.usecase.DeletePairingUseCase
 import com.safeanot.app.domain.usecase.GeneratePairingCodeUseCase
 import com.safeanot.app.domain.usecase.GetPairingsUseCase
+import com.safeanot.app.domain.usecase.UnlockBadgeUseCase
 import com.safeanot.app.worker.GuardianHeartbeatScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +40,7 @@ class GuardianPairingViewModel @Inject constructor(
     private val deletePairingUseCase: DeletePairingUseCase,
     private val getPairingsUseCase: GetPairingsUseCase,
     private val heartbeatScheduler: GuardianHeartbeatScheduler,
+    private val unlockBadgeUseCase: UnlockBadgeUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GuardianUiState())
@@ -80,6 +83,7 @@ class GuardianPairingViewModel @Inject constructor(
                 claimPairingCodeUseCase(code, label)
                 _uiState.update { it.copy(claimSuccess = true, isLoading = false) }
                 heartbeatScheduler.schedule()
+                unlockBadgeUseCase(BadgeType.FAMILY_PROTECTOR)
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message ?: "Failed to claim code", isLoading = false) }
             }
