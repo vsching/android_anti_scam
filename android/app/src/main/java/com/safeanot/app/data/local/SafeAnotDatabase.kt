@@ -14,8 +14,11 @@ import com.safeanot.app.data.local.entity.CheckResultCacheEntity
 import com.safeanot.app.data.local.entity.ReminderConfigEntity
 import com.safeanot.app.data.local.entity.ScamDomainEntity
 import com.safeanot.app.data.local.entity.SecurityScoreEntity
+import com.safeanot.app.data.local.entity.BadgeEntity
 import com.safeanot.app.data.local.entity.GuardianPairingEntity
+import com.safeanot.app.data.local.entity.QuizResultEntity
 import com.safeanot.app.data.local.entity.ShareEventEntity
+import com.safeanot.app.data.local.entity.StreakEntity
 import com.safeanot.app.data.local.entity.SyncMetadataEntity
 
 @Database(
@@ -29,8 +32,11 @@ import com.safeanot.app.data.local.entity.SyncMetadataEntity
         ReminderConfigEntity::class,
         ShareEventEntity::class,
         GuardianPairingEntity::class,
+        StreakEntity::class,
+        BadgeEntity::class,
+        QuizResultEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = true,
 )
 abstract class SafeAnotDatabase : RoomDatabase() {
@@ -40,6 +46,9 @@ abstract class SafeAnotDatabase : RoomDatabase() {
     abstract fun reminderConfigDao(): ReminderConfigDao
     abstract fun shareEventDao(): ShareEventDao
     abstract fun guardianDao(): GuardianDao
+    abstract fun streakDao(): StreakDao
+    abstract fun badgeDao(): BadgeDao
+    abstract fun quizDao(): QuizDao
 
     companion object {
         val MIGRATION_4_5 = object : Migration(4, 5) {
@@ -88,6 +97,43 @@ abstract class SafeAnotDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE guardian_pairings ADD COLUMN last_security_score INTEGER DEFAULT NULL")
                 db.execSQL("ALTER TABLE guardian_pairings ADD COLUMN last_heartbeat_at INTEGER DEFAULT NULL")
                 db.execSQL("ALTER TABLE guardian_pairings ADD COLUMN play_protect_enabled INTEGER DEFAULT NULL")
+            }
+        }
+
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS streaks (
+                        id INTEGER NOT NULL PRIMARY KEY,
+                        current_streak INTEGER NOT NULL DEFAULT 0,
+                        longest_streak INTEGER NOT NULL DEFAULT 0,
+                        last_check_date INTEGER NOT NULL DEFAULT 0,
+                        streak_start_date INTEGER NOT NULL DEFAULT 0
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS badges (
+                        badge_id TEXT NOT NULL PRIMARY KEY,
+                        unlocked INTEGER NOT NULL DEFAULT 0,
+                        unlocked_at INTEGER
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS quiz_results (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        session_id TEXT NOT NULL,
+                        score_percent INTEGER NOT NULL,
+                        correct_count INTEGER NOT NULL,
+                        question_count INTEGER NOT NULL,
+                        completed_at INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
             }
         }
     }

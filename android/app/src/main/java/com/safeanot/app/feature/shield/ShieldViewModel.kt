@@ -17,10 +17,13 @@ import com.safeanot.app.domain.model.ShareType
 import com.safeanot.app.domain.repository.AuditRepository
 import com.safeanot.app.domain.repository.GuardianRepository
 import com.safeanot.app.domain.usecase.GenerateScoreCardUseCase
+import com.safeanot.app.domain.model.Streak
+import com.safeanot.app.domain.usecase.GetCurrentStreakUseCase
 import com.safeanot.app.domain.usecase.GetSecurityScoreUseCase
 import com.safeanot.app.domain.usecase.RunAuditUseCase
 import com.safeanot.app.domain.usecase.SendHelpRequestUseCase
 import com.safeanot.app.domain.usecase.TrackShareEventUseCase
+import com.safeanot.app.domain.usecase.UpdateStreakUseCase
 import com.safeanot.app.feature.check.ShareEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -53,6 +56,8 @@ class ShieldViewModel @Inject constructor(
     private val trackShareEventUseCase: TrackShareEventUseCase,
     private val sendHelpRequestUseCase: SendHelpRequestUseCase,
     private val guardianRepository: GuardianRepository,
+    private val updateStreakUseCase: UpdateStreakUseCase,
+    private val getCurrentStreakUseCase: GetCurrentStreakUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ShieldUiState())
@@ -68,6 +73,9 @@ class ShieldViewModel @Inject constructor(
         .map { it > 0 }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    val streak: StateFlow<Streak> = getCurrentStreakUseCase()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Streak())
+
     private val _shareEvents = Channel<ShareEvent>(Channel.BUFFERED)
     val shareEvents = _shareEvents.receiveAsFlow()
 
@@ -81,6 +89,7 @@ class ShieldViewModel @Inject constructor(
             try {
                 runAuditUseCase()
                 _uiState.value = _uiState.value.copy(isLoading = false, hasScanned = true)
+                updateStreakUseCase(securityScore.value.scorePercent)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -100,6 +109,7 @@ class ShieldViewModel @Inject constructor(
                     isRefreshing = false,
                     hasScanned = true,
                 )
+                updateStreakUseCase(securityScore.value.scorePercent)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isRefreshing = false,

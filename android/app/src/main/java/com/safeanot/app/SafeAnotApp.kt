@@ -26,6 +26,7 @@ import com.safeanot.app.util.Constants
 import com.safeanot.app.worker.AuditReminderScheduler
 import com.safeanot.app.worker.DatabaseSyncWorker
 import com.safeanot.app.worker.ShareEventSyncWorker
+import com.safeanot.app.worker.StreakCheckScheduler
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -55,6 +56,9 @@ class SafeAnotApp : Application(), Configuration.Provider {
     @Inject
     lateinit var userPreferencesDataStore: UserPreferencesDataStore
 
+    @Inject
+    lateinit var streakCheckScheduler: StreakCheckScheduler
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
@@ -66,6 +70,7 @@ class SafeAnotApp : Application(), Configuration.Provider {
         scheduleDatabaseSync()
         scheduleAuditReminders()
         scheduleShareEventSync()
+        scheduleStreakCheck()
         registerFcmToken()
         initializeFcmSubscription()
     }
@@ -197,5 +202,9 @@ class SafeAnotApp : Application(), Configuration.Provider {
             val intervalDays = config?.intervalDays ?: Constants.DEFAULT_REMINDER_INTERVAL_DAYS.toInt()
             reminderScheduler.updateSchedule(enabled, intervalDays)
         }
+    }
+
+    private fun scheduleStreakCheck() {
+        streakCheckScheduler.schedule()
     }
 }

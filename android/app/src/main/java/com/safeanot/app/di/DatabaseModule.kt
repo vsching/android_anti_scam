@@ -11,7 +11,10 @@ import com.safeanot.app.data.local.GuardianDao
 import com.safeanot.app.data.local.ReminderConfigDao
 import com.safeanot.app.data.local.SafeAnotDatabase
 import com.safeanot.app.data.local.ScamDomainDao
+import com.safeanot.app.data.local.BadgeDao
+import com.safeanot.app.data.local.QuizDao
 import com.safeanot.app.data.local.ShareEventDao
+import com.safeanot.app.data.local.StreakDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,7 +34,7 @@ object DatabaseModule {
             SafeAnotDatabase::class.java,
             "safeanot_database",
         )
-            .addMigrations(SafeAnotDatabase.MIGRATION_4_5, SafeAnotDatabase.MIGRATION_5_6, SafeAnotDatabase.MIGRATION_6_7, SafeAnotDatabase.MIGRATION_7_8)
+            .addMigrations(SafeAnotDatabase.MIGRATION_4_5, SafeAnotDatabase.MIGRATION_5_6, SafeAnotDatabase.MIGRATION_6_7, SafeAnotDatabase.MIGRATION_7_8, SafeAnotDatabase.MIGRATION_8_9)
             .fallbackToDestructiveMigrationFrom(1, 2, 3)
             .build()
     }
@@ -70,5 +73,23 @@ object DatabaseModule {
     @Singleton
     fun provideGuardianDao(database: SafeAnotDatabase): GuardianDao {
         return database.guardianDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideStreakDao(database: SafeAnotDatabase): StreakDao {
+        return database.streakDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideBadgeDao(database: SafeAnotDatabase): BadgeDao {
+        return database.badgeDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideQuizDao(database: SafeAnotDatabase): QuizDao {
+        return database.quizDao()
     }
 }
