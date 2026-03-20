@@ -22,11 +22,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,7 +68,21 @@ fun ShieldScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val auditItems by viewModel.auditItems.collectAsStateWithLifecycle()
     val score by viewModel.securityScore.collectAsStateWithLifecycle()
+    val hasGuardians by viewModel.hasGuardians.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    var showHelpConfirmDialog by remember { mutableStateOf(false) }
+
+    // Show snackbar for help request result
+    LaunchedEffect(uiState.helpRequestSent, uiState.helpRequestError) {
+        if (uiState.helpRequestSent) {
+            snackbarHostState.showSnackbar("Help request sent to your guardians")
+            viewModel.clearHelpRequestStatus()
+        } else if (uiState.helpRequestError != null) {
+            snackbarHostState.showSnackbar(uiState.helpRequestError ?: "Failed to send")
+            viewModel.clearHelpRequestStatus()
+        }
+    }
 
     // Collect share events from the ViewModel and handle intent creation in UI.
     // ShareEvent carries its own shareType and contentId metadata.
@@ -191,6 +209,33 @@ fun ShieldScreen(
                             fontWeight = FontWeight.Bold,
                         )
                     }
+
+                    // "Help Me Fix This" button — visible only when device has guardians
+                    if (hasGuardians) {
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Button(
+                            onClick = { showHelpConfirmDialog = true },
+                            colors = ButtonDefaults.buttonColors(containerColor = RedAccent),
+                            shape = RoundedCornerShape(12.dp),
+                            enabled = !uiState.isSendingHelpRequest,
+                        ) {
+                            if (uiState.isSendingHelpRequest) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .height(16.dp)
+                                        .width(16.dp),
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    strokeWidth = 2.dp,
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                            Text(
+                                text = "Help Me Fix This",
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                    }
                 }
             }
 
@@ -237,5 +282,37 @@ fun ShieldScreen(
             // Bottom spacing
             item { Spacer(modifier = Modifier.height(16.dp)) }
         }
+
+        // Snackbar host for help request feedback
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
+    }
+
+    // Confirmation dialog for "Help Me Fix This"
+    if (showHelpConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showHelpConfirmDialog = false },
+            title = { Text("Send Help Request?") },
+            text = {
+                Text("This will notify your guardians that you need help fixing security issues on your device.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showHelpConfirmDialog = false
+                        viewModel.sendHelpRequest()
+                    },
+                ) {
+                    Text("Send")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showHelpConfirmDialog = false }) {
+                    Text("Cancel")
+                }
+            },
+        )
     }
 }

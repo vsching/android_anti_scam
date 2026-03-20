@@ -27,6 +27,9 @@ const GENERATE_RATE_LIMIT = 10;
 /** Maximum guardian alerts per ward per day (anti-spam). */
 const MAX_ALERTS_PER_DAY = 3;
 
+/** Rate limit: max 1 help request per ward per hour. */
+const HELP_REQUEST_RATE_LIMIT_SECONDS = 3600;
+
 /** Score drop threshold that triggers an alert. */
 const SCORE_DROP_THRESHOLD = 20;
 
@@ -633,6 +636,115 @@ export async function handleRegisterFcmToken(
   )
     .bind(deviceId, fcmToken, now)
     .run();
+
+  return jsonResponse({ status: 'ok' }, 200);
+}
+
+/**
+ * POST /api/guardian/help-request
+ * Ward sends a "Help Me Fix This" request to all their guardians.
+ * Rate limited to 1 request per hour per ward device.
+ */
+export async function handleHelpRequest(
+  request: Request,
+  env: Env,
+  _params: Record<string, string>,
+): Promise<Response> {
+  const result = await readBody(request);
+  if (result instanceof Response) return result;
+  const [bodyText, body] = result;
+
+  // Verify HMAC
+  const hmacError = await verifyDeviceHmac(request, bodyText, env);
+  if (hmacError) return hmacError;
+
+  // Validate required fields
+  const deviceId = body.device_id;
+  if (typeof deviceId !== 'string' || !deviceId.trim()) {
+    return jsonResponse({ error: 'Missing or invalid device_id' }, 400);
+  }
+
+  const securityScore = body.security_score;
+  if (typeof securityScore !== 'number' || securityScore < 0 || securityScore > 100) {
+    return jsonResponse({ error: 'Missing or invalid security_score (0-100)' }, 400);
+  }
+
+  const unfixedItems = body.unfixed_items;
+  if (!Array.isArray(unfixedItems)) {
+    return jsonResponse({ error: 'Missing or invalid unfixed_items (must be array)' }, 400);
+  }
+
+  // Validate each unfixed item is a string
+  for (const item of unfixedItems) {
+    if (typeof item !== 'string') {
+      return jsonResponse({ error: 'unfixed_items must contain only strings' }, 400);
+    }
+  }
+
+  // Verify device has at least one guardian pairing (device must be a ward)
+  const pairingCount = await env.DB.prepare(
+    'SELECT COUNT(*) as cnt FROM guardian_pairings WHERE ward_device_id = ?',
+  )
+    .bind(deviceId)
+    .first<{ cnt: number }>();
+
+  if (!pairingCount || pairingCount.cnt === 0) {
+    return jsonResponse({ error: 'Device has no guardian pairings' }, 403);
+  }
+
+  // Rate limit: 1 help request per hour
+  const now = Math.floor(Date.now() / 1000);
+  const oneHourAgo = now - HELP_REQUEST_RATE_LIMIT_SECONDS;
+  const lastRequest = await env.DB.prepare(
+    'SELECT created_at FROM guardian_help_requests WHERE ward_device_id = ? AND created_at >= ? ORDER BY created_at DESC LIMIT 1',
+  )
+    .bind(deviceId, oneHourAgo)
+    .first<{ created_at: number }>();
+
+  if (lastRequest) {
+    return jsonResponse({ error: 'Rate limit exceeded. Try again later.' }, 429);
+  }
+
+  // Record the help request
+  await env.DB.prepare(
+    'INSERT INTO guardian_help_requests (ward_device_id, security_score, unfixed_items, created_at) VALUES (?, ?, ?, ?)',
+  )
+    .bind(deviceId, securityScore, JSON.stringify(unfixedItems), now)
+    .run();
+
+  // Get ward display name
+  const wardInfo = await env.DB.prepare(
+    'SELECT ward_display_name FROM guardian_pairings WHERE ward_device_id = ? LIMIT 1',
+  )
+    .bind(deviceId)
+    .first<{ ward_display_name: string }>();
+
+  const wardName = wardInfo?.ward_display_name || 'Your ward';
+  const title = `${wardName} — Help Requested`;
+  const notifBody = `${wardName} needs help fixing ${unfixedItems.length} security item${unfixedItems.length === 1 ? '' : 's'} (score: ${securityScore}%)`;
+
+  // Get all guardians' FCM tokens
+  const guardianTokens = await env.DB.prepare(
+    `SELECT t.fcm_token
+     FROM guardian_pairings p
+     JOIN guardian_fcm_tokens t ON t.device_id = p.guardian_device_id
+     WHERE p.ward_device_id = ?`,
+  )
+    .bind(deviceId)
+    .all<{ fcm_token: string }>();
+
+  const tokens = guardianTokens.results ?? [];
+  const data: Record<string, string> = {
+    type: 'help_request',
+    ward_device_id: deviceId,
+    security_score: String(securityScore),
+    unfixed_items: JSON.stringify(unfixedItems),
+  };
+
+  // Send notifications to all guardians
+  for (const row of tokens) {
+    await sendFcmNotification(env, row.fcm_token, title, notifBody, data);
+  }
 
   return jsonResponse({ status: 'ok' }, 200);
 }

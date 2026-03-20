@@ -28,6 +28,9 @@ class FakeGuardianRepository : GuardianRepository {
     var refreshWardsCalled = false
     var heartbeatSent = false
     var lastHeartbeatScore: Int? = null
+    var helpRequestSent = false
+    var lastHelpRequestScore: Int? = null
+    var lastHelpRequestUnfixedItems: List<String>? = null
     var wardHeartbeatHistory: WardHeartbeatHistory = WardHeartbeatHistory(
         deviceId = "ward-device",
         displayName = "Ward Device",
@@ -72,6 +75,13 @@ class FakeGuardianRepository : GuardianRepository {
         if (shouldThrow) throw RuntimeException("Test error")
         heartbeatSent = true
         lastHeartbeatScore = securityScore
+    }
+
+    override suspend fun sendHelpRequest(securityScore: Int, unfixedItems: List<String>) {
+        if (shouldThrow) throw RuntimeException("Test error")
+        helpRequestSent = true
+        lastHelpRequestScore = securityScore
+        lastHelpRequestUnfixedItems = unfixedItems
     }
 
     override fun getWards(deviceId: String): Flow<List<GuardianPairing>> {

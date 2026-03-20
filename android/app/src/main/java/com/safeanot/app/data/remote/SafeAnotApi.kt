@@ -9,6 +9,7 @@ import com.safeanot.app.data.remote.model.ClaimPairingCodeRequest
 import com.safeanot.app.data.remote.model.DeletePairingRequest
 import com.safeanot.app.data.remote.model.GeneratePairingCodeRequest
 import com.safeanot.app.data.remote.model.HeartbeatRequest
+import com.safeanot.app.data.remote.model.HelpRequestBody
 import com.safeanot.app.data.remote.model.RegisterFcmTokenRequest
 import com.safeanot.app.data.remote.model.GuardianPairingDto
 import com.safeanot.app.data.remote.model.WardHeartbeatDto
@@ -77,4 +78,7 @@ interface SafeAnotApi {
         @Query("device_id") wardDeviceId: String,
         @Query("days") days: Int = 7,
     ): List<WardHeartbeatDto>
+
+    @POST("api/guardian/help-request")
+    suspend fun sendHelpRequest(@Body request: HelpRequestBody): Response<Unit>
 }

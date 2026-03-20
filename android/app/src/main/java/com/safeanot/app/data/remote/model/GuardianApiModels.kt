@@ -67,6 +67,12 @@ data class RegisterFcmTokenRequest(
     @SerializedName("fcm_token") val fcmToken: String,
 )
 
+data class HelpRequestBody(
+    @SerializedName("device_id") val deviceId: String,
+    @SerializedName("security_score") val securityScore: Int,
+    @SerializedName("unfixed_items") val unfixedItems: List<String>,
+)
+
 data class WardHeartbeatDto(
     @SerializedName("device_id") val deviceId: String,
     @SerializedName("display_name") val displayName: String,

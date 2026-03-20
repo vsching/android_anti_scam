@@ -15,14 +15,17 @@ import com.safeanot.app.domain.model.ShareEventModel
 import com.safeanot.app.domain.model.SharePlatform
 import com.safeanot.app.domain.model.ShareType
 import com.safeanot.app.domain.repository.AuditRepository
+import com.safeanot.app.domain.repository.GuardianRepository
 import com.safeanot.app.domain.usecase.GenerateScoreCardUseCase
 import com.safeanot.app.domain.usecase.GetSecurityScoreUseCase
 import com.safeanot.app.domain.usecase.RunAuditUseCase
+import com.safeanot.app.domain.usecase.SendHelpRequestUseCase
 import com.safeanot.app.domain.usecase.TrackShareEventUseCase
 import com.safeanot.app.feature.check.ShareEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,6 +39,9 @@ data class ShieldUiState(
     val isRefreshing: Boolean = false,
     val hasScanned: Boolean = false,
     val error: String? = null,
+    val helpRequestSent: Boolean = false,
+    val helpRequestError: String? = null,
+    val isSendingHelpRequest: Boolean = false,
 )
 
 @HiltViewModel
@@ -45,6 +51,8 @@ class ShieldViewModel @Inject constructor(
     private val generateScoreCardUseCase: GenerateScoreCardUseCase,
     private val repository: AuditRepository,
     private val trackShareEventUseCase: TrackShareEventUseCase,
+    private val sendHelpRequestUseCase: SendHelpRequestUseCase,
+    private val guardianRepository: GuardianRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ShieldUiState())
@@ -55,6 +63,10 @@ class ShieldViewModel @Inject constructor(
 
     val securityScore: StateFlow<SecurityScore> = getSecurityScoreUseCase()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SecurityScore())
+
+    val hasGuardians: StateFlow<Boolean> = guardianRepository.getGuardianCount()
+        .map { it > 0 }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     private val _shareEvents = Channel<ShareEvent>(Channel.BUFFERED)
     val shareEvents = _shareEvents.receiveAsFlow()
@@ -143,5 +155,36 @@ class ShieldViewModel @Inject constructor(
                 )
             )
         }
+    }
+
+    /** Send a "Help Me Fix This" request to all guardians. */
+    fun sendHelpRequest() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isSendingHelpRequest = true,
+                helpRequestSent = false,
+                helpRequestError = null,
+            )
+            try {
+                sendHelpRequestUseCase()
+                _uiState.value = _uiState.value.copy(
+                    isSendingHelpRequest = false,
+                    helpRequestSent = true,
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isSendingHelpRequest = false,
+                    helpRequestError = e.message ?: "Failed to send help request",
+                )
+            }
+        }
+    }
+
+    /** Clear the help request sent/error status. */
+    fun clearHelpRequestStatus() {
+        _uiState.value = _uiState.value.copy(
+            helpRequestSent = false,
+            helpRequestError = null,
+        )
     }
 }

@@ -75,6 +75,13 @@ interface GuardianRepository {
     suspend fun refreshWards(deviceId: String)
 
     /**
+     * Send a "Help Me Fix This" request to all guardians.
+     * @param securityScore The current security score (0-100).
+     * @param unfixedItems List of unfixed item names.
+     */
+    suspend fun sendHelpRequest(securityScore: Int, unfixedItems: List<String>)
+
+    /**
      * Get heartbeat history for a specific ward.
      * @param wardDeviceId The device ID of the ward.
      * @param days Number of days of history to fetch.

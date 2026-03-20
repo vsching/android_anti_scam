@@ -11,6 +11,7 @@ import com.safeanot.app.data.remote.model.ClaimPairingCodeRequest
 import com.safeanot.app.data.remote.model.DeletePairingRequest
 import com.safeanot.app.data.remote.model.GeneratePairingCodeRequest
 import com.safeanot.app.data.remote.model.HeartbeatRequest
+import com.safeanot.app.data.remote.model.HelpRequestBody
 import com.safeanot.app.domain.model.GuardianPairing
 import com.safeanot.app.domain.model.GuardianRole
 import com.safeanot.app.domain.model.HeartbeatEntry
@@ -124,6 +125,16 @@ class GuardianRepositoryImpl @Inject constructor(
             GuardianPairingEntity.fromDomain(dto.toDomain())
         }
         guardianDao.insertAll(allEntities)
+    }
+
+    override suspend fun sendHelpRequest(securityScore: Int, unfixedItems: List<String>) {
+        val deviceId = deviceIdProvider.getOrCreateDeviceId()
+        val request = HelpRequestBody(
+            deviceId = deviceId,
+            securityScore = securityScore,
+            unfixedItems = unfixedItems,
+        )
+        api.sendHelpRequest(request)
     }
 
     override suspend fun getWardHeartbeatHistory(
