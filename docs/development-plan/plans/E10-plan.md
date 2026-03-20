@@ -8,7 +8,7 @@
 
 - [ ] Dependencies complete: E03 (Phone Shield) -- DONE, E07 (Share & Viral Loops) -- DONE
 - [ ] Technical specs reviewed: BRAINSTORM_FEATURES.md Section 11, E03 epic (security score), E07 epic (share infra)
-- [x] Plan reviewed by Codex (7 findings fixed -- see Codex Review Trace)
+- [x] Plan reviewed by Codex (10 findings fixed -- see Codex Review Trace)
 - [ ] Plan approved by user
 
 ---
@@ -33,7 +33,7 @@
    - Details: Add `StreakEntity::class`, `BadgeEntity::class`, and `QuizResultEntity::class` to the `@Database entities` array. Bump version from 8 to 9. Add `abstract fun streakDao(): StreakDao`, `abstract fun badgeDao(): BadgeDao`, `abstract fun quizDao(): QuizDao`. Create a single atomic `MIGRATION_8_9` that creates ALL 3 tables in one migration block:
      - `CREATE TABLE IF NOT EXISTS streaks (id INTEGER NOT NULL PRIMARY KEY, current_streak INTEGER NOT NULL DEFAULT 0, longest_streak INTEGER NOT NULL DEFAULT 0, last_check_date INTEGER NOT NULL DEFAULT 0, streak_start_date INTEGER NOT NULL DEFAULT 0)`
      - `CREATE TABLE IF NOT EXISTS badges (badge_id TEXT NOT NULL PRIMARY KEY, unlocked INTEGER NOT NULL DEFAULT 0, unlocked_at INTEGER)`
-     - `CREATE TABLE IF NOT EXISTS quiz_results (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, score_percent INTEGER NOT NULL, correct_count INTEGER NOT NULL, question_count INTEGER NOT NULL, completed_at INTEGER NOT NULL)`
+     - `CREATE TABLE IF NOT EXISTS quiz_results (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, session_id TEXT NOT NULL, score_percent INTEGER NOT NULL, correct_count INTEGER NOT NULL, question_count INTEGER NOT NULL, completed_at INTEGER NOT NULL)`
    - **Note**: This is the ONLY migration for E10. Issues E10-002 and E10-003 reference this same migration -- they do NOT create separate migrations. All 3 tables ship atomically to avoid incremental migration hazards.
 
 4. **Register migration in DatabaseModule**
@@ -69,12 +69,12 @@
 10. **Create UpdateStreakUseCase**
     - File: `android/app/src/main/java/com/safeanot/app/domain/usecase/UpdateStreakUseCase.kt`
     - Action: Create
-    - Details: `@Inject constructor(private val streakRepository: StreakRepository)`. `suspend operator fun invoke(currentScorePercent: Int)`. Logic: get current streak from repo. **Important**: `lastCheckDate` is stored as epoch millis but comparison must be done in day units to avoid date-unit mismatch. Convert both to days-since-epoch before comparing: `val lastDay = streak.lastCheckDate / (24 * 60 * 60 * 1000L)` and `val today = System.currentTimeMillis() / (24 * 60 * 60 * 1000L)`. If `lastDay == today`, return early (already checked today). If score >= 80 AND (`lastDay == today - 1` OR streak is 0): increment `currentStreak`, update `longestStreak` if exceeded, set `lastCheckDate` to `System.currentTimeMillis()`, set `streakStartDate` if starting fresh. If score >= 80 BUT `today - lastDay > 1`: reset streak to 1 (starting fresh today). If score < 80: reset `currentStreak` to 0, set `lastCheckDate` to `System.currentTimeMillis()`. Save via `streakRepository.updateStreak()`. **Known limitation (MVP)**: clock manipulation by the user (e.g., manually setting the device date forward/backward) is not guarded against; acceptable for MVP.
+    - Details: `@Inject constructor(private val streakRepository: StreakRepository, private val evaluateBadgesUseCase: EvaluateBadgesUseCase)`. `suspend operator fun invoke(currentScorePercent: Int): List<BadgeType>` -- returns list of newly unlocked badges (may be empty). Logic: get current streak from repo. **Important**: `lastCheckDate` is stored as epoch millis but comparison must be done in day units to avoid date-unit mismatch. Convert both to days-since-epoch before comparing: `val lastDay = streak.lastCheckDate / (24 * 60 * 60 * 1000L)` and `val today = System.currentTimeMillis() / (24 * 60 * 60 * 1000L)`. **Badge evaluation runs first, unconditionally**: `val newBadges = evaluateBadgesUseCase()` -- this ensures score-based and streak-based badges are evaluated even on same-day repeat calls. Then, if `lastDay == today`, return `newBadges` early (streak already updated today, but badges were still evaluated). If score >= 80 AND (`lastDay == today - 1` OR streak is 0): increment `currentStreak`, update `longestStreak` if exceeded, set `lastCheckDate` to `System.currentTimeMillis()`, set `streakStartDate` if starting fresh. If score >= 80 BUT `today - lastDay > 1`: reset streak to 1 (starting fresh today). If score < 80: reset `currentStreak` to 0, set `lastCheckDate` to `System.currentTimeMillis()`. Save via `streakRepository.updateStreak()`. Return `newBadges`. **Known limitation (MVP)**: clock manipulation by the user (e.g., manually setting the device date forward/backward) is not guarded against; acceptable for MVP.
 
 11. **Create StreakCheckWorker**
     - File: `android/app/src/main/java/com/safeanot/app/worker/StreakCheckWorker.kt`
     - Action: Create
-    - Details: `@HiltWorker` class, `@AssistedInject constructor` with `@Assisted appContext: Context`, `@Assisted workerParams: WorkerParameters`, `AuditRepository`, `UpdateStreakUseCase`. In `doWork()`: get current security score from `AuditRepository` (latest `SecurityScoreEntity`), call `updateStreakUseCase(scorePercent)`, return `Result.success()`. Wrapped in try/catch returning `Result.retry()` on failure. Follows the existing `AuditReminderWorker` pattern.
+    - Details: `@HiltWorker` class, `@AssistedInject constructor` with `@Assisted appContext: Context`, `@Assisted workerParams: WorkerParameters`, `AuditRepository`, `UpdateStreakUseCase`. In `doWork()`: get current security score from `AuditRepository` (latest `SecurityScoreEntity`), call `val newBadges = updateStreakUseCase(scorePercent)`. If `newBadges` is non-empty, show a system notification for each newly unlocked badge (using `NotificationCompat.Builder` with the app's existing notification channel) -- this is the notification path for badges unlocked via the background worker, where no ViewModel/UI Snackbar is available. Return `Result.success()`. Wrapped in try/catch returning `Result.retry()` on failure. Follows the existing `AuditReminderWorker` pattern.
 
 12. **Create StreakCheckScheduler**
     - File: `android/app/src/main/java/com/safeanot/app/worker/StreakCheckScheduler.kt`
@@ -89,11 +89,11 @@
 14. **Call UpdateStreakUseCase after manual audit completion**
     - File: `android/app/src/main/java/com/safeanot/app/feature/shield/ShieldViewModel.kt`
     - Action: Modify
-    - Details: Inject `UpdateStreakUseCase`. After successful `runAuditUseCase()` in both `runScan()` and `onRefresh()`, call `updateStreakUseCase(securityScore.value.scorePercent)` to update streak immediately when user manually scans.
+    - Details: Inject `UpdateStreakUseCase`. After successful `runAuditUseCase()` in both `runScan()` and `onRefresh()`, call `val newBadges = updateStreakUseCase(securityScore.value.scorePercent)` to update streak immediately when user manually scans. For each badge in `newBadges`, send to `_badgeUnlockEvent` channel (defined in E10-004 task 14) so the UI can show a Snackbar notification.
 
 ### Tests
 
-- `android/app/src/test/java/com/safeanot/app/domain/usecase/UpdateStreakUseCaseTest.kt` -- Tests streak increment on score >= 80%, reset on score < 80%, reset on missed day (gap > 1), longest streak tracking, same-day idempotency, fresh start when no previous streak exists. Tests that day comparison uses `millis / (24*60*60*1000L)` correctly.
+- `android/app/src/test/java/com/safeanot/app/domain/usecase/UpdateStreakUseCaseTest.kt` -- Tests streak increment on score >= 80%, reset on score < 80%, reset on missed day (gap > 1), longest streak tracking, same-day idempotency (streak not updated but badges still evaluated), fresh start when no previous streak exists. Tests that day comparison uses `millis / (24*60*60*1000L)` correctly. Tests that `evaluateBadgesUseCase()` is called even on same-day early return. Tests that newly unlocked badges are returned.
 - `android/app/src/test/java/com/safeanot/app/data/repository/StreakRepositoryImplTest.kt` -- Tests entity-to-domain mapping, observe flow emissions, upsert persistence.
 - `android/app/src/test/java/com/safeanot/app/worker/StreakCheckWorkerTest.kt` -- Tests worker behavior: calls `updateStreakUseCase` with current security score, returns `Result.success()` on success, returns `Result.retry()` on exception.
 - `android/app/src/androidTest/java/com/safeanot/app/data/local/MigrationTest.kt` -- Room migration test (androidTest). Uses `MigrationTestHelper` to verify `MIGRATION_8_9` correctly creates all 3 tables (`streaks`, `badges`, `quiz_results`) with expected schemas. Validates columns, types, and defaults.
@@ -118,7 +118,7 @@
 1. **Create Badge sealed class with all badge definitions**
    - File: `android/app/src/main/java/com/safeanot/app/domain/model/Badge.kt`
    - Action: Create
-   - Details: `enum class BadgeType` with entries: `PHONE_HARDENED`, `FIRST_SCAN`, `STREAK_STARTER`, `WEEK_WARRIOR`, `MONTH_MASTER`, `SCAM_SPOTTER`, `LINK_CHECKER`, `SHARE_GUARDIAN`, `FAMILY_PROTECTOR`. Companion object with `fun allBadges(): List<BadgeInfo>` returning a list of `BadgeInfo(type: BadgeType, title: String, description: String, conditionHint: String)`. Example: `BadgeInfo(PHONE_HARDENED, "Phone Hardened", "Achieved 100% security score", "Get 100% security score")`.
+   - Details: `enum class BadgeType` with entries: `PHONE_HARDENED`, `FIRST_SCAN`, `STREAK_STARTER`, `WEEK_WARRIOR`, `MONTH_MASTER`, `SCAM_SPOTTER`, `LINK_CHECKER`, `SHARE_GUARDIAN`, `FAMILY_PROTECTOR`. Companion object with `fun allBadges(): List<BadgeInfo>` returning a list of `BadgeInfo(type: BadgeType, title: String, description: String, conditionHint: String, icon: String)` where `icon` is a Material Symbol name for the badge (used by `BadgeCard` composable). Examples: `BadgeInfo(PHONE_HARDENED, "Phone Hardened", "Achieved 100% security score", "Get 100% security score", icon = "shield")`, `BadgeInfo(FIRST_SCAN, "First Scan", "Completed your first security scan", "Complete a security scan", icon = "search")`, `BadgeInfo(STREAK_STARTER, ..., icon = "local_fire_department")`, `BadgeInfo(WEEK_WARRIOR, ..., icon = "local_fire_department")`, `BadgeInfo(MONTH_MASTER, ..., icon = "local_fire_department")`, `BadgeInfo(SCAM_SPOTTER, ..., icon = "school")`, `BadgeInfo(LINK_CHECKER, ..., icon = "link")`, `BadgeInfo(SHARE_GUARDIAN, ..., icon = "share")`, `BadgeInfo(FAMILY_PROTECTOR, ..., icon = "people")`.
 
 2. **Create BadgeProgress domain model**
    - File: `android/app/src/main/java/com/safeanot/app/domain/model/BadgeProgress.kt`
@@ -182,10 +182,10 @@
       - `LINK_CHECKER`, `SHARE_GUARDIAN`, `FAMILY_PROTECTOR`, `SCAM_SPOTTER`: unlocked by their respective features calling `badgeRepository.unlockBadge()` directly (not evaluated here -- those features trigger unlock themselves)
     - For each condition met, calls `badgeRepository.unlockBadge()` and collects newly unlocked badges.
 
-12. **Trigger badge evaluation after streak update**
+12. **Badge evaluation is already integrated into UpdateStreakUseCase (see E10-001 task 10)**
     - File: `android/app/src/main/java/com/safeanot/app/domain/usecase/UpdateStreakUseCase.kt`
-    - Action: Modify
-    - Details: Inject `EvaluateBadgesUseCase`. After updating streak data, call `evaluateBadgesUseCase()` to check if any streak-based or score-based badges should be unlocked.
+    - Action: No-op (already done in E10-001 task 10)
+    - Details: `EvaluateBadgesUseCase` is injected directly in `UpdateStreakUseCase` (E10-001 task 10) and called **before** the same-day early return, ensuring badges are always evaluated. `UpdateStreakUseCase.invoke()` returns `List<BadgeType>` of newly unlocked badges, which callers (StreakCheckWorker, ShieldViewModel) can use to emit notification events.
 
 13. **Trigger "Link Checker" badge unlock in CheckViewModel**
     - File: `android/app/src/main/java/com/safeanot/app/feature/check/CheckViewModel.kt`
@@ -236,7 +236,7 @@
 3. **Create QuizResultEntity Room entity**
    - File: `android/app/src/main/java/com/safeanot/app/data/local/entity/QuizResultEntity.kt`
    - Action: Create
-   - Details: `@Entity(tableName = "quiz_results")` with: `@PrimaryKey(autoGenerate = true) val id: Long = 0`, `@ColumnInfo(name = "score_percent") val scorePercent: Int`, `@ColumnInfo(name = "correct_count") val correctCount: Int`, `@ColumnInfo(name = "question_count") val questionCount: Int`, `@ColumnInfo(name = "completed_at") val completedAt: Long`.
+   - Details: `@Entity(tableName = "quiz_results")` with: `@PrimaryKey(autoGenerate = true) val id: Long = 0`, `@ColumnInfo(name = "session_id") val sessionId: String` (UUID string, generated via `UUID.randomUUID().toString()` at quiz start -- uniquely identifies each quiz session for analytics and deduplication), `@ColumnInfo(name = "score_percent") val scorePercent: Int`, `@ColumnInfo(name = "correct_count") val correctCount: Int`, `@ColumnInfo(name = "question_count") val questionCount: Int`, `@ColumnInfo(name = "completed_at") val completedAt: Long`.
 
 4. **Create QuizDao**
    - File: `android/app/src/main/java/com/safeanot/app/data/local/QuizDao.kt`
@@ -256,17 +256,17 @@
 7. **Create QuizRepository interface**
    - File: `android/app/src/main/java/com/safeanot/app/domain/repository/QuizRepository.kt`
    - Action: Create
-   - Details: Interface with methods: `suspend fun saveResult(scorePercent: Int, correctCount: Int, questionCount: Int)`, `fun observeResults(): Flow<List<QuizResult>>`, `suspend fun getBestScore(): Int?`.
+   - Details: Interface with methods: `suspend fun saveResult(sessionId: String, scorePercent: Int, correctCount: Int, questionCount: Int)`, `fun observeResults(): Flow<List<QuizResult>>`, `suspend fun getBestScore(): Int?`.
 
 8. **Create QuizResult domain model**
    - File: `android/app/src/main/java/com/safeanot/app/domain/model/QuizResult.kt`
    - Action: Create
-   - Details: `data class QuizResult(val id: Long, val scorePercent: Int, val correctCount: Int, val questionCount: Int, val completedAt: Long)`.
+   - Details: `data class QuizResult(val id: Long, val sessionId: String, val scorePercent: Int, val correctCount: Int, val questionCount: Int, val completedAt: Long)`.
 
 9. **Create QuizRepositoryImpl**
    - File: `android/app/src/main/java/com/safeanot/app/data/repository/QuizRepositoryImpl.kt`
    - Action: Create
-   - Details: `@Inject constructor(private val quizDao: QuizDao)`. Maps between entity and domain model. `saveResult()` creates entity with `completedAt = System.currentTimeMillis()` and calls `insert()`.
+   - Details: `@Inject constructor(private val quizDao: QuizDao)`. Maps between entity and domain model. `saveResult()` creates entity with provided `sessionId` and `completedAt = System.currentTimeMillis()` and calls `insert()`.
 
 10. **Register QuizRepository in RepositoryModule**
     - File: `android/app/src/main/java/com/safeanot/app/di/RepositoryModule.kt`
@@ -276,7 +276,7 @@
 11. **Create QuizViewModel**
     - File: `android/app/src/main/java/com/safeanot/app/feature/quiz/QuizViewModel.kt`
     - Action: Create
-    - Details: `@HiltViewModel @Inject constructor(private val quizRepository: QuizRepository, private val unlockBadgeUseCase: UnlockBadgeUseCase, private val trackShareEventUseCase: TrackShareEventUseCase)`. State: `QuizUiState(questions: List<QuizQuestion> = emptyList(), currentIndex: Int = 0, selectedAnswers: Map<Int, Int> = emptyMap(), isComplete: Boolean = false, scorePercent: Int = 0, correctCount: Int = 0)`. Methods: `startQuiz()` -- loads 5 random questions from `QuizQuestionBank.getRandomQuiz()`. `selectAnswer(questionIndex: Int, optionIndex: Int)` -- records answer. `nextQuestion()` -- increments index or completes quiz if last. `completeQuiz()` -- calculates score, saves result via repository, if 100% calls `unlockBadgeUseCase(BadgeType.SCAM_SPOTTER)`. No Context dependency -- share event emitted as domain data (following ShieldViewModel pattern with Channel<ShareEvent>).
+    - Details: `@HiltViewModel @Inject constructor(private val quizRepository: QuizRepository, private val unlockBadgeUseCase: UnlockBadgeUseCase, private val trackShareEventUseCase: TrackShareEventUseCase)`. State: `QuizUiState(questions: List<QuizQuestion> = emptyList(), currentIndex: Int = 0, selectedAnswers: Map<Int, Int> = emptyMap(), isComplete: Boolean = false, scorePercent: Int = 0, correctCount: Int = 0, sessionId: String = "")`. Methods: `startQuiz()` -- generates `sessionId = UUID.randomUUID().toString()`, loads 5 random questions from `QuizQuestionBank.getRandomQuiz()`. `selectAnswer(questionIndex: Int, optionIndex: Int)` -- records answer. `nextQuestion()` -- increments index or completes quiz if last. `completeQuiz()` -- calculates score, saves result via `quizRepository.saveResult(sessionId, scorePercent, correctCount, questionCount)`, if 100% calls `unlockBadgeUseCase(BadgeType.SCAM_SPOTTER)`. No Context dependency -- share event emitted as domain data (following ShieldViewModel pattern with Channel<ShareEvent>).
 
 ### Tests
 
@@ -314,7 +314,7 @@
 3. **Create BadgeCard composable**
    - File: `android/app/src/main/java/com/safeanot/app/feature/achievements/components/BadgeCard.kt`
    - Action: Create
-   - Details: `@Composable fun BadgeCard(badgeProgress: BadgeProgress)`. Material 3 card showing badge icon (use `Icons.Default` mappings: Shield for PHONE_HARDENED, Search for FIRST_SCAN, LocalFireDepartment for streak badges, School for SCAM_SPOTTER, Link for LINK_CHECKER, Share for SHARE_GUARDIAN, People for FAMILY_PROTECTOR). Unlocked: colored icon + title + unlock date in relative time. Locked: grayed-out icon + title + condition hint text. Uses `DarkCard` background color from existing theme.
+   - Details: `@Composable fun BadgeCard(badgeProgress: BadgeProgress)`. Material 3 card showing badge icon resolved from `badgeProgress.badge.icon` (Material Symbol name) via a helper `fun badgeIcon(name: String): ImageVector` that maps icon names to `Icons.Default` vectors (e.g., `"shield"` -> `Icons.Default.Shield`, `"search"` -> `Icons.Default.Search`, `"local_fire_department"` -> `Icons.Default.LocalFireDepartment`, `"school"` -> `Icons.Default.School`, `"link"` -> `Icons.Default.Link`, `"share"` -> `Icons.Default.Share`, `"people"` -> `Icons.Default.People`). Unlocked: colored icon + title + unlock date in relative time. Locked: grayed-out icon + title + condition hint text. Uses `DarkCard` background color from existing theme.
 
 4. **Create StreakBanner composable**
    - File: `android/app/src/main/java/com/safeanot/app/feature/achievements/components/StreakBanner.kt`
@@ -480,3 +480,6 @@ Recommended sequence (respects internal dependencies):
 | 5 | MEDIUM | Missing tests -- no worker behavior test, no migration test, no quiz share-content test, no navigation tests | Added StreakCheckWorkerTest, MigrationTest (androidTest), quiz share event assertion in QuizViewModelTest, GamificationNavigationTest (androidTest). | E10-001, E10-003, E10-004 |
 | 6 | MEDIUM | Badge unlock notification missing -- user has no feedback when a badge is unlocked | Added E10-004 task 14: `_badgeUnlockEvent` Channel in VMs that call `unlockBadgeUseCase`, UI collects flow and shows Snackbar. | E10-004 |
 | 7 | LOW | Clock manipulation risk -- user can change device date to game streaks | Accepted for MVP. Added known-limitation comment to UpdateStreakUseCase task description. | E10-001 |
+| 8 | HIGH | UpdateStreakUseCase returns early on same-day, skipping badge evaluation -- badges only evaluated when streak changes, not on repeat app opens | Moved badge evaluation (`evaluateBadgesUseCase()`) BEFORE the same-day early return in UpdateStreakUseCase. Changed return type to `List<BadgeType>` so callers can emit unlock events. E10-002 task 12 changed to no-op (injection now in E10-001 task 10). | E10-001, E10-002 |
+| 9 | MEDIUM | Badge unlock notification incomplete for background worker -- badges unlocked via StreakCheckWorker have no notification path since no ViewModel/Snackbar is available | Updated StreakCheckWorker (E10-001 task 11) to read `newBadges` return value from `updateStreakUseCase()` and show system notifications via `NotificationCompat.Builder` for each newly unlocked badge. | E10-001 |
+| 10 | LOW | Missing badge icon and quiz session_id in data models -- Badge has no icon field for UI rendering; QuizResultEntity has no session identifier for analytics/deduplication | Added `icon: String` (Material Symbol name) to `BadgeInfo` data class (E10-002 task 1). Added `sessionId: String` (UUID) to `QuizResultEntity` (E10-003 task 3), `QuizResult` domain model (E10-003 task 8), `QuizRepository` interface (E10-003 task 7), `QuizRepositoryImpl` (E10-003 task 9), `QuizViewModel` (E10-003 task 11). Updated `MIGRATION_8_9` SQL to include `session_id` column. Updated `BadgeCard` to resolve icon from `BadgeInfo.icon` field. | E10-002, E10-003, E10-004 |
