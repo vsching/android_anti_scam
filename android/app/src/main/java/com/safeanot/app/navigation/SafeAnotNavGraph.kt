@@ -79,13 +79,9 @@ fun SafeAnotNavGraph(pendingUrl: String? = null, pendingNavigationRoute: String?
         }
     }
 
-    // Track whether we have consumed the pending navigation route
-    var navRouteConsumed by rememberSaveable { mutableStateOf(false) }
-
     // Navigate to the requested route from a notification deep-link
     LaunchedEffect(pendingNavigationRoute) {
-        if (pendingNavigationRoute != null && !navRouteConsumed) {
-            navRouteConsumed = true
+        if (pendingNavigationRoute != null) {
             navController.navigate(pendingNavigationRoute) {
                 popUpTo(navController.graph.findStartDestination().id) {
                     saveState = true

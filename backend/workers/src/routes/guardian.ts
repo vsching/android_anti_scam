@@ -554,6 +554,7 @@ export async function handlePostHeartbeat(
         const data: Record<string, string> = {
           type: 'guardian_alert',
           ward_device_id: deviceId,
+          ward_name: wardName,
           alert_reason: alertReason,
           security_score: String(securityScore),
         };
@@ -773,6 +774,8 @@ export async function handleHelpRequest(
   const data: Record<string, string> = {
     type: 'help_request',
     ward_device_id: deviceId,
+    ward_name: wardName,
+    message: notifBody,
     security_score: String(securityScore),
     unfixed_items: JSON.stringify(unfixedItems),
   };

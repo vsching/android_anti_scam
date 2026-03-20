@@ -45,6 +45,12 @@ interface GuardianRepository {
     fun getGuardianCount(): Flow<Int>
 
     /**
+     * Check if this device has ward role (is being monitored by guardians).
+     * Returns a Flow of the count of pairings where this device is a ward.
+     */
+    fun getWardRoleCount(): Flow<Int>
+
+    /**
      * Get the device ID for the current device.
      */
     suspend fun getDeviceId(): String

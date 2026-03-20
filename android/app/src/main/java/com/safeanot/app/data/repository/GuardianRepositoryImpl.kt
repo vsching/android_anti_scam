@@ -71,17 +71,23 @@ class GuardianRepositoryImpl @Inject constructor(
 
     override suspend fun refreshPairings() {
         val deviceId = deviceIdProvider.getOrCreateDeviceId()
+        // Fetch both lists before modifying local cache to avoid data loss on API failure
         val wards = api.getWards(deviceId)
         val guardians = api.getGuardians(deviceId)
         val allPairings = (wards + guardians).map { dto ->
             GuardianPairingEntity.fromDomain(dto.toDomain(deviceId))
         }
+        // Only wipe and replace after successful fetch
         guardianDao.deleteAll()
         guardianDao.insertAll(allPairings)
     }
 
     override fun getGuardianCount(): Flow<Int> {
         return guardianDao.getGuardianCount()
+    }
+
+    override fun getWardRoleCount(): Flow<Int> {
+        return guardianDao.getWardRoleCount()
     }
 
     override suspend fun getDeviceId(): String {
@@ -117,16 +123,17 @@ class GuardianRepositoryImpl @Inject constructor(
     }
 
     override suspend fun refreshWards(deviceId: String) {
+        // Fetch both lists before modifying local cache to avoid data loss on API failure
         val wards = api.getWards(deviceId)
+        val guardians = api.getGuardians(deviceId)
         val wardEntities = wards.map { dto ->
             GuardianPairingEntity.fromDomain(dto.toDomain(deviceId))
         }
-        // Update only ward pairings, preserving guardian pairings
-        guardianDao.deleteAll()
-        val guardians = api.getGuardians(deviceId)
         val allEntities = wardEntities + guardians.map { dto ->
             GuardianPairingEntity.fromDomain(dto.toDomain(deviceId))
         }
+        // Only wipe and replace after successful fetch
+        guardianDao.deleteAll()
         guardianDao.insertAll(allEntities)
     }
 

@@ -27,9 +27,9 @@ class GuardianHeartbeatWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         return try {
-            // Check if the device has any guardian pairings
-            val pairingCount = guardianRepository.getGuardianCount().first()
-            if (pairingCount == 0) {
+            // Only send heartbeats if this device is a ward (has guardians monitoring it)
+            val wardRoleCount = guardianRepository.getWardRoleCount().first()
+            if (wardRoleCount == 0) {
                 return Result.success()
             }
 
