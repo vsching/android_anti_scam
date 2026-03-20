@@ -39,8 +39,10 @@ class StreakCheckWorker @AssistedInject constructor(
     override suspend fun doWork(): Result {
         return try {
             val score = auditRepository.getSecurityScore().firstOrNull()
-            val scorePercent = score?.scorePercent ?: 0
-            val newBadges = updateStreakUseCase(scorePercent)
+            // Skip streak update if no audit baseline exists yet (new user).
+            // A synthetic 0 score would write lastCheckDate and block real same-day streak starts.
+            if (score == null) return Result.success()
+            val newBadges = updateStreakUseCase(score.scorePercent)
 
             if (newBadges.isNotEmpty() && hasNotificationPermission()) {
                 createNotificationChannel()
