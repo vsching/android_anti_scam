@@ -124,7 +124,10 @@ button:focus-visible {
   transform: translateY(0);
   pointer-events: auto;
 }
-.screen::-webkit-scrollbar { width: 0; }
+.screen::-webkit-scrollbar { width: 4px; }
+.screen::-webkit-scrollbar-track { background: transparent; }
+.screen::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+.screen::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
 
 /* Bottom Navigation */
 .bottom-nav {
