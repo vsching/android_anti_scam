@@ -79,7 +79,14 @@ class AlertsViewModel @Inject constructor(
         // Observe the featured "Scam of the Week" alert
         viewModelScope.launch {
             getFeaturedAlertUseCase().collect { featured ->
-                _uiState.update { it.copy(featuredAlert = featured) }
+                _uiState.update {
+                    // Reset dismiss flag when a different featured alert arrives
+                    val isNewAlert = featured?.id != it.featuredAlert?.id
+                    it.copy(
+                        featuredAlert = featured,
+                        isFeaturedDismissed = if (isNewAlert) false else it.isFeaturedDismissed,
+                    )
+                }
             }
         }
 

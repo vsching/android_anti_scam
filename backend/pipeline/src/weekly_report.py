@@ -47,7 +47,7 @@ def fetch_recent_alerts(d1_client: D1Client, days: int = 7) -> list[dict[str, An
         return rows
     except Exception as exc:
         logger.error("Failed to fetch recent alerts: %s", exc)
-        return []
+        raise RuntimeError(f"D1 query failed: {exc}") from exc
 
 
 def select_top_alert(alerts: list[dict[str, Any]]) -> dict[str, Any] | None:

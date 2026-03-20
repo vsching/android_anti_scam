@@ -100,9 +100,9 @@ class FcmTokenManager @Inject constructor(
      * - When [enabled] is false: unsubscribe from all topics.
      * - When [region] is null: unsubscribe from all topics (no region selected yet).
      */
-    fun updateSubscription(enabled: Boolean, region: String?) {
+    suspend fun updateSubscription(enabled: Boolean, region: String?) {
         if (!enabled || region == null) {
-            unsubscribeFromAllTopics()
+            unsubscribeFromAllTopicsAwait()
             return
         }
 
@@ -112,8 +112,22 @@ class FcmTokenManager @Inject constructor(
             return
         }
 
-        // Unsubscribe from old topics before subscribing to new one
-        unsubscribeFromAllTopics()
+        // Await unsubscribe completion before subscribing to prevent race
+        // where late unsubscribe removes the newly subscribed topic
+        unsubscribeFromAllTopicsAwait()
         subscribeToRegionTopic(region)
+    }
+
+    /** Await-based unsubscribe to prevent race conditions with subscribe. */
+    private suspend fun unsubscribeFromAllTopicsAwait() {
+        ALL_SCAM_ALERT_TOPICS.forEach { topic ->
+            try {
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(topic).await()
+                Log.d(TAG, "Unsubscribed from topic: $topic")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to unsubscribe from topic: $topic", e)
+            }
+        }
+        currentTopic = null
     }
 }
