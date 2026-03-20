@@ -8,7 +8,7 @@
 
 - [ ] Dependencies complete: E03 (Phone Shield) -- DONE, E07 (Share & Viral Loops) -- DONE
 - [ ] Technical specs reviewed: BRAINSTORM_FEATURES.md Section 11, E03 epic (security score), E07 epic (share infra)
-- [ ] Plan reviewed by Codex
+- [x] Plan reviewed by Codex (7 findings fixed -- see Codex Review Trace)
 - [ ] Plan approved by user
 
 ---
@@ -27,10 +27,14 @@
    - Action: Create
    - Details: `@Dao` interface. Methods: `@Query("SELECT * FROM streaks WHERE id = 1") fun observeStreak(): Flow<StreakEntity?>`, `@Query("SELECT * FROM streaks WHERE id = 1") suspend fun getStreakOnce(): StreakEntity?`, `@Upsert suspend fun upsert(entity: StreakEntity)`. Uses `@Upsert` (Room 2.5+) for insert-or-update semantics on the singleton row.
 
-3. **Add StreakEntity to SafeAnotDatabase and create migration**
+3. **Add StreakEntity, BadgeEntity, QuizResultEntity to SafeAnotDatabase and create ONE atomic migration**
    - File: `android/app/src/main/java/com/safeanot/app/data/local/SafeAnotDatabase.kt`
    - Action: Modify
-   - Details: Add `StreakEntity::class` to the `@Database entities` array. Bump version from 8 to 9. Add `abstract fun streakDao(): StreakDao`. Create `MIGRATION_8_9` that creates the `streaks` table: `CREATE TABLE IF NOT EXISTS streaks (id INTEGER NOT NULL PRIMARY KEY, current_streak INTEGER NOT NULL DEFAULT 0, longest_streak INTEGER NOT NULL DEFAULT 0, last_check_date INTEGER NOT NULL DEFAULT 0, streak_start_date INTEGER NOT NULL DEFAULT 0)`.
+   - Details: Add `StreakEntity::class`, `BadgeEntity::class`, and `QuizResultEntity::class` to the `@Database entities` array. Bump version from 8 to 9. Add `abstract fun streakDao(): StreakDao`, `abstract fun badgeDao(): BadgeDao`, `abstract fun quizDao(): QuizDao`. Create a single atomic `MIGRATION_8_9` that creates ALL 3 tables in one migration block:
+     - `CREATE TABLE IF NOT EXISTS streaks (id INTEGER NOT NULL PRIMARY KEY, current_streak INTEGER NOT NULL DEFAULT 0, longest_streak INTEGER NOT NULL DEFAULT 0, last_check_date INTEGER NOT NULL DEFAULT 0, streak_start_date INTEGER NOT NULL DEFAULT 0)`
+     - `CREATE TABLE IF NOT EXISTS badges (badge_id TEXT NOT NULL PRIMARY KEY, unlocked INTEGER NOT NULL DEFAULT 0, unlocked_at INTEGER)`
+     - `CREATE TABLE IF NOT EXISTS quiz_results (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, score_percent INTEGER NOT NULL, correct_count INTEGER NOT NULL, question_count INTEGER NOT NULL, completed_at INTEGER NOT NULL)`
+   - **Note**: This is the ONLY migration for E10. Issues E10-002 and E10-003 reference this same migration -- they do NOT create separate migrations. All 3 tables ship atomically to avoid incremental migration hazards.
 
 4. **Register migration in DatabaseModule**
    - File: `android/app/src/main/java/com/safeanot/app/di/DatabaseModule.kt`
@@ -65,7 +69,7 @@
 10. **Create UpdateStreakUseCase**
     - File: `android/app/src/main/java/com/safeanot/app/domain/usecase/UpdateStreakUseCase.kt`
     - Action: Create
-    - Details: `@Inject constructor(private val streakRepository: StreakRepository)`. `suspend operator fun invoke(currentScorePercent: Int)`. Logic: get current streak from repo. Calculate today's date as days-since-epoch (`System.currentTimeMillis() / 86_400_000L`). If `lastCheckDate` is the same day, return early (already checked today). If score >= 80 AND lastCheckDate was yesterday (or streak is 0): increment `currentStreak`, update `longestStreak` if exceeded, set `lastCheckDate` to now, set `streakStartDate` if starting fresh. If score >= 80 BUT gap > 1 day: reset streak to 1 (starting fresh today). If score < 80: reset `currentStreak` to 0, set `lastCheckDate` to now. Save via `streakRepository.updateStreak()`.
+    - Details: `@Inject constructor(private val streakRepository: StreakRepository)`. `suspend operator fun invoke(currentScorePercent: Int)`. Logic: get current streak from repo. **Important**: `lastCheckDate` is stored as epoch millis but comparison must be done in day units to avoid date-unit mismatch. Convert both to days-since-epoch before comparing: `val lastDay = streak.lastCheckDate / (24 * 60 * 60 * 1000L)` and `val today = System.currentTimeMillis() / (24 * 60 * 60 * 1000L)`. If `lastDay == today`, return early (already checked today). If score >= 80 AND (`lastDay == today - 1` OR streak is 0): increment `currentStreak`, update `longestStreak` if exceeded, set `lastCheckDate` to `System.currentTimeMillis()`, set `streakStartDate` if starting fresh. If score >= 80 BUT `today - lastDay > 1`: reset streak to 1 (starting fresh today). If score < 80: reset `currentStreak` to 0, set `lastCheckDate` to `System.currentTimeMillis()`. Save via `streakRepository.updateStreak()`. **Known limitation (MVP)**: clock manipulation by the user (e.g., manually setting the device date forward/backward) is not guarded against; acceptable for MVP.
 
 11. **Create StreakCheckWorker**
     - File: `android/app/src/main/java/com/safeanot/app/worker/StreakCheckWorker.kt`
@@ -89,8 +93,10 @@
 
 ### Tests
 
-- `android/app/src/test/java/com/safeanot/app/domain/usecase/UpdateStreakUseCaseTest.kt` -- Tests streak increment on score >= 80%, reset on score < 80%, reset on missed day (gap > 1), longest streak tracking, same-day idempotency, fresh start when no previous streak exists.
+- `android/app/src/test/java/com/safeanot/app/domain/usecase/UpdateStreakUseCaseTest.kt` -- Tests streak increment on score >= 80%, reset on score < 80%, reset on missed day (gap > 1), longest streak tracking, same-day idempotency, fresh start when no previous streak exists. Tests that day comparison uses `millis / (24*60*60*1000L)` correctly.
 - `android/app/src/test/java/com/safeanot/app/data/repository/StreakRepositoryImplTest.kt` -- Tests entity-to-domain mapping, observe flow emissions, upsert persistence.
+- `android/app/src/test/java/com/safeanot/app/worker/StreakCheckWorkerTest.kt` -- Tests worker behavior: calls `updateStreakUseCase` with current security score, returns `Result.success()` on success, returns `Result.retry()` on exception.
+- `android/app/src/androidTest/java/com/safeanot/app/data/local/MigrationTest.kt` -- Room migration test (androidTest). Uses `MigrationTestHelper` to verify `MIGRATION_8_9` correctly creates all 3 tables (`streaks`, `badges`, `quiz_results`) with expected schemas. Validates columns, types, and defaults.
 
 ### Acceptance Criteria
 
@@ -129,10 +135,10 @@
    - Action: Create
    - Details: `@Dao` interface. Methods: `@Query("SELECT * FROM badges") fun observeAll(): Flow<List<BadgeEntity>>`, `@Query("SELECT * FROM badges WHERE badge_id = :badgeId") suspend fun getById(badgeId: String): BadgeEntity?`, `@Upsert suspend fun upsert(entity: BadgeEntity)`, `@Query("SELECT COUNT(*) FROM badges WHERE unlocked = 1") fun observeUnlockedCount(): Flow<Int>`.
 
-5. **Add BadgeEntity to SafeAnotDatabase (same migration as E10-001)**
+5. **Add BadgeEntity to SafeAnotDatabase (already handled in E10-001 task 3)**
    - File: `android/app/src/main/java/com/safeanot/app/data/local/SafeAnotDatabase.kt`
-   - Action: Modify
-   - Details: Add `BadgeEntity::class` to `@Database entities` array (in the same version 9 bump from E10-001). Add `abstract fun badgeDao(): BadgeDao`. Extend `MIGRATION_8_9` to also create `badges` table: `CREATE TABLE IF NOT EXISTS badges (badge_id TEXT NOT NULL PRIMARY KEY, unlocked INTEGER NOT NULL DEFAULT 0, unlocked_at INTEGER)`. Note: This is part of the same migration as E10-001 task 3 -- both tables are created in MIGRATION_8_9.
+   - Action: No-op (already done in E10-001 task 3)
+   - Details: `BadgeEntity::class`, `abstract fun badgeDao(): BadgeDao`, and the `badges` CREATE TABLE statement are all part of the single atomic `MIGRATION_8_9` defined in E10-001 task 3. No additional migration work needed here.
 
 6. **Register BadgeDao in DatabaseModule**
    - File: `android/app/src/main/java/com/safeanot/app/di/DatabaseModule.kt`
@@ -159,6 +165,11 @@
     - Action: Create
     - Details: `@Inject constructor(private val badgeRepository: BadgeRepository)`. `operator fun invoke(): Flow<List<BadgeProgress>> = badgeRepository.observeAllBadges()`.
 
+10b. **Create UnlockBadgeUseCase**
+    - File: `android/app/src/main/java/com/safeanot/app/domain/usecase/UnlockBadgeUseCase.kt`
+    - Action: Create
+    - Details: `@Inject constructor(private val badgeRepository: BadgeRepository)`. `suspend operator fun invoke(type: BadgeType): Boolean = badgeRepository.unlockBadge(type)`. This is a thin wrapper ensuring ViewModels never inject `BadgeRepository` directly, following the project's clean architecture convention (VMs depend on use cases only).
+
 11. **Create EvaluateBadgesUseCase**
     - File: `android/app/src/main/java/com/safeanot/app/domain/usecase/EvaluateBadgesUseCase.kt`
     - Action: Create
@@ -179,12 +190,17 @@
 13. **Trigger "Link Checker" badge unlock in CheckViewModel**
     - File: `android/app/src/main/java/com/safeanot/app/feature/check/CheckViewModel.kt`
     - Action: Modify
-    - Details: Inject `BadgeRepository`. After a successful link check (verdict received), call `badgeRepository.unlockBadge(BadgeType.LINK_CHECKER)` in a viewModelScope launch.
+    - Details: Inject `UnlockBadgeUseCase`. After a successful link check (verdict received), call `unlockBadgeUseCase(BadgeType.LINK_CHECKER)` in a viewModelScope launch.
 
 14. **Trigger "Share Guardian" badge unlock in ShieldViewModel**
     - File: `android/app/src/main/java/com/safeanot/app/feature/shield/ShieldViewModel.kt`
     - Action: Modify
-    - Details: Inject `BadgeRepository`. In `onShareCompleted()`, call `badgeRepository.unlockBadge(BadgeType.SHARE_GUARDIAN)`.
+    - Details: Inject `UnlockBadgeUseCase`. In `onShareCompleted()`, call `unlockBadgeUseCase(BadgeType.SHARE_GUARDIAN)`.
+
+15. **Trigger "Family Protector" badge unlock on guardian pairing**
+    - File: `android/app/src/main/java/com/safeanot/app/feature/guardian/GuardianPairingViewModel.kt` (or `GuardianRepositoryImpl.kt`)
+    - Action: Modify
+    - Details: Inject `UnlockBadgeUseCase`. After a guardian pairing is successfully created, call `unlockBadgeUseCase(BadgeType.FAMILY_PROTECTOR)` in a `viewModelScope.launch`. This ensures the badge is actually unlocked when its condition is met, rather than relying on the user to navigate to a separate evaluation flow.
 
 ### Tests
 
@@ -227,10 +243,10 @@
    - Action: Create
    - Details: `@Dao` interface. Methods: `@Insert suspend fun insert(result: QuizResultEntity)`, `@Query("SELECT * FROM quiz_results ORDER BY completed_at DESC") fun observeResults(): Flow<List<QuizResultEntity>>`, `@Query("SELECT MAX(score_percent) FROM quiz_results") suspend fun getBestScore(): Int?`.
 
-5. **Add QuizResultEntity to SafeAnotDatabase (same migration)**
+5. **Add QuizResultEntity to SafeAnotDatabase (already handled in E10-001 task 3)**
    - File: `android/app/src/main/java/com/safeanot/app/data/local/SafeAnotDatabase.kt`
-   - Action: Modify
-   - Details: Add `QuizResultEntity::class` to `@Database entities` array (same version 9 migration). Add `abstract fun quizDao(): QuizDao`. Extend `MIGRATION_8_9` to also create `quiz_results` table: `CREATE TABLE IF NOT EXISTS quiz_results (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, score_percent INTEGER NOT NULL, correct_count INTEGER NOT NULL, question_count INTEGER NOT NULL, completed_at INTEGER NOT NULL)`.
+   - Action: No-op (already done in E10-001 task 3)
+   - Details: `QuizResultEntity::class`, `abstract fun quizDao(): QuizDao`, and the `quiz_results` CREATE TABLE statement are all part of the single atomic `MIGRATION_8_9` defined in E10-001 task 3. No additional migration work needed here.
 
 6. **Register QuizDao in DatabaseModule**
    - File: `android/app/src/main/java/com/safeanot/app/di/DatabaseModule.kt`
@@ -260,11 +276,11 @@
 11. **Create QuizViewModel**
     - File: `android/app/src/main/java/com/safeanot/app/feature/quiz/QuizViewModel.kt`
     - Action: Create
-    - Details: `@HiltViewModel @Inject constructor(private val quizRepository: QuizRepository, private val badgeRepository: BadgeRepository, private val trackShareEventUseCase: TrackShareEventUseCase)`. State: `QuizUiState(questions: List<QuizQuestion> = emptyList(), currentIndex: Int = 0, selectedAnswers: Map<Int, Int> = emptyMap(), isComplete: Boolean = false, scorePercent: Int = 0, correctCount: Int = 0)`. Methods: `startQuiz()` -- loads 5 random questions from `QuizQuestionBank.getRandomQuiz()`. `selectAnswer(questionIndex: Int, optionIndex: Int)` -- records answer. `nextQuestion()` -- increments index or completes quiz if last. `completeQuiz()` -- calculates score, saves result via repository, if 100% calls `badgeRepository.unlockBadge(BadgeType.SCAM_SPOTTER)`. No Context dependency -- share event emitted as domain data (following ShieldViewModel pattern with Channel<ShareEvent>).
+    - Details: `@HiltViewModel @Inject constructor(private val quizRepository: QuizRepository, private val unlockBadgeUseCase: UnlockBadgeUseCase, private val trackShareEventUseCase: TrackShareEventUseCase)`. State: `QuizUiState(questions: List<QuizQuestion> = emptyList(), currentIndex: Int = 0, selectedAnswers: Map<Int, Int> = emptyMap(), isComplete: Boolean = false, scorePercent: Int = 0, correctCount: Int = 0)`. Methods: `startQuiz()` -- loads 5 random questions from `QuizQuestionBank.getRandomQuiz()`. `selectAnswer(questionIndex: Int, optionIndex: Int)` -- records answer. `nextQuestion()` -- increments index or completes quiz if last. `completeQuiz()` -- calculates score, saves result via repository, if 100% calls `unlockBadgeUseCase(BadgeType.SCAM_SPOTTER)`. No Context dependency -- share event emitted as domain data (following ShieldViewModel pattern with Channel<ShareEvent>).
 
 ### Tests
 
-- `android/app/src/test/java/com/safeanot/app/feature/quiz/QuizViewModelTest.kt` -- Tests quiz flow: start loads 5 questions, answer selection, score calculation at 0/20/40/60/80/100%, badge unlock at 100% only, result saved to repository.
+- `android/app/src/test/java/com/safeanot/app/feature/quiz/QuizViewModelTest.kt` -- Tests quiz flow: start loads 5 questions, answer selection, score calculation at 0/20/40/60/80/100%, badge unlock at 100% only, result saved to repository. Tests share event: after quiz completion, `onShare()` emits a `ShareEvent` via channel with expected content string (e.g., "I scored X% on SafeAnot's Spot the Scam quiz!").
 - `android/app/src/test/java/com/safeanot/app/domain/model/QuizQuestionBankTest.kt` -- Tests question bank has >= 15 questions, all have valid correctIndex within options range, getRandomQuiz returns requested count, shuffled order.
 - `android/app/src/test/java/com/safeanot/app/data/repository/QuizRepositoryImplTest.kt` -- Tests save and observe results, best score query.
 
@@ -348,9 +364,14 @@
 13. **Expose badge count in ProfileViewModel**
     - File: `android/app/src/main/java/com/safeanot/app/feature/profile/ProfileViewModel.kt`
     - Action: Modify
-    - Details: Inject `BadgeRepository`. Add `val unlockedBadgeCount: StateFlow<Int> = badgeRepository.observeUnlockedCount().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)`.
+    - Details: Inject `GetBadgesUseCase`. Add `val unlockedBadgeCount: StateFlow<Int> = getBadgesUseCase().map { badges -> badges.count { it.isUnlocked } }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)`. Note: VMs must not inject repositories directly; use cases enforce this architectural boundary.
 
-14. **Register routes in SafeAnotNavGraph**
+14. **Add badge unlock notification event to ViewModels**
+    - File: `android/app/src/main/java/com/safeanot/app/feature/shield/ShieldViewModel.kt` (and other VMs that call `unlockBadgeUseCase`)
+    - Action: Modify
+    - Details: Add a `private val _badgeUnlockEvent = Channel<BadgeType>(Channel.BUFFERED)` and expose `val badgeUnlockEvent = _badgeUnlockEvent.receiveAsFlow()`. After calling `unlockBadgeUseCase(type)`, if it returns `true` (newly unlocked), send the badge type to the channel: `_badgeUnlockEvent.send(type)`. In the corresponding Screen composables, collect this flow via `LaunchedEffect` and show a Snackbar with text like "Badge Unlocked: {badge.title}!" using the scaffold's `SnackbarHostState`. Apply the same pattern in `CheckViewModel`, `QuizViewModel`, and `GuardianPairingViewModel`.
+
+15. **Register routes in SafeAnotNavGraph**
     - File: `android/app/src/main/java/com/safeanot/app/navigation/SafeAnotNavGraph.kt`
     - Action: Modify
     - Details: Import `AchievementsScreen` and `QuizScreen`. Add composable routes: `composable(Screen.Achievements.route) { AchievementsScreen(onNavigateBack = { navController.popBackStack() }, onNavigateToQuiz = { navController.navigate(Screen.Quiz.route) }) }` and `composable(Screen.Quiz.route) { QuizScreen(onNavigateBack = { navController.popBackStack() }) }`. Wire `ProfileScreen` `onNavigateToAchievements` to `navController.navigate(Screen.Achievements.route)`. Update bottom bar hide logic to include `achievements` and `quiz` routes (add to the `startsWith` checks).
@@ -359,6 +380,7 @@
 
 - `android/app/src/test/java/com/safeanot/app/feature/achievements/AchievementsViewModelTest.kt` -- Tests badges and streak state collected from use cases, initial state shows all badges.
 - `android/app/src/test/java/com/safeanot/app/feature/shield/ShieldViewModelTest.kt` -- Update existing test to verify streak StateFlow is exposed and emits default Streak when no data.
+- `android/app/src/androidTest/java/com/safeanot/app/navigation/GamificationNavigationTest.kt` -- Navigation tests: Profile -> Achievements route works, Achievements -> Quiz route works, back navigation returns correctly, bottom bar hidden on Achievements and Quiz screens.
 
 ### Acceptance Criteria
 
@@ -408,8 +430,10 @@ Recommended sequence (respects internal dependencies):
 | `android/app/src/main/java/com/safeanot/app/domain/repository/BadgeRepository.kt` | Create | E10-002 |
 | `android/app/src/main/java/com/safeanot/app/data/repository/BadgeRepositoryImpl.kt` | Create | E10-002 |
 | `android/app/src/main/java/com/safeanot/app/domain/usecase/GetBadgesUseCase.kt` | Create | E10-002 |
+| `android/app/src/main/java/com/safeanot/app/domain/usecase/UnlockBadgeUseCase.kt` | Create | E10-002 |
 | `android/app/src/main/java/com/safeanot/app/domain/usecase/EvaluateBadgesUseCase.kt` | Create | E10-002 |
 | `android/app/src/main/java/com/safeanot/app/feature/check/CheckViewModel.kt` | Modify | E10-002 |
+| `android/app/src/main/java/com/safeanot/app/feature/guardian/GuardianPairingViewModel.kt` | Modify | E10-002 |
 | `android/app/src/main/java/com/safeanot/app/domain/model/QuizQuestion.kt` | Create | E10-003 |
 | `android/app/src/main/java/com/safeanot/app/domain/model/QuizQuestionBank.kt` | Create | E10-003 |
 | `android/app/src/main/java/com/safeanot/app/domain/model/QuizResult.kt` | Create | E10-003 |
@@ -439,3 +463,20 @@ Recommended sequence (respects internal dependencies):
 | `android/app/src/test/java/com/safeanot/app/domain/model/QuizQuestionBankTest.kt` | Create | E10-003 |
 | `android/app/src/test/java/com/safeanot/app/data/repository/QuizRepositoryImplTest.kt` | Create | E10-003 |
 | `android/app/src/test/java/com/safeanot/app/feature/achievements/AchievementsViewModelTest.kt` | Create | E10-004 |
+| `android/app/src/test/java/com/safeanot/app/worker/StreakCheckWorkerTest.kt` | Create | E10-001 |
+| `android/app/src/androidTest/java/com/safeanot/app/data/local/MigrationTest.kt` | Create | E10-001 |
+| `android/app/src/androidTest/java/com/safeanot/app/navigation/GamificationNavigationTest.kt` | Create | E10-004 |
+
+---
+
+## Codex Review Trace
+
+| # | Severity | Finding | Fix Applied | Issues Affected |
+|---|----------|---------|-------------|-----------------|
+| 1 | HIGH | Room migration unsafe for incremental shipping -- MIGRATION_8_9 mutated across 3 issues, risking partial migrations on intermediate deploys | Made ONE atomic migration in E10-001 task 3 that creates ALL 3 tables (streaks, badges, quiz_results). E10-002 task 5 and E10-003 task 5 changed to no-op referencing E10-001 task 3. | E10-001, E10-002, E10-003 |
+| 2 | HIGH | UpdateStreakUseCase date-unit bug -- lastCheckDate stored as epoch millis but compared as days, causing streak logic to never match "same day" or "yesterday" | Explicitly convert to days in comparison: `val lastDay = lastCheckDate / (24 * 60 * 60 * 1000L)` and `val today = System.currentTimeMillis() / (24 * 60 * 60 * 1000L)`. All comparisons use day units. | E10-001 |
+| 3 | HIGH | "Family Protector" badge not unlocked from guardian pairing -- no code path triggers the unlock | Added E10-002 task 15: hook into GuardianPairingViewModel to call `unlockBadgeUseCase(FAMILY_PROTECTOR)` when pairing is created. | E10-002 |
+| 4 | MEDIUM | Architecture drift -- BadgeRepository injected directly into VMs, violating clean architecture convention | Added `UnlockBadgeUseCase` (E10-002 task 10b). Updated CheckViewModel, ShieldViewModel, QuizViewModel, and ProfileViewModel to inject use cases instead of repository. | E10-002, E10-003, E10-004 |
+| 5 | MEDIUM | Missing tests -- no worker behavior test, no migration test, no quiz share-content test, no navigation tests | Added StreakCheckWorkerTest, MigrationTest (androidTest), quiz share event assertion in QuizViewModelTest, GamificationNavigationTest (androidTest). | E10-001, E10-003, E10-004 |
+| 6 | MEDIUM | Badge unlock notification missing -- user has no feedback when a badge is unlocked | Added E10-004 task 14: `_badgeUnlockEvent` Channel in VMs that call `unlockBadgeUseCase`, UI collects flow and shows Snackbar. | E10-004 |
+| 7 | LOW | Clock manipulation risk -- user can change device date to game streaks | Accepted for MVP. Added known-limitation comment to UpdateStreakUseCase task description. | E10-001 |
