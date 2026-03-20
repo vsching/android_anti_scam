@@ -64,6 +64,10 @@ class FakeGuardianRepository : GuardianRepository {
 
     override fun getGuardianCount(): Flow<Int> = pairingsFlow.map { it.size }
 
+    override fun getWardRoleCount(): Flow<Int> = pairingsFlow.map { pairings ->
+        pairings.count { it.role == GuardianRole.WARD }
+    }
+
     override suspend fun getDeviceId(): String = "test-device-id"
 
     override suspend fun sendHeartbeat(

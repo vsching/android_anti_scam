@@ -191,6 +191,8 @@ class GuardianRepositoryImplTest {
 
         override fun getGuardianCount(): Flow<Int> = dao.getGuardianCount()
 
+        override fun getWardRoleCount(): Flow<Int> = dao.getWardRoleCount()
+
         override suspend fun getDeviceId(): String = deviceId
 
         override suspend fun getPairingIdByPairedDeviceId(pairedDeviceId: String): String? {
@@ -232,6 +234,10 @@ class GuardianRepositoryImplTest {
         }
 
         override fun getGuardianCount(): Flow<Int> = pairingsFlow.map { it.size }
+
+        override fun getWardRoleCount(): Flow<Int> = pairingsFlow.map { pairings ->
+            pairings.count { it.role == "WARD" }
+        }
 
         override suspend fun getPairingIdByPairedDeviceId(pairedDeviceId: String): String? {
             return allEntities.find { it.pairedDeviceId == pairedDeviceId }?.id

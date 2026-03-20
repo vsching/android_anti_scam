@@ -338,7 +338,7 @@ export async function handleGetGuardians(
   if (hmacError) return hmacError;
 
   const pairings = await env.DB.prepare(
-    `SELECT id, guardian_device_id, guardian_display_name, created_at
+    `SELECT id, ward_device_id, guardian_device_id, ward_display_name, guardian_display_name, created_at
      FROM guardian_pairings
      WHERE ward_device_id = ?
      ORDER BY created_at DESC`,
