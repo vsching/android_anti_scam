@@ -9,12 +9,12 @@ import com.safeanot.app.domain.model.BadgeType
 import com.safeanot.app.domain.repository.BadgeRepository
 import javax.inject.Inject
 
-class UnlockBadgeUseCase @Inject constructor(
+open class UnlockBadgeUseCase @Inject constructor(
     private val badgeRepository: BadgeRepository,
 ) {
 
     /** Returns true if newly unlocked, false if already unlocked. */
-    suspend operator fun invoke(type: BadgeType): Boolean {
+    open suspend operator fun invoke(type: BadgeType): Boolean {
         return badgeRepository.unlockBadge(type)
     }
 }

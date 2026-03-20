@@ -34,6 +34,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.safeanot.app.feature.alerts.AlertDetailScreen
 import com.safeanot.app.feature.alerts.AlertsScreen
+import com.safeanot.app.feature.achievements.AchievementsScreen
 import com.safeanot.app.feature.check.CheckScreen
 import com.safeanot.app.feature.check.CheckViewModel
 import com.safeanot.app.feature.fix.FixScreen
@@ -41,6 +42,7 @@ import com.safeanot.app.feature.guardian.GuardianDashboardScreen
 import com.safeanot.app.feature.guardian.PairingScreen
 import com.safeanot.app.feature.guardian.WardDetailScreen
 import com.safeanot.app.feature.profile.ProfileScreen
+import com.safeanot.app.feature.quiz.QuizScreen
 import com.safeanot.app.feature.shield.ShieldScreen
 
 private data class BottomNavItem(
@@ -91,9 +93,10 @@ fun SafeAnotNavGraph(pendingUrl: String? = null, pendingNavigationRoute: String?
         }
     }
 
-    // Hide bottom bar on the Fix flow and Alert Detail
+    // Hide bottom bar on the Fix flow, Alert Detail, Guardian, Achievements, and Quiz
     val showBottomBar = currentDestination?.route?.let { route ->
-        !route.startsWith("fix/") && !route.startsWith("alerts/") && !route.startsWith("guardian/")
+        !route.startsWith("fix/") && !route.startsWith("alerts/") && !route.startsWith("guardian/") &&
+            route != Screen.Achievements.route && route != Screen.Quiz.route
     } ?: true
 
     Scaffold(
@@ -164,6 +167,9 @@ fun SafeAnotNavGraph(pendingUrl: String? = null, pendingNavigationRoute: String?
                     onNavigateToGuardianDashboard = {
                         navController.navigate(Screen.GuardianDashboard.route)
                     },
+                    onNavigateToAchievements = {
+                        navController.navigate(Screen.Achievements.route)
+                    },
                 )
             }
 
@@ -215,6 +221,21 @@ fun SafeAnotNavGraph(pendingUrl: String? = null, pendingNavigationRoute: String?
                 ),
             ) {
                 WardDetailScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
+
+            composable(Screen.Achievements.route) {
+                AchievementsScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToQuiz = {
+                        navController.navigate(Screen.Quiz.route)
+                    },
+                )
+            }
+
+            composable(Screen.Quiz.route) {
+                QuizScreen(
                     onNavigateBack = { navController.popBackStack() },
                 )
             }

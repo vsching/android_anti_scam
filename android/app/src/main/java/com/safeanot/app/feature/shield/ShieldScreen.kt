@@ -53,6 +53,7 @@ import com.safeanot.app.feature.check.ShareEvent
 import com.safeanot.app.feature.shield.components.AppCard
 import com.safeanot.app.feature.shield.components.PlayProtectCard
 import com.safeanot.app.feature.shield.components.SecurityScoreRing
+import com.safeanot.app.feature.shield.components.StreakChip
 import com.safeanot.app.ui.theme.BlueAccent
 import com.safeanot.app.ui.theme.RedAccent
 import com.safeanot.app.ui.theme.TextSecondary
@@ -69,6 +70,7 @@ fun ShieldScreen(
     val auditItems by viewModel.auditItems.collectAsStateWithLifecycle()
     val score by viewModel.securityScore.collectAsStateWithLifecycle()
     val hasGuardians by viewModel.hasGuardians.collectAsStateWithLifecycle()
+    val streak by viewModel.streak.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     var showHelpConfirmDialog by remember { mutableStateOf(false) }
@@ -174,6 +176,12 @@ fun ShieldScreen(
                         totalCount = score.totalItems,
                         scoreBand = score.band,
                     )
+
+                    // Streak chip (visible when streak >= 1)
+                    if (streak.currentStreak >= 1) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        StreakChip(streakDays = streak.currentStreak)
+                    }
 
                     Spacer(modifier = Modifier.height(12.dp))
 

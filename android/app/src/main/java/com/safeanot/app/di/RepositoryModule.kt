@@ -8,6 +8,7 @@ import com.safeanot.app.data.repository.AuditRepositoryImpl
 import com.safeanot.app.data.repository.BadgeRepositoryImpl
 import com.safeanot.app.data.repository.GuardianRepositoryImpl
 import com.safeanot.app.data.repository.LinkCheckRepositoryImpl
+import com.safeanot.app.data.repository.QuizRepositoryImpl
 import com.safeanot.app.data.repository.ShareEventRepositoryImpl
 import com.safeanot.app.data.repository.StreakRepositoryImpl
 import com.safeanot.app.data.repository.SyncRepositoryImpl
@@ -17,6 +18,7 @@ import com.safeanot.app.domain.repository.AuditRepository
 import com.safeanot.app.domain.repository.BadgeRepository
 import com.safeanot.app.domain.repository.GuardianRepository
 import com.safeanot.app.domain.repository.LinkCheckRepository
+import com.safeanot.app.domain.repository.QuizRepository
 import com.safeanot.app.domain.repository.ShareEventRepository
 import com.safeanot.app.domain.repository.StreakRepository
 import com.safeanot.app.domain.repository.SyncRepository
@@ -66,4 +68,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindBadgeRepository(impl: BadgeRepositoryImpl): BadgeRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindQuizRepository(impl: QuizRepositoryImpl): QuizRepository
 }

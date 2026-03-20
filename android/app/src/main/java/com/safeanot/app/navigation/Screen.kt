@@ -41,4 +41,10 @@ sealed class Screen(val route: String) {
         fun createRoute(deviceId: String): String =
             "guardian/ward/$deviceId"
     }
+
+    /** Achievements screen showing badges, streak, and quiz entry point. */
+    data object Achievements : Screen("achievements")
+
+    /** "Spot the Scam" quiz screen. */
+    data object Quiz : Screen("quiz")
 }

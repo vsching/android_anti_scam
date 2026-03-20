@@ -8,8 +8,8 @@ import com.safeanot.app.domain.repository.StreakRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetCurrentStreakUseCase @Inject constructor(
+open class GetCurrentStreakUseCase @Inject constructor(
     private val streakRepository: StreakRepository,
 ) {
-    operator fun invoke(): Flow<Streak> = streakRepository.observeStreak()
+    open operator fun invoke(): Flow<Streak> = streakRepository.observeStreak()
 }

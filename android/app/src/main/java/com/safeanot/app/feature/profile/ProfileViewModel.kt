@@ -19,15 +19,19 @@ import com.safeanot.app.domain.repository.UserPreferencesRepository
 import com.safeanot.app.util.Constants
 import com.safeanot.app.domain.repository.GuardianRepository
 import com.safeanot.app.domain.usecase.GetAuditStatsUseCase
+import com.safeanot.app.domain.usecase.GetBadgesUseCase
 import com.safeanot.app.domain.usecase.GetPreferredRegionUseCase
 import com.safeanot.app.domain.usecase.SetPreferredRegionUseCase
 import com.safeanot.app.worker.AuditReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -59,6 +63,7 @@ class ProfileViewModel @Inject constructor(
     private val setPreferredRegionUseCase: SetPreferredRegionUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val guardianRepository: GuardianRepository,
+    getBadgesUseCase: GetBadgesUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -66,6 +71,10 @@ class ProfileViewModel @Inject constructor(
 
     private val _shareEvent = Channel<Unit>(Channel.BUFFERED)
     val shareEvent = _shareEvent.receiveAsFlow()
+
+    val unlockedBadgeCount: StateFlow<Int> = getBadgesUseCase()
+        .map { badges -> badges.count { it.isUnlocked } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     init {
         viewModelScope.launch {

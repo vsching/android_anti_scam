@@ -8,11 +8,11 @@ import com.safeanot.app.domain.repository.BadgeRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetBadgesUseCase @Inject constructor(
+open class GetBadgesUseCase @Inject constructor(
     private val badgeRepository: BadgeRepository,
 ) {
 
-    operator fun invoke(): Flow<List<BadgeProgress>> {
+    open operator fun invoke(): Flow<List<BadgeProgress>> {
         return badgeRepository.observeAllBadges()
     }
 }
