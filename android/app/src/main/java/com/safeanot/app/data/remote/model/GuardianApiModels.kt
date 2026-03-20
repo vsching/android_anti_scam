@@ -37,6 +37,9 @@ data class GuardianPairingDto(
     @SerializedName("role") val role: String,
     @SerializedName("label") val label: String,
     @SerializedName("created_at") val createdAt: Long,
+    @SerializedName("security_score") val securityScore: Int? = null,
+    @SerializedName("heartbeat_timestamp") val heartbeatTimestamp: Long? = null,
+    @SerializedName("play_protect_enabled") val playProtectEnabled: Boolean? = null,
 ) {
     fun toDomain(): GuardianPairing = GuardianPairing(
         id = id,
@@ -45,6 +48,9 @@ data class GuardianPairingDto(
         role = GuardianRole.valueOf(role),
         label = label,
         createdAt = createdAt,
+        lastSecurityScore = securityScore,
+        lastHeartbeatAt = heartbeatTimestamp,
+        playProtectEnabled = playProtectEnabled,
     )
 }
 

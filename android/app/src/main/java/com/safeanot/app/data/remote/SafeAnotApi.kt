@@ -77,6 +77,7 @@ interface SafeAnotApi {
     suspend fun getWardHeartbeats(
         @retrofit2.http.Path("deviceId") wardDeviceId: String,
         @Query("days") days: Int = 7,
+        @Query("guardian_device_id") guardianDeviceId: String,
     ): List<WardHeartbeatDto>
 
     @POST("api/guardian/help-request")

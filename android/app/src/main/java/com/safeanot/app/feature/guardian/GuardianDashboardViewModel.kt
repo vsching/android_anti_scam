@@ -91,13 +91,19 @@ class GuardianDashboardViewModel @Inject constructor(
     }
 
     private fun GuardianPairing.toWardUiModel(): WardUiModel {
-        // Note: GuardianPairing doesn't carry heartbeat data directly.
-        // The heartbeat data would need to be fetched separately or enriched.
-        // For now, we create a basic WardUiModel from the pairing data.
+        val isStale = lastHeartbeatAt?.let { heartbeatTime ->
+            System.currentTimeMillis() - heartbeatTime * 1000 > STALE_THRESHOLD_MS
+        } ?: false
+
         return WardUiModel(
             pairingId = id,
             deviceId = pairedDeviceId,
             displayName = label,
+            securityScore = lastSecurityScore,
+            scoreBand = lastSecurityScore?.let { ScoreBand.fromPercent(it) },
+            lastHeartbeat = lastHeartbeatAt,
+            playProtectEnabled = playProtectEnabled,
+            isStale = isStale,
         )
     }
 }

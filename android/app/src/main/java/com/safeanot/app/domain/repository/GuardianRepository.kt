@@ -87,4 +87,10 @@ interface GuardianRepository {
      * @param days Number of days of history to fetch.
      */
     suspend fun getWardHeartbeatHistory(wardDeviceId: String, days: Int = 7): com.safeanot.app.domain.model.WardHeartbeatHistory
+
+    /**
+     * Look up the pairing ID for a given paired device ID from local cache.
+     * @return The pairing ID or null if not found.
+     */
+    suspend fun getPairingIdByPairedDeviceId(pairedDeviceId: String): String?
 }

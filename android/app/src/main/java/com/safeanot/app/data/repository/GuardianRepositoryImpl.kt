@@ -132,11 +132,16 @@ class GuardianRepositoryImpl @Inject constructor(
         api.sendHelpRequest(request)
     }
 
+    override suspend fun getPairingIdByPairedDeviceId(pairedDeviceId: String): String? {
+        return guardianDao.getPairingIdByPairedDeviceId(pairedDeviceId)
+    }
+
     override suspend fun getWardHeartbeatHistory(
         wardDeviceId: String,
         days: Int,
     ): WardHeartbeatHistory {
-        val dtos = api.getWardHeartbeats(wardDeviceId, days)
+        val myDeviceId = deviceIdProvider.getOrCreateDeviceId()
+        val dtos = api.getWardHeartbeats(wardDeviceId, days, myDeviceId)
         return WardHeartbeatHistory(
             deviceId = wardDeviceId,
             displayName = dtos.firstOrNull()?.displayName ?: "",

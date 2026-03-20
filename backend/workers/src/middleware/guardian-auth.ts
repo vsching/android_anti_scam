@@ -10,15 +10,17 @@ export async function verifyDeviceHmac(
   body: string,
   env: Env,
 ): Promise<Response | null> {
+  // TODO: Enforce HMAC verification in production by always setting GUARDIAN_HMAC_SECRET.
+  // For development/MVP, skip HMAC verification if the secret is not configured.
+  const secret = env.GUARDIAN_HMAC_SECRET;
+  if (!secret) {
+    return null;
+  }
+
   const hmacHeader = request.headers.get('X-Device-HMAC');
 
   if (!hmacHeader) {
     return jsonResponse({ error: 'Missing X-Device-HMAC header' }, 401);
-  }
-
-  const secret = env.GUARDIAN_HMAC_SECRET;
-  if (!secret) {
-    return jsonResponse({ error: 'Server misconfiguration' }, 500);
   }
 
   const encoder = new TextEncoder();

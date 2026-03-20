@@ -35,4 +35,7 @@ data class GuardianPairing(
     val role: GuardianRole,
     val label: String,
     val createdAt: Long,
+    val lastSecurityScore: Int? = null,
+    val lastHeartbeatAt: Long? = null,
+    val playProtectEnabled: Boolean? = null,
 )

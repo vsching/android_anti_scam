@@ -252,7 +252,7 @@ export async function handleClaimPairingCode(
   }
 
   // Create pairing and mark code as claimed atomically
-  await env.DB.batch([
+  const batchResults = await env.DB.batch([
     env.DB.prepare(
       'UPDATE guardian_pairing_codes SET claimed = 1 WHERE code = ?',
     ).bind(code.toUpperCase()),
@@ -262,7 +262,19 @@ export async function handleClaimPairingCode(
     ).bind(pairingCode.ward_device_id, guardianDeviceId, guardianDisplayName, now),
   ]);
 
-  return jsonResponse({ status: 'paired', ward_device_id: pairingCode.ward_device_id }, 200);
+  // Retrieve the newly created pairing to return a full DTO
+  const insertMeta = batchResults[1]?.meta;
+  const newPairingId = insertMeta?.last_row_id;
+
+  return jsonResponse({
+    id: newPairingId,
+    ward_device_id: pairingCode.ward_device_id,
+    guardian_device_id: guardianDeviceId,
+    ward_display_name: '',
+    guardian_display_name: guardianDisplayName,
+    created_at: now,
+    status: 'paired',
+  }, 200);
 }
 
 /**
@@ -298,7 +310,7 @@ export async function handleGetWards(
     .bind(deviceId)
     .all();
 
-  return jsonResponse({ wards: pairings.results ?? [] }, 200);
+  return jsonResponse(pairings.results ?? [], 200);
 }
 
 /**
@@ -330,7 +342,7 @@ export async function handleGetGuardians(
     .bind(deviceId)
     .all();
 
-  return jsonResponse({ guardians: pairings.results ?? [] }, 200);
+  return jsonResponse(pairings.results ?? [], 200);
 }
 
 /**
@@ -573,6 +585,22 @@ export async function handleGetWardHeartbeats(
   const hmacError = await verifyDeviceHmac(request, wardDeviceId, env);
   if (hmacError) return hmacError;
 
+  // Authorization: verify the requester is a guardian of this ward
+  const guardianDeviceId = url.searchParams.get('guardian_device_id');
+  if (!guardianDeviceId) {
+    return jsonResponse({ error: 'Missing guardian_device_id query parameter' }, 400);
+  }
+
+  const pairingExists = await env.DB.prepare(
+    'SELECT id FROM guardian_pairings WHERE ward_device_id = ? AND guardian_device_id = ?',
+  )
+    .bind(wardDeviceId, guardianDeviceId)
+    .first();
+
+  if (!pairingExists) {
+    return jsonResponse({ error: 'Not authorized to view this ward\'s heartbeats' }, 403);
+  }
+
   // Parse days parameter
   const daysParam = url.searchParams.get('days');
   let days = DEFAULT_HEARTBEAT_DAYS;
@@ -596,7 +624,7 @@ export async function handleGetWardHeartbeats(
     .bind(wardDeviceId, since)
     .all();
 
-  return jsonResponse({ heartbeats: heartbeats.results ?? [] }, 200);
+  return jsonResponse(heartbeats.results ?? [], 200);
 }
 
 /**

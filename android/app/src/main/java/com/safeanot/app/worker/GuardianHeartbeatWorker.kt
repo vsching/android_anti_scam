@@ -9,6 +9,8 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.safeanot.app.domain.model.AppCategory
+import com.safeanot.app.domain.model.AuditStatus
 import com.safeanot.app.domain.repository.AuditRepository
 import com.safeanot.app.domain.repository.GuardianRepository
 import dagger.assisted.Assisted
@@ -35,12 +37,21 @@ class GuardianHeartbeatWorker @AssistedInject constructor(
             val score = auditRepository.getSecurityScore().first()
                 ?: return Result.success()
 
+            // Determine Play Protect status from PROTECTION category audit items.
+            // If all protection items are SECURED or NOT_INSTALLED, consider Play Protect enabled.
+            val protectionItems = auditRepository.getAuditItemsByCategory(
+                AppCategory.PROTECTION.name,
+            ).first()
+            val playProtectEnabled = protectionItems.isEmpty() || protectionItems.all {
+                it.status == AuditStatus.SECURED || it.status == AuditStatus.NOT_INSTALLED
+            }
+
             // Send heartbeat to backend
             guardianRepository.sendHeartbeat(
                 securityScore = score.scorePercent,
                 securedItems = score.securedItems,
                 totalItems = score.totalItems,
-                playProtectEnabled = true,
+                playProtectEnabled = playProtectEnabled,
             )
 
             Result.success()

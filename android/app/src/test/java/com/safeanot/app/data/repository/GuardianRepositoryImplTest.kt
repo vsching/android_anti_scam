@@ -191,6 +191,10 @@ class GuardianRepositoryImplTest {
         override fun getGuardianCount(): Flow<Int> = dao.getGuardianCount()
 
         override suspend fun getDeviceId(): String = deviceId
+
+        override suspend fun getPairingIdByPairedDeviceId(pairedDeviceId: String): String? {
+            return dao.getPairingIdByPairedDeviceId(pairedDeviceId)
+        }
     }
 
     // --- Fakes ---
@@ -227,6 +231,10 @@ class GuardianRepositoryImplTest {
         }
 
         override fun getGuardianCount(): Flow<Int> = pairingsFlow.map { it.size }
+
+        override suspend fun getPairingIdByPairedDeviceId(pairedDeviceId: String): String? {
+            return allEntities.find { it.pairedDeviceId == pairedDeviceId }?.id
+        }
     }
 
     private class FakeGuardianApi : SafeAnotApi {

@@ -99,4 +99,10 @@ class FakeGuardianRepository : GuardianRepository {
         if (shouldThrow) throw RuntimeException("Test error")
         return wardHeartbeatHistory
     }
+
+    override suspend fun getPairingIdByPairedDeviceId(pairedDeviceId: String): String? {
+        if (shouldThrow) throw RuntimeException("Test error")
+        return pairingsFlow.value.find { it.pairedDeviceId == pairedDeviceId }?.id
+            ?: "pairing-for-$pairedDeviceId"
+    }
 }

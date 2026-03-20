@@ -85,8 +85,10 @@ class WardDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isUnlinking = true, error = null) }
             try {
-                // Find the pairing ID for this ward and delete it
-                guardianRepository.deletePairing(wardDeviceId)
+                // Look up the pairing ID from local cache using the ward's device ID
+                val pairingId = guardianRepository.getPairingIdByPairedDeviceId(wardDeviceId)
+                    ?: throw IllegalStateException("Pairing not found for device $wardDeviceId")
+                guardianRepository.deletePairing(pairingId)
                 _uiState.update { it.copy(isUnlinking = false, unlinkSuccess = true) }
             } catch (e: Exception) {
                 _uiState.update {

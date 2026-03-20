@@ -104,7 +104,7 @@ class WardDetailViewModelTest {
         vm.unlink()
 
         assertTrue(vm.uiState.value.unlinkSuccess)
-        assertTrue(fakeRepo.deletedPairingIds.contains("ward-device"))
+        assertTrue(fakeRepo.deletedPairingIds.contains("pairing-for-ward-device"))
     }
 
     @Test

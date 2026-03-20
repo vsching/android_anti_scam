@@ -336,18 +336,18 @@ describe('Guardian Pairing API', () => {
         'guardian-hb',
       );
       expect(res.status).toBe(200);
-      const body = await res.json<{
-        wards: Array<{
+      const body = await res.json<
+        Array<{
           ward_device_id: string;
           security_score: number;
           heartbeat_timestamp: number;
-        }>;
-      }>();
-      expect(body.wards).toHaveLength(1);
-      expect(body.wards[0].ward_device_id).toBe('ward-hb');
+        }>
+      >();
+      expect(body).toHaveLength(1);
+      expect(body[0].ward_device_id).toBe('ward-hb');
       // Should return the latest heartbeat
-      expect(body.wards[0].security_score).toBe(85);
-      expect(body.wards[0].heartbeat_timestamp).toBe(now);
+      expect(body[0].security_score).toBe(85);
+      expect(body[0].heartbeat_timestamp).toBe(now);
     });
 
     it('returns empty array when guardian has no wards', async () => {
@@ -356,8 +356,8 @@ describe('Guardian Pairing API', () => {
         'no-wards',
       );
       expect(res.status).toBe(200);
-      const body = await res.json<{ wards: unknown[] }>();
-      expect(body.wards).toHaveLength(0);
+      const body = await res.json<unknown[]>();
+      expect(body).toHaveLength(0);
     });
 
     it('rejects missing device_id', async () => {
@@ -386,10 +386,10 @@ describe('Guardian Pairing API', () => {
         'ward-g',
       );
       expect(res.status).toBe(200);
-      const body = await res.json<{
-        guardians: Array<{ guardian_device_id: string; guardian_display_name: string }>;
-      }>();
-      expect(body.guardians).toHaveLength(2);
+      const body = await res.json<
+        Array<{ guardian_device_id: string; guardian_display_name: string }>
+      >();
+      expect(body).toHaveLength(2);
     });
   });
 
@@ -597,8 +597,11 @@ describe('Guardian Pairing API', () => {
     it('returns heartbeat history for a ward', async () => {
       const now = Math.floor(Date.now() / 1000);
 
-      // Insert heartbeats
+      // Insert pairing and heartbeats
       await env.DB.batch([
+        env.DB.prepare(
+          'INSERT INTO guardian_pairings (ward_device_id, guardian_device_id, guardian_display_name, created_at) VALUES (?, ?, ?, ?)',
+        ).bind('ward-history', 'guardian-history', 'Guardian', now),
         env.DB.prepare(
           'INSERT INTO guardian_heartbeats (ward_device_id, security_score, secured_items, total_items, play_protect_enabled, timestamp) VALUES (?, ?, ?, ?, ?, ?)',
         ).bind('ward-history', 70, 5, 8, 1, now - 3600),
@@ -608,17 +611,17 @@ describe('Guardian Pairing API', () => {
       ]);
 
       const res = await getWithHmac(
-        'http://localhost/api/guardian/wards/ward-history/heartbeats',
+        'http://localhost/api/guardian/wards/ward-history/heartbeats?guardian_device_id=guardian-history',
         'ward-history',
       );
       expect(res.status).toBe(200);
-      const body = await res.json<{
-        heartbeats: Array<{ security_score: number; timestamp: number }>;
-      }>();
-      expect(body.heartbeats).toHaveLength(2);
+      const body = await res.json<
+        Array<{ security_score: number; timestamp: number }>
+      >();
+      expect(body).toHaveLength(2);
       // Should be ordered by timestamp DESC
-      expect(body.heartbeats[0].security_score).toBe(85);
-      expect(body.heartbeats[1].security_score).toBe(70);
+      expect(body[0].security_score).toBe(85);
+      expect(body[1].security_score).toBe(70);
     });
 
     it('respects days query parameter', async () => {
@@ -627,6 +630,9 @@ describe('Guardian Pairing API', () => {
       const eightDaysAgo = now - 8 * 24 * 60 * 60;
 
       await env.DB.batch([
+        env.DB.prepare(
+          'INSERT INTO guardian_pairings (ward_device_id, guardian_device_id, guardian_display_name, created_at) VALUES (?, ?, ?, ?)',
+        ).bind('ward-days', 'guardian-days', 'Guardian', now),
         env.DB.prepare(
           'INSERT INTO guardian_heartbeats (ward_device_id, security_score, secured_items, total_items, play_protect_enabled, timestamp) VALUES (?, ?, ?, ?, ?, ?)',
         ).bind('ward-days', 70, 5, 8, 1, eightDaysAgo),
@@ -637,35 +643,57 @@ describe('Guardian Pairing API', () => {
 
       // Default 7 days - should only return the recent one
       const res = await getWithHmac(
-        'http://localhost/api/guardian/wards/ward-days/heartbeats',
+        'http://localhost/api/guardian/wards/ward-days/heartbeats?guardian_device_id=guardian-days',
         'ward-days',
       );
       expect(res.status).toBe(200);
-      const body = await res.json<{
-        heartbeats: Array<{ security_score: number }>;
-      }>();
-      expect(body.heartbeats).toHaveLength(1);
-      expect(body.heartbeats[0].security_score).toBe(90);
+      const body = await res.json<
+        Array<{ security_score: number }>
+      >();
+      expect(body).toHaveLength(1);
+      expect(body[0].security_score).toBe(90);
 
       // 30 days - should return both
       const res30 = await getWithHmac(
-        'http://localhost/api/guardian/wards/ward-days/heartbeats?days=30',
+        'http://localhost/api/guardian/wards/ward-days/heartbeats?days=30&guardian_device_id=guardian-days',
         'ward-days',
       );
-      const body30 = await res30.json<{
-        heartbeats: Array<{ security_score: number }>;
-      }>();
-      expect(body30.heartbeats).toHaveLength(2);
+      const body30 = await res30.json<
+        Array<{ security_score: number }>
+      >();
+      expect(body30).toHaveLength(2);
     });
 
     it('returns empty array when no heartbeats exist', async () => {
+      const now = Math.floor(Date.now() / 1000);
+      // Create pairing so authorization passes
+      await env.DB.prepare(
+        'INSERT INTO guardian_pairings (ward_device_id, guardian_device_id, guardian_display_name, created_at) VALUES (?, ?, ?, ?)',
+      ).bind('no-heartbeats', 'guardian-no-hb', 'Guardian', now).run();
+
       const res = await getWithHmac(
-        'http://localhost/api/guardian/wards/no-heartbeats/heartbeats',
+        'http://localhost/api/guardian/wards/no-heartbeats/heartbeats?guardian_device_id=guardian-no-hb',
         'no-heartbeats',
       );
       expect(res.status).toBe(200);
-      const body = await res.json<{ heartbeats: unknown[] }>();
-      expect(body.heartbeats).toHaveLength(0);
+      const body = await res.json<unknown[]>();
+      expect(body).toHaveLength(0);
+    });
+
+    it('returns 403 when requester is not a guardian of the ward', async () => {
+      const res = await getWithHmac(
+        'http://localhost/api/guardian/wards/some-ward/heartbeats?guardian_device_id=not-a-guardian',
+        'some-ward',
+      );
+      expect(res.status).toBe(403);
+    });
+
+    it('returns 400 when guardian_device_id is missing', async () => {
+      const res = await getWithHmac(
+        'http://localhost/api/guardian/wards/some-ward/heartbeats',
+        'some-ward',
+      );
+      expect(res.status).toBe(400);
     });
   });
 });

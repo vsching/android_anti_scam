@@ -52,11 +52,16 @@ class SafeAnotMessagingService : FirebaseMessagingService() {
         }
     }
 
+    /** Sanitize notification text: strip newlines and truncate to maxLength. */
+    private fun sanitize(text: String, maxLength: Int = 100): String {
+        return text.replace(Regex("[\r\n]+"), " ").take(maxLength)
+    }
+
     private fun showGuardianAlertNotification(data: Map<String, String>) {
         createGuardianNotificationChannel()
 
-        val wardName = data["ward_name"] ?: "Your ward"
-        val alertReason = data["alert_reason"] ?: "Security status changed"
+        val wardName = sanitize(data["ward_name"] ?: "Your ward")
+        val alertReason = sanitize(data["alert_reason"] ?: "Security status changed")
         val wardDeviceId = data["ward_device_id"] ?: ""
         val type = data["type"] ?: "guardian_alert"
 

@@ -28,6 +28,15 @@ data class GuardianPairingEntity(
 
     @ColumnInfo(name = "created_at")
     val createdAt: Long,
+
+    @ColumnInfo(name = "last_security_score", defaultValue = "NULL")
+    val lastSecurityScore: Int? = null,
+
+    @ColumnInfo(name = "last_heartbeat_at", defaultValue = "NULL")
+    val lastHeartbeatAt: Long? = null,
+
+    @ColumnInfo(name = "play_protect_enabled", defaultValue = "NULL")
+    val playProtectEnabled: Boolean? = null,
 ) {
     fun toDomain(): GuardianPairing = GuardianPairing(
         id = id,
@@ -36,6 +45,9 @@ data class GuardianPairingEntity(
         role = GuardianRole.valueOf(role),
         label = label,
         createdAt = createdAt,
+        lastSecurityScore = lastSecurityScore,
+        lastHeartbeatAt = lastHeartbeatAt,
+        playProtectEnabled = playProtectEnabled,
     )
 
     companion object {
@@ -47,6 +59,9 @@ data class GuardianPairingEntity(
                 role = domain.role.name,
                 label = domain.label,
                 createdAt = domain.createdAt,
+                lastSecurityScore = domain.lastSecurityScore,
+                lastHeartbeatAt = domain.lastHeartbeatAt,
+                playProtectEnabled = domain.playProtectEnabled,
             )
     }
 }

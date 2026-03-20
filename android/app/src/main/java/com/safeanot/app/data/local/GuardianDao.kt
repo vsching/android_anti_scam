@@ -33,4 +33,7 @@ interface GuardianDao {
 
     @Query("SELECT COUNT(*) FROM guardian_pairings")
     fun getGuardianCount(): Flow<Int>
+
+    @Query("SELECT id FROM guardian_pairings WHERE paired_device_id = :pairedDeviceId LIMIT 1")
+    suspend fun getPairingIdByPairedDeviceId(pairedDeviceId: String): String?
 }
