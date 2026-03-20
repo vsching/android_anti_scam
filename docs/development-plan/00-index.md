@@ -24,7 +24,7 @@
 | Epic | Name | Status | Depends On | Issues |
 |------|------|--------|------------|--------|
 | E08 | Family Guardian Mode | ☑ | E01, E03 | 6 |
-| E09 | Scam of the Week + Push Notifications | ◐ | E01, E04 | 4 |
+| E09 | Scam of the Week + Push Notifications | ☑ | E01, E04 | 4 |
 | E10 | Gamification + Streaks | ☐ | E03, E07 | 4 |
 
 ## Phase 3: Data Moat (Community + Partnerships)
