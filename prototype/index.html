@@ -5,50 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Safe Anot? — Scam Protection for MY/SG</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0D1117;
-  --bg-card: #161B22;
-  --bg-card-hover: #1C2129;
-  --bg-elevated: #1E2430;
-  --blue: #58A6FF;
-  --blue-dim: rgba(88,166,255,0.15);
-  --purple: #BC8CFF;
-  --green: #3FB950;
-  --green-dim: rgba(63,185,80,0.12);
-  --green-glow: rgba(63,185,80,0.3);
-  --red: #F85149;
-  --red-dim: rgba(248,81,73,0.12);
-  --red-glow: rgba(248,81,73,0.3);
-  --orange: #D29922;
-  --orange-dim: rgba(210,153,34,0.12);
-  --orange-glow: rgba(210,153,34,0.3);
-  --text-primary: #F0F6FC;
-  --text-secondary: #8B949E;
-  --text-tertiary: #7D8590;
-  --border: rgba(240,246,252,0.06);
-  --border-subtle: rgba(240,246,252,0.04);
+  --bg: #FAFAFA;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F8FAFC;
+  --bg-elevated: #FFFFFF;
+  --indigo: #4F46E5;
+  --indigo-light: #EEF2FF;
+  --teal: #0D9488;
+  --teal-light: #F0FDFA;
+  --green: #16A34A;
+  --green-dim: rgba(22,163,74,0.1);
+  --red: #DC2626;
+  --red-dim: rgba(220,38,38,0.1);
+  --orange: #F59E0B;
+  --orange-dim: rgba(245,158,11,0.1);
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+  --text-tertiary: #94A3B8;
+  --border: rgba(0,0,0,0.08);
+  --border-subtle: rgba(0,0,0,0.04);
   --radius: 16px;
   --radius-sm: 12px;
   --radius-xs: 8px;
-  --gradient-accent: linear-gradient(135deg, #58A6FF 0%, #BC8CFF 100%);
-  --gradient-red: linear-gradient(135deg, #F85149 0%, #DA3633 100%);
-  --gradient-green: linear-gradient(135deg, #3FB950 0%, #238636 100%);
-  --gradient-orange: linear-gradient(135deg, #D29922 0%, #BB8009 100%);
-  --gradient-teal: linear-gradient(135deg, #58A6FF 0%, #3FB950 100%);
+  --gradient-accent: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
+  --gradient-red: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  --gradient-green: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+  --gradient-orange: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  --gradient-teal: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
   --nav-height: 72px;
-  --teal: #4EC9B0;
-  --teal-dim: rgba(78,201,176,0.12);
-  --teal-glow: rgba(78,201,176,0.3);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #0A0E14;
+  font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #E2E8F0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -61,12 +58,12 @@ body {
 }
 
 *:focus-visible {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--indigo);
   outline-offset: 2px;
   border-radius: 4px;
 }
 button:focus-visible {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--indigo);
   outline-offset: 2px;
 }
 
@@ -77,10 +74,10 @@ button:focus-visible {
   background: var(--bg);
   border-radius: 44px;
   box-shadow:
-    0 0 0 3px #1C2129,
-    0 0 0 6px #0D1117,
-    0 0 80px rgba(88,166,255,0.06),
-    0 20px 60px rgba(0,0,0,0.6);
+    0 0 0 3px #312e81,
+    0 0 0 6px #1e1b4b,
+    0 0 80px rgba(79,70,229,0.08),
+    0 20px 60px rgba(0,0,0,0.3);
   overflow: hidden;
   position: relative;
 }
@@ -100,7 +97,7 @@ button:focus-visible {
   z-index: 10;
 }
 .status-bar .icons { display: flex; gap: 4px; align-items: center; }
-.status-bar .icons .material-symbols-outlined { font-size: 17px; }
+.status-bar .icons .material-symbols-rounded { font-size: 17px; }
 
 /* Screens */
 .screen {
@@ -137,7 +134,7 @@ button:focus-visible {
   left: 16px;
   right: 16px;
   height: 60px;
-  background: rgba(22,27,34,0.92);
+  background: rgba(255,255,255,0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 30px;
@@ -146,7 +143,7 @@ button:focus-visible {
   justify-content: space-around;
   z-index: 20;
   border: 1px solid var(--border);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .nav-item {
@@ -167,12 +164,12 @@ button:focus-visible {
   letter-spacing: 0.3px;
   -webkit-tap-highlight-color: transparent;
 }
-.nav-item .material-symbols-outlined { font-size: 24px; transition: all 0.25s ease; }
+.nav-item .material-symbols-rounded { font-size: 24px; transition: all 0.25s ease; }
 .nav-item.active {
-  color: var(--blue);
-  background: var(--blue-dim);
+  color: var(--indigo);
+  background: var(--indigo-light);
 }
-.nav-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+.nav-item.active .material-symbols-rounded { font-variation-settings: 'FILL' 1; }
 .nav-item span.nav-label { display: block; }
 
 /* Reduced motion */
@@ -247,7 +244,7 @@ button:focus-visible {
   opacity: 0.2;
   filter: blur(16px);
 }
-.onboarding-icon .material-symbols-outlined { font-size: 52px; color: white; position: relative; z-index: 1; }
+.onboarding-icon .material-symbols-rounded { font-size: 52px; color: white; position: relative; z-index: 1; }
 .onboarding-slide h2 {
   font-size: 26px;
   font-weight: 800;
@@ -281,7 +278,7 @@ button:focus-visible {
 }
 .onboarding-dot.active {
   width: 24px;
-  background: var(--blue);
+  background: var(--indigo);
 }
 .onboarding-next {
   width: 100%;
@@ -330,7 +327,7 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
 }
-.logo-icon .material-symbols-outlined { font-size: 20px; color: white; }
+.logo-icon .material-symbols-rounded { font-size: 20px; color: white; }
 .logo-text {
   font-size: 18px;
   font-weight: 800;
@@ -382,7 +379,7 @@ button:focus-visible {
 }
 .link-input::placeholder { color: var(--text-tertiary); }
 .link-input:focus {
-  border-color: var(--blue);
+  border-color: var(--indigo);
   box-shadow: 0 0 0 3px rgba(88,166,255,0.15), 0 0 20px rgba(88,166,255,0.1);
 }
 
@@ -407,7 +404,7 @@ button:focus-visible {
 }
 .btn-check-now:hover { box-shadow: 0 6px 32px rgba(88,166,255,0.35); }
 .btn-check-now:active { transform: scale(0.97); }
-.btn-check-now .material-symbols-outlined { font-size: 22px; }
+.btn-check-now .material-symbols-rounded { font-size: 22px; }
 
 .share-hint {
   text-align: center;
@@ -427,7 +424,7 @@ button:focus-visible {
   justify-content: center;
   gap: 4px;
 }
-.domain-count .material-symbols-outlined { font-size: 14px; }
+.domain-count .material-symbols-rounded { font-size: 14px; }
 
 /* Recent Checks */
 .recent-section {
@@ -474,9 +471,9 @@ button:focus-visible {
   min-width: 10px;
   border-radius: 50%;
 }
-.verdict-dot.red { background: var(--red); box-shadow: 0 0 8px var(--red-glow); }
-.verdict-dot.green { background: var(--green); box-shadow: 0 0 8px var(--green-glow); }
-.verdict-dot.orange { background: var(--orange); box-shadow: 0 0 8px var(--orange-glow); }
+.verdict-dot.red { background: var(--red); box-shadow: 0 0 8px var(--red-dim); }
+.verdict-dot.green { background: var(--green); box-shadow: 0 0 8px var(--green-dim); }
+.verdict-dot.orange { background: var(--orange); box-shadow: 0 0 8px var(--orange-dim); }
 
 .verdict-info { flex: 1; min-width: 0; }
 .verdict-domain {
@@ -522,8 +519,8 @@ button:focus-visible {
   cursor: pointer;
   transition: background 0.2s;
 }
-.verdict-share:hover { background: var(--blue-dim); color: var(--blue); }
-.verdict-share .material-symbols-outlined { font-size: 18px; }
+.verdict-share:hover { background: var(--indigo-light); color: var(--indigo); }
+.verdict-share .material-symbols-rounded { font-size: 18px; }
 
 /* ========== SCREEN 2: SHIELD ========== */
 .shield-header {
@@ -555,18 +552,18 @@ button:focus-visible {
   animation: shieldGlow 3s ease-in-out infinite;
 }
 @keyframes shieldGlow {
-  0%, 100% { box-shadow: 0 0 30px var(--orange-glow), 0 0 60px rgba(210,153,34,0.1); }
-  50% { box-shadow: 0 0 40px var(--orange-glow), 0 0 80px rgba(210,153,34,0.15); }
+  0%, 100% { box-shadow: 0 0 30px var(--orange-dim), 0 0 60px rgba(210,153,34,0.1); }
+  50% { box-shadow: 0 0 40px var(--orange-dim), 0 0 80px rgba(210,153,34,0.15); }
 }
 .shield-icon-bg.score-green { animation-name: shieldGlowGreen; }
 @keyframes shieldGlowGreen {
-  0%, 100% { box-shadow: 0 0 30px var(--green-glow), 0 0 60px rgba(63,185,80,0.1); }
-  50% { box-shadow: 0 0 40px var(--green-glow), 0 0 80px rgba(63,185,80,0.15); }
+  0%, 100% { box-shadow: 0 0 30px var(--green-dim), 0 0 60px rgba(63,185,80,0.1); }
+  50% { box-shadow: 0 0 40px var(--green-dim), 0 0 80px rgba(63,185,80,0.15); }
 }
 .shield-icon-bg.score-red { animation-name: shieldGlowRed; }
 @keyframes shieldGlowRed {
-  0%, 100% { box-shadow: 0 0 30px var(--red-glow), 0 0 60px rgba(248,81,73,0.1); }
-  50% { box-shadow: 0 0 40px var(--red-glow), 0 0 80px rgba(248,81,73,0.15); }
+  0%, 100% { box-shadow: 0 0 30px var(--red-dim), 0 0 60px rgba(248,81,73,0.1); }
+  50% { box-shadow: 0 0 40px var(--red-dim), 0 0 80px rgba(248,81,73,0.15); }
 }
 .shield-icon-inner {
   position: relative;
@@ -580,7 +577,7 @@ button:focus-visible {
   justify-content: center;
   z-index: 1;
 }
-.shield-icon-inner .material-symbols-outlined {
+.shield-icon-inner .material-symbols-rounded {
   font-size: 48px;
   color: var(--orange);
   font-variation-settings: 'FILL' 1;
@@ -692,7 +689,7 @@ button:focus-visible {
   border-radius: 100px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  color: var(--blue);
+  color: var(--indigo);
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
@@ -702,8 +699,8 @@ button:focus-visible {
   gap: 6px;
   transition: all 0.2s;
 }
-.btn-recheck:hover { background: var(--blue-dim); }
-.btn-recheck .material-symbols-outlined { font-size: 18px; }
+.btn-recheck:hover { background: var(--indigo-light); }
+.btn-recheck .material-symbols-rounded { font-size: 18px; }
 
 /* ========== SCREEN 3: ALERTS ========== */
 .alerts-header {
@@ -749,9 +746,9 @@ button:focus-visible {
   justify-content: center;
 }
 .alert-severity.high { background: var(--red-dim); }
-.alert-severity.high .material-symbols-outlined { color: var(--red); font-size: 20px; }
+.alert-severity.high .material-symbols-rounded { color: var(--red); font-size: 20px; }
 .alert-severity.medium { background: var(--orange-dim); }
-.alert-severity.medium .material-symbols-outlined { color: var(--orange); font-size: 20px; }
+.alert-severity.medium .material-symbols-rounded { color: var(--orange); font-size: 20px; }
 
 .alert-title {
   font-size: 15px;
@@ -774,7 +771,7 @@ button:focus-visible {
   color: var(--red);
   font-weight: 600;
 }
-.alert-reports .material-symbols-outlined { font-size: 14px; }
+.alert-reports .material-symbols-rounded { font-size: 14px; }
 .alert-expand {
   display: none;
   margin-top: 12px;
@@ -813,7 +810,7 @@ button:focus-visible {
   font-size: 28px;
   font-weight: 800;
   letter-spacing: -1px;
-  color: var(--blue);
+  color: var(--indigo);
 }
 .stat-label {
   font-size: 13px;
@@ -933,12 +930,12 @@ button:focus-visible {
 }
 .accordion-btn:hover { background: var(--bg-card-hover); }
 .accordion-btn .accordion-label { flex: 1; padding-right: 8px; }
-.accordion-btn .material-symbols-outlined {
+.accordion-btn .material-symbols-rounded {
   font-size: 20px;
   color: var(--text-tertiary);
   transition: transform 0.3s;
 }
-.accordion-item.open .accordion-btn .material-symbols-outlined {
+.accordion-item.open .accordion-btn .material-symbols-rounded {
   transform: rotate(180deg);
 }
 .accordion-content {
@@ -973,7 +970,7 @@ button:focus-visible {
   gap: 8px;
 }
 .share-app-btn:active { transform: scale(0.97); }
-.share-app-btn .material-symbols-outlined { font-size: 20px; }
+.share-app-btn .material-symbols-rounded { font-size: 20px; }
 
 .about-section {
   padding: 20px;
@@ -1024,7 +1021,7 @@ button:focus-visible {
   gap: 12px;
   border: 1px solid rgba(248,81,73,0.15);
 }
-.risk-card .material-symbols-outlined { font-size: 24px; color: var(--red); min-width: 24px; }
+.risk-card .material-symbols-rounded { font-size: 24px; color: var(--red); min-width: 24px; }
 .risk-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
 
 .steps-section { padding: 0 16px; }
@@ -1079,7 +1076,7 @@ button:focus-visible {
   align-items: center;
   gap: 8px;
 }
-.settings-mock-header .material-symbols-outlined { font-size: 18px; }
+.settings-mock-header .material-symbols-rounded { font-size: 18px; }
 .settings-mock-row {
   padding: 16px;
   display: flex;
@@ -1101,7 +1098,7 @@ button:focus-visible {
   gap: 8px;
   border: 1px solid rgba(210,153,34,0.15);
 }
-.fix-hint .material-symbols-outlined { font-size: 18px; }
+.fix-hint .material-symbols-rounded { font-size: 18px; }
 .fix-hint.hidden { display: none; }
 
 .fix-buttons {
@@ -1134,11 +1131,11 @@ button:focus-visible {
   padding: 16px;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--blue);
+  color: var(--indigo);
   font-family: inherit;
   font-size: 15px;
   font-weight: 700;
-  border: 1.5px solid var(--blue);
+  border: 1.5px solid var(--indigo);
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
@@ -1146,15 +1143,15 @@ button:focus-visible {
   justify-content: center;
   gap: 8px;
 }
-.btn-fix-outlined:hover { background: var(--blue-dim); }
+.btn-fix-outlined:hover { background: var(--indigo-light); }
 .btn-fix-outlined:disabled {
   color: var(--text-tertiary);
   border-color: var(--text-tertiary);
   cursor: not-allowed;
 }
 .btn-fix-outlined:disabled:hover { background: transparent; }
-.btn-fix-outlined .material-symbols-outlined,
-.btn-fix-primary .material-symbols-outlined { font-size: 20px; }
+.btn-fix-outlined .material-symbols-rounded,
+.btn-fix-primary .material-symbols-rounded { font-size: 20px; }
 .btn-text-skip {
   background: none;
   border: none;
@@ -1232,10 +1229,10 @@ button:focus-visible {
 .verdict-shield.red { background: var(--red-dim); border: 2px solid var(--red); }
 .verdict-shield.green { background: var(--green-dim); border: 2px solid var(--green); }
 .verdict-shield.orange { background: var(--orange-dim); border: 2px solid var(--orange); }
-.verdict-shield .material-symbols-outlined { font-size: 44px; }
-.verdict-shield.red .material-symbols-outlined { color: var(--red); }
-.verdict-shield.green .material-symbols-outlined { color: var(--green); }
-.verdict-shield.orange .material-symbols-outlined { color: var(--orange); }
+.verdict-shield .material-symbols-rounded { font-size: 44px; }
+.verdict-shield.red .material-symbols-rounded { color: var(--red); }
+.verdict-shield.green .material-symbols-rounded { color: var(--green); }
+.verdict-shield.orange .material-symbols-rounded { color: var(--orange); }
 
 .verdict-label {
   font-size: 32px;
@@ -1274,7 +1271,7 @@ button:focus-visible {
   align-items: center;
   gap: 6px;
 }
-.verdict-warning .material-symbols-outlined { font-size: 18px; }
+.verdict-warning .material-symbols-rounded { font-size: 18px; }
 
 .verdict-actions {
   position: relative;
@@ -1302,9 +1299,9 @@ button:focus-visible {
   gap: 8px;
 }
 .btn-verdict-primary:active { transform: scale(0.97); }
-.btn-verdict-primary.red { background: var(--gradient-red); box-shadow: 0 4px 16px var(--red-glow); }
-.btn-verdict-primary.green { background: var(--gradient-green); box-shadow: 0 4px 16px var(--green-glow); }
-.btn-verdict-primary.orange { background: var(--gradient-orange); box-shadow: 0 4px 16px var(--orange-glow); }
+.btn-verdict-primary.red { background: var(--gradient-red); box-shadow: 0 4px 16px var(--red-dim); }
+.btn-verdict-primary.green { background: var(--gradient-green); box-shadow: 0 4px 16px var(--green-dim); }
+.btn-verdict-primary.orange { background: var(--gradient-orange); box-shadow: 0 4px 16px var(--orange-dim); }
 
 .btn-verdict-outlined {
   width: 100%;
@@ -1365,9 +1362,9 @@ button:focus-visible {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.08); opacity: 0.7; }
 }
-.scan-shield .material-symbols-outlined {
+.scan-shield .material-symbols-rounded {
   font-size: 56px;
-  color: var(--blue);
+  color: var(--indigo);
   font-variation-settings: 'FILL' 1;
 }
 .scan-text {
@@ -1401,14 +1398,14 @@ button:focus-visible {
   justify-content: center;
   margin-bottom: 16px;
   animation: popIn 0.4s ease;
-  box-shadow: 0 0 40px var(--green-glow);
+  box-shadow: 0 0 40px var(--green-dim);
 }
 @keyframes popIn {
   0% { transform: scale(0); }
   60% { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
-.success-check .material-symbols-outlined { font-size: 44px; color: white; }
+.success-check .material-symbols-rounded { font-size: 44px; color: white; }
 .success-text { font-size: 18px; font-weight: 700; color: var(--green); }
 
 /* Toast */
@@ -1430,7 +1427,7 @@ button:focus-visible {
   pointer-events: none;
   text-align: center;
   border: 1px solid var(--border);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 .toast.show { opacity: 1; transform: translateY(0); }
 
@@ -1455,8 +1452,8 @@ button:focus-visible {
   animation: eduGlow 2.5s ease-in-out infinite;
 }
 @keyframes eduGlow {
-  0%, 100% { box-shadow: 0 0 25px var(--red-glow), 0 0 50px rgba(248,81,73,0.1); }
-  50% { box-shadow: 0 0 40px var(--red-glow), 0 0 70px rgba(248,81,73,0.2); }
+  0%, 100% { box-shadow: 0 0 25px var(--red-dim), 0 0 50px rgba(248,81,73,0.1); }
+  50% { box-shadow: 0 0 40px var(--red-dim), 0 0 70px rgba(248,81,73,0.2); }
 }
 .edu-icon-inner {
   position: relative;
@@ -1470,7 +1467,7 @@ button:focus-visible {
   justify-content: center;
   z-index: 1;
 }
-.edu-icon-inner .material-symbols-outlined {
+.edu-icon-inner .material-symbols-rounded {
   font-size: 40px;
   color: var(--red);
   font-variation-settings: 'FILL' 1;
@@ -1529,7 +1526,7 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
 }
-.edu-step-icon .material-symbols-outlined {
+.edu-step-icon .material-symbols-rounded {
   font-size: 22px;
   color: var(--red);
 }
@@ -1549,7 +1546,7 @@ button:focus-visible {
   padding: 6px 0;
   color: var(--text-tertiary);
 }
-.edu-step-arrow .material-symbols-outlined { font-size: 20px; }
+.edu-step-arrow .material-symbols-rounded { font-size: 20px; }
 
 .edu-stat-card {
   margin: 0 20px 16px;
@@ -1561,7 +1558,7 @@ button:focus-visible {
   gap: 14px;
   align-items: center;
 }
-.edu-stat-card .material-symbols-outlined {
+.edu-stat-card .material-symbols-rounded {
   font-size: 28px;
   color: var(--orange);
   min-width: 28px;
@@ -1629,7 +1626,7 @@ button:focus-visible {
   transition: all 0.2s;
 }
 .btn-text-why:hover { background: var(--bg-card-hover); color: var(--text-primary); }
-.btn-text-why .material-symbols-outlined { font-size: 16px; }
+.btn-text-why .material-symbols-rounded { font-size: 16px; }
 
 /* App card expanded "why" explanation */
 .app-card-why {
@@ -1688,12 +1685,12 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
   margin: 0 auto 20px;
-  box-shadow: 0 0 30px var(--red-glow), 0 0 60px rgba(248,81,73,0.1);
+  box-shadow: 0 0 30px var(--red-dim), 0 0 60px rgba(248,81,73,0.1);
   animation: shareRingPulse 2s ease-in-out infinite;
 }
 @keyframes shareRingPulse {
-  0%, 100% { box-shadow: 0 0 25px var(--red-glow); }
-  50% { box-shadow: 0 0 40px var(--red-glow), 0 0 60px rgba(248,81,73,0.15); }
+  0%, 100% { box-shadow: 0 0 25px var(--red-dim); }
+  50% { box-shadow: 0 0 40px var(--red-dim), 0 0 60px rgba(248,81,73,0.15); }
 }
 .share-prompt-score {
   font-size: 32px;
@@ -1772,7 +1769,7 @@ button:focus-visible {
   transition: all 0.2s;
 }
 .share-prompt-copy:hover { background: var(--bg-card-hover); }
-.share-prompt-copy .material-symbols-outlined { font-size: 18px; }
+.share-prompt-copy .material-symbols-rounded { font-size: 18px; }
 
 .share-prompt-people {
   display: flex;
@@ -1783,7 +1780,7 @@ button:focus-visible {
   color: var(--text-tertiary);
   margin-bottom: 16px;
 }
-.share-prompt-people .material-symbols-outlined { font-size: 16px; color: var(--green); }
+.share-prompt-people .material-symbols-rounded { font-size: 16px; color: var(--green); }
 
 .share-prompt-skip {
   background: none;
@@ -1818,7 +1815,7 @@ button:focus-visible {
   transition: background 0.2s;
 }
 .guardian-top-bar-back:hover { background: var(--bg-card); }
-.guardian-top-bar-back .material-symbols-outlined { font-size: 24px; }
+.guardian-top-bar-back .material-symbols-rounded { font-size: 24px; }
 .guardian-top-bar-title {
   font-size: 18px;
   font-weight: 700;
@@ -1841,7 +1838,7 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
 }
-.pairing-logo-icon .material-symbols-outlined { font-size: 20px; color: white; }
+.pairing-logo-icon .material-symbols-rounded { font-size: 20px; color: white; }
 .pairing-logo-text {
   font-size: 18px;
   font-weight: 800;
@@ -1916,16 +1913,16 @@ button:focus-visible {
 .role-card.protect .role-card-icon {
   background: var(--green-dim);
 }
-.role-card.protect .role-card-icon .material-symbols-outlined {
+.role-card.protect .role-card-icon .material-symbols-rounded {
   color: var(--green);
   font-size: 28px;
   font-variation-settings: 'FILL' 1;
 }
 .role-card.monitor .role-card-icon {
-  background: var(--blue-dim);
+  background: var(--indigo-light);
 }
-.role-card.monitor .role-card-icon .material-symbols-outlined {
-  color: var(--blue);
+.role-card.monitor .role-card-icon .material-symbols-rounded {
+  color: var(--indigo);
   font-size: 28px;
   font-variation-settings: 'FILL' 1;
 }
@@ -1947,7 +1944,7 @@ button:focus-visible {
   transform: translateY(-50%);
   color: var(--text-tertiary);
 }
-.role-card-arrow .material-symbols-outlined { font-size: 20px; }
+.role-card-arrow .material-symbols-rounded { font-size: 20px; }
 
 /* Code Generation */
 .code-panel {
@@ -1977,7 +1974,7 @@ button:focus-visible {
   font-weight: 800;
   letter-spacing: 8px;
   color: var(--green);
-  font-family: 'Inter', monospace;
+  font-family: 'Quicksand', monospace;
   margin-bottom: 12px;
 }
 .code-display-timer {
@@ -1989,7 +1986,7 @@ button:focus-visible {
   justify-content: center;
   gap: 6px;
 }
-.code-display-timer .material-symbols-outlined { font-size: 18px; }
+.code-display-timer .material-symbols-rounded { font-size: 18px; }
 .code-display-instruction {
   margin-top: 16px;
   font-size: 13px;
@@ -2058,7 +2055,7 @@ button:focus-visible {
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
   color: var(--text-primary);
-  font-family: 'Inter', monospace;
+  font-family: 'Quicksand', monospace;
   font-size: 24px;
   font-weight: 700;
   letter-spacing: 6px;
@@ -2074,7 +2071,7 @@ button:focus-visible {
   font-weight: 500;
 }
 .code-input:focus {
-  border-color: var(--blue);
+  border-color: var(--indigo);
   box-shadow: 0 0 0 3px rgba(88,166,255,0.15), 0 0 20px rgba(88,166,255,0.1);
 }
 .btn-guardian-link {
@@ -2120,7 +2117,7 @@ button:focus-visible {
   margin: 0 auto 16px;
   animation: popIn 0.4s ease;
 }
-.guardian-link-success-check .material-symbols-outlined {
+.guardian-link-success-check .material-symbols-rounded {
   font-size: 36px;
   color: var(--green);
   font-variation-settings: 'FILL' 1;
@@ -2171,8 +2168,8 @@ button:focus-visible {
   flex-shrink: 0;
 }
 .linked-member-avatar.guardian {
-  background: var(--blue-dim);
-  color: var(--blue);
+  background: var(--indigo-light);
+  color: var(--indigo);
 }
 .linked-member-avatar.protected {
   background: var(--green-dim);
@@ -2227,7 +2224,7 @@ button:focus-visible {
   justify-content: center;
   gap: 6px;
 }
-.pull-refresh .material-symbols-outlined {
+.pull-refresh .material-symbols-rounded {
   font-size: 16px;
   animation: guardianSpin 1.5s linear infinite;
 }
@@ -2305,12 +2302,12 @@ button:focus-visible {
   align-items: center;
   gap: 4px;
 }
-.ward-card-heartbeat .material-symbols-outlined { font-size: 14px; }
+.ward-card-heartbeat .material-symbols-rounded { font-size: 14px; }
 .ward-card-arrow {
   color: var(--text-tertiary);
   flex-shrink: 0;
 }
-.ward-card-arrow .material-symbols-outlined { font-size: 20px; }
+.ward-card-arrow .material-symbols-rounded { font-size: 20px; }
 .ward-card-badges {
   display: flex;
   gap: 8px;
@@ -2325,7 +2322,7 @@ button:focus-visible {
   align-items: center;
   gap: 4px;
 }
-.ward-badge .material-symbols-outlined { font-size: 14px; }
+.ward-badge .material-symbols-rounded { font-size: 14px; }
 .ward-badge.play-protect-on {
   background: var(--green-dim);
   color: var(--green);
@@ -2425,13 +2422,13 @@ button:focus-visible {
   justify-content: center;
   flex-shrink: 0;
 }
-.status-card-icon .material-symbols-outlined { font-size: 22px; }
+.status-card-icon .material-symbols-rounded { font-size: 22px; }
 .status-card-icon.green { background: var(--green-dim); }
-.status-card-icon.green .material-symbols-outlined { color: var(--green); font-variation-settings: 'FILL' 1; }
+.status-card-icon.green .material-symbols-rounded { color: var(--green); font-variation-settings: 'FILL' 1; }
 .status-card-icon.red { background: var(--red-dim); }
-.status-card-icon.red .material-symbols-outlined { color: var(--red); font-variation-settings: 'FILL' 1; }
+.status-card-icon.red .material-symbols-rounded { color: var(--red); font-variation-settings: 'FILL' 1; }
 .status-card-icon.orange { background: var(--orange-dim); }
-.status-card-icon.orange .material-symbols-outlined { color: var(--orange); }
+.status-card-icon.orange .material-symbols-rounded { color: var(--orange); }
 .status-card-info { flex: 1; }
 .status-card-label { font-size: 14px; font-weight: 600; }
 .status-card-value { font-size: 12px; color: var(--text-tertiary); }
@@ -2583,7 +2580,7 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
 }
-.guardian-profile-icon .material-symbols-outlined { font-size: 24px; color: white; }
+.guardian-profile-icon .material-symbols-rounded { font-size: 24px; color: white; }
 .guardian-profile-info h3 {
   font-size: 17px;
   font-weight: 700;
@@ -2598,14 +2595,14 @@ button:focus-visible {
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: var(--teal-dim);
+  background: var(--teal-light);
   border-radius: var(--radius-xs);
   margin-bottom: 14px;
   font-size: 14px;
   color: var(--teal);
   font-weight: 600;
 }
-.guardian-profile-summary .material-symbols-outlined { font-size: 18px; }
+.guardian-profile-summary .material-symbols-rounded { font-size: 18px; }
 .btn-guardian-setup {
   width: 100%;
   padding: 14px;
@@ -2660,9 +2657,9 @@ button:focus-visible {
   <div class="status-bar" aria-hidden="true">
     <span>9:41</span>
     <div class="icons">
-      <span class="material-symbols-outlined">signal_cellular_alt</span>
-      <span class="material-symbols-outlined">wifi</span>
-      <span class="material-symbols-outlined">battery_5_bar</span>
+      <span class="material-symbols-rounded">signal_cellular_alt</span>
+      <span class="material-symbols-rounded">wifi</span>
+      <span class="material-symbols-rounded">battery_5_bar</span>
     </div>
   </div>
 
@@ -2671,21 +2668,21 @@ button:focus-visible {
     <div class="onboarding-slides">
       <div class="onboarding-slide active" data-slide="0">
         <div class="onboarding-icon" style="background: var(--gradient-accent);">
-          <span class="material-symbols-outlined">shield</span>
+          <span class="material-symbols-rounded">shield</span>
         </div>
         <h2>Welcome to Safe Anot?</h2>
         <p>Your scam protection companion for Malaysia and Singapore</p>
       </div>
       <div class="onboarding-slide" data-slide="1">
-        <div class="onboarding-icon" style="background: linear-gradient(135deg, #3FB950, #238636);">
-          <span class="material-symbols-outlined">link</span>
+        <div class="onboarding-icon" style="background: linear-gradient(135deg, #16A34A, #15803D);">
+          <span class="material-symbols-rounded">link</span>
         </div>
         <h2>Check Any Link</h2>
         <p>Paste any suspicious link and get an instant verdict. Safe anot? We'll tell you in seconds.</p>
       </div>
       <div class="onboarding-slide" data-slide="2">
-        <div class="onboarding-icon" style="background: linear-gradient(135deg, #BC8CFF, #8957E5);">
-          <span class="material-symbols-outlined">family_restroom</span>
+        <div class="onboarding-icon" style="background: linear-gradient(135deg, #0D9488, #0F766E);">
+          <span class="material-symbols-rounded">family_restroom</span>
         </div>
         <h2>Protect Your Family</h2>
         <p>Guard your parents from scam apps and get alerts when their phone security changes.</p>
@@ -2717,13 +2714,13 @@ button:focus-visible {
           Share on WhatsApp
         </button>
         <button class="share-prompt-copy" id="btnShareCopy">
-          <span class="material-symbols-outlined" aria-hidden="true">content_copy</span>
+          <span class="material-symbols-rounded" aria-hidden="true">content_copy</span>
           Copy Link
         </button>
       </div>
 
       <div class="share-prompt-people">
-        <span class="material-symbols-outlined" aria-hidden="true">group</span>
+        <span class="material-symbols-rounded" aria-hidden="true">group</span>
         <span>12,847 people protected their family this week</span>
       </div>
 
@@ -2734,7 +2731,7 @@ button:focus-visible {
   <!-- Scan Overlay -->
   <div class="scan-overlay" id="scanOverlay" role="status" aria-live="polite">
     <div class="scan-shield" aria-hidden="true">
-      <span class="material-symbols-outlined">shield</span>
+      <span class="material-symbols-rounded">shield</span>
     </div>
     <div class="scan-text">Scanning your device...</div>
   </div>
@@ -2742,7 +2739,7 @@ button:focus-visible {
   <!-- Success Overlay -->
   <div class="success-overlay" id="successOverlay" role="status" aria-live="assertive">
     <div class="success-check" aria-hidden="true">
-      <span class="material-symbols-outlined">check</span>
+      <span class="material-symbols-rounded">check</span>
     </div>
     <div class="success-text">Secured!</div>
   </div>
@@ -2763,7 +2760,7 @@ button:focus-visible {
     <div class="check-header">
       <div class="logo">
         <div class="logo-icon" aria-hidden="true">
-          <span class="material-symbols-outlined">shield</span>
+          <span class="material-symbols-rounded">shield</span>
         </div>
         <span class="logo-text">Safe Anot?</span>
       </div>
@@ -2782,13 +2779,13 @@ button:focus-visible {
       </div>
 
       <button class="btn-check-now" id="btnCheckNow">
-        <span class="material-symbols-outlined" aria-hidden="true">search</span>
+        <span class="material-symbols-rounded" aria-hidden="true">search</span>
         CHECK NOW
       </button>
 
       <div class="share-hint">Or <strong>share a link from WhatsApp</strong> to check instantly</div>
       <div class="domain-count">
-        <span class="material-symbols-outlined" aria-hidden="true">database</span>
+        <span class="material-symbols-rounded" aria-hidden="true">database</span>
         We check against 500,000+ known scam domains
       </div>
     </div>
@@ -2804,7 +2801,7 @@ button:focus-visible {
           <div class="verdict-reason">Fake banking domain</div>
         </div>
         <button class="verdict-share" aria-label="Share warning about maybank-secure-update.xyz">
-          <span class="material-symbols-outlined">share</span>
+          <span class="material-symbols-rounded">share</span>
         </button>
       </div>
 
@@ -2816,7 +2813,7 @@ button:focus-visible {
           <div class="verdict-reason">Official Shopee domain</div>
         </div>
         <button class="verdict-share" aria-label="Share result for shopee.com.my">
-          <span class="material-symbols-outlined">share</span>
+          <span class="material-symbols-rounded">share</span>
         </button>
       </div>
 
@@ -2828,7 +2825,7 @@ button:focus-visible {
           <div class="verdict-reason">URL shortener detected</div>
         </div>
         <button class="verdict-share" aria-label="Share warning about bit.ly/kl-investment">
-          <span class="material-symbols-outlined">share</span>
+          <span class="material-symbols-rounded">share</span>
         </button>
       </div>
     </div>
@@ -2847,7 +2844,7 @@ button:focus-visible {
         <div class="edu-icon-wrapper">
           <div class="edu-icon-bg"></div>
           <div class="edu-icon-inner">
-            <span class="material-symbols-outlined">warning</span>
+            <span class="material-symbols-rounded">warning</span>
           </div>
         </div>
         <h3 class="edu-title">Did you know?</h3>
@@ -2858,29 +2855,29 @@ button:focus-visible {
         <div class="edu-step">
           <div class="edu-step-num">1</div>
           <div class="edu-step-content">
-            <div class="edu-step-icon"><span class="material-symbols-outlined">chat</span></div>
+            <div class="edu-step-icon"><span class="material-symbols-rounded">chat</span></div>
             <div>
               <div class="edu-step-title">Scammer sends a file</div>
               <div class="edu-step-desc">They send a dangerous APK file disguised as a "bank update" or "trading app" via WhatsApp or Telegram.</div>
             </div>
           </div>
         </div>
-        <div class="edu-step-arrow"><span class="material-symbols-outlined">arrow_downward</span></div>
+        <div class="edu-step-arrow"><span class="material-symbols-rounded">arrow_downward</span></div>
         <div class="edu-step">
           <div class="edu-step-num">2</div>
           <div class="edu-step-content">
-            <div class="edu-step-icon"><span class="material-symbols-outlined">download</span></div>
+            <div class="edu-step-icon"><span class="material-symbols-rounded">download</span></div>
             <div>
               <div class="edu-step-title">Your phone installs it</div>
               <div class="edu-step-desc">If "Install unknown apps" is ON for WhatsApp, your phone allows the scam app to be installed — no warning.</div>
             </div>
           </div>
         </div>
-        <div class="edu-step-arrow"><span class="material-symbols-outlined">arrow_downward</span></div>
+        <div class="edu-step-arrow"><span class="material-symbols-rounded">arrow_downward</span></div>
         <div class="edu-step">
           <div class="edu-step-num">3</div>
           <div class="edu-step-content">
-            <div class="edu-step-icon"><span class="material-symbols-outlined">credit_card_off</span></div>
+            <div class="edu-step-icon"><span class="material-symbols-rounded">credit_card_off</span></div>
             <div>
               <div class="edu-step-title">Money gone</div>
               <div class="edu-step-desc">The scam app steals your banking login, OTP codes, or takes control of your phone. Victims lose thousands.</div>
@@ -2890,7 +2887,7 @@ button:focus-visible {
       </div>
 
       <div class="edu-stat-card">
-        <span class="material-symbols-outlined" aria-hidden="true">trending_up</span>
+        <span class="material-symbols-rounded" aria-hidden="true">trending_up</span>
         <div>
           <div class="edu-stat-number">RM 2.7 billion</div>
           <div class="edu-stat-label">lost to scams in Malaysia in 2025</div>
@@ -2900,7 +2897,7 @@ button:focus-visible {
       <div class="edu-bottom">
         <p class="edu-cta-text">Let's check if your phone is vulnerable.</p>
         <button class="edu-scan-btn" id="btnStartShieldScan">
-          <span class="material-symbols-outlined" aria-hidden="true">radar</span>
+          <span class="material-symbols-rounded" aria-hidden="true">radar</span>
           Scan My Phone
         </button>
         <p class="edu-reassure">Takes 3 seconds. No data leaves your phone.</p>
@@ -2912,7 +2909,7 @@ button:focus-visible {
       <div class="shield-header" style="display:flex;align-items:center;justify-content:space-between;">
         <h2>Your Phone Shield</h2>
         <button class="btn-text-why" id="btnWhyThisMatters" aria-label="Why this matters">
-          <span class="material-symbols-outlined" aria-hidden="true">help</span> Why?
+          <span class="material-symbols-rounded" aria-hidden="true">help</span> Why?
         </button>
       </div>
 
@@ -2920,7 +2917,7 @@ button:focus-visible {
         <div class="shield-icon-wrapper">
           <div class="shield-icon-bg" id="shieldGlowBg"></div>
           <div class="shield-icon-inner">
-            <span class="material-symbols-outlined" id="shieldIconSymbol">shield</span>
+            <span class="material-symbols-rounded" id="shieldIconSymbol">shield</span>
           </div>
         </div>
         <div class="shield-score" id="shieldScore" aria-label="Security score">72%</div>
@@ -2941,7 +2938,7 @@ button:focus-visible {
 
       <div class="recheck-container">
         <button class="btn-recheck" id="btnRecheck">
-          <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+          <span class="material-symbols-rounded" aria-hidden="true">refresh</span>
           Recheck All
         </button>
       </div>
@@ -2959,7 +2956,7 @@ button:focus-visible {
     <div class="alert-card" role="button" tabindex="0" aria-expanded="false">
       <div class="alert-card-top">
         <div class="alert-severity high" aria-label="High severity">
-          <span class="material-symbols-outlined">phishing</span>
+          <span class="material-symbols-rounded">phishing</span>
         </div>
         <div>
           <div class="alert-title">Fake Maybank Login Pages Spreading on WhatsApp</div>
@@ -2968,7 +2965,7 @@ button:focus-visible {
       <div class="alert-meta">
         <span>2 days ago</span>
         <span class="dot"></span>
-        <span class="alert-reports"><span class="material-symbols-outlined">warning</span> 237 reports in Selangor</span>
+        <span class="alert-reports"><span class="material-symbols-rounded">warning</span> 237 reports in Selangor</span>
       </div>
       <div class="alert-expand">Scammers are distributing fake Maybank2u login pages via WhatsApp. These pages look identical to the real thing but steal your credentials. Always type maybank2u.com.my directly into your browser.</div>
     </div>
@@ -2976,7 +2973,7 @@ button:focus-visible {
     <div class="alert-card" role="button" tabindex="0" aria-expanded="false">
       <div class="alert-card-top">
         <div class="alert-severity high" aria-label="High severity">
-          <span class="material-symbols-outlined">bug_report</span>
+          <span class="material-symbols-rounded">bug_report</span>
         </div>
         <div>
           <div class="alert-title">Fake "LHDN Tax Refund" SMS Targeting KL Residents</div>
@@ -2985,7 +2982,7 @@ button:focus-visible {
       <div class="alert-meta">
         <span>3 days ago</span>
         <span class="dot"></span>
-        <span class="alert-reports"><span class="material-symbols-outlined">warning</span> 182 reports in KL</span>
+        <span class="alert-reports"><span class="material-symbols-rounded">warning</span> 182 reports in KL</span>
       </div>
       <div class="alert-expand">SMS messages claiming you have a tax refund from LHDN are fake. They link to phishing pages that steal your banking info. LHDN never sends refund links via SMS.</div>
     </div>
@@ -2993,7 +2990,7 @@ button:focus-visible {
     <div class="alert-card" role="button" tabindex="0" aria-expanded="false">
       <div class="alert-card-top">
         <div class="alert-severity medium" aria-label="Medium severity">
-          <span class="material-symbols-outlined">shopping_cart</span>
+          <span class="material-symbols-rounded">shopping_cart</span>
         </div>
         <div>
           <div class="alert-title">Fake Shopee "Lucky Draw" Links on Facebook</div>
@@ -3002,7 +2999,7 @@ button:focus-visible {
       <div class="alert-meta">
         <span>5 days ago</span>
         <span class="dot"></span>
-        <span class="alert-reports"><span class="material-symbols-outlined">warning</span> 94 reports in Penang</span>
+        <span class="alert-reports"><span class="material-symbols-rounded">warning</span> 94 reports in Penang</span>
       </div>
       <div class="alert-expand">Ads on Facebook promising Shopee lucky draw prizes are scams. They lead to fake sites that collect your personal data. Shopee only runs promotions within their official app.</div>
     </div>
@@ -3010,7 +3007,7 @@ button:focus-visible {
     <div class="alert-card" role="button" tabindex="0" aria-expanded="false">
       <div class="alert-card-top">
         <div class="alert-severity high" aria-label="High severity">
-          <span class="material-symbols-outlined">smartphone</span>
+          <span class="material-symbols-rounded">smartphone</span>
         </div>
         <div>
           <div class="alert-title">Malicious APK Disguised as "TNG eWallet Update"</div>
@@ -3019,7 +3016,7 @@ button:focus-visible {
       <div class="alert-meta">
         <span>1 week ago</span>
         <span class="dot"></span>
-        <span class="alert-reports"><span class="material-symbols-outlined">warning</span> 156 reports in Johor</span>
+        <span class="alert-reports"><span class="material-symbols-rounded">warning</span> 156 reports in Johor</span>
       </div>
       <div class="alert-expand">A fake APK file is being shared on Telegram claiming to be a TNG eWallet update. It installs malware that steals your OTP codes. Only update apps through Google Play Store.</div>
     </div>
@@ -3056,7 +3053,7 @@ button:focus-visible {
     <div class="guardian-profile-card" id="guardianCardSetup">
       <div class="guardian-profile-header">
         <div class="guardian-profile-icon">
-          <span class="material-symbols-outlined">family_restroom</span>
+          <span class="material-symbols-rounded">family_restroom</span>
         </div>
         <div class="guardian-profile-info">
           <h3>Family Guardian</h3>
@@ -3072,7 +3069,7 @@ button:focus-visible {
     <div class="guardian-profile-card" id="guardianCardLinked" style="display:none;">
       <div class="guardian-profile-header">
         <div class="guardian-profile-icon">
-          <span class="material-symbols-outlined">family_restroom</span>
+          <span class="material-symbols-rounded">family_restroom</span>
         </div>
         <div class="guardian-profile-info">
           <h3>Family Guardian</h3>
@@ -3080,7 +3077,7 @@ button:focus-visible {
         </div>
       </div>
       <div class="guardian-profile-summary">
-        <span class="material-symbols-outlined">monitoring</span>
+        <span class="material-symbols-rounded">monitoring</span>
         Monitoring 2 family members
       </div>
       <button class="btn-guardian-dashboard" id="btnGuardianDashboard">
@@ -3122,7 +3119,7 @@ button:focus-visible {
       <div class="accordion-item">
         <button class="accordion-btn" aria-expanded="false">
           <span class="accordion-label">Never install APKs from WhatsApp or Telegram</span>
-          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+          <span class="material-symbols-rounded" aria-hidden="true">expand_more</span>
         </button>
         <div class="accordion-content" role="region">
           <p>Scammers send APK files through messaging apps disguised as legitimate apps, updates, or tools. Never download and install APK files received through these channels.</p>
@@ -3131,7 +3128,7 @@ button:focus-visible {
       <div class="accordion-item">
         <button class="accordion-btn" aria-expanded="false">
           <span class="accordion-label">Only install apps from Google Play Store</span>
-          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+          <span class="material-symbols-rounded" aria-hidden="true">expand_more</span>
         </button>
         <div class="accordion-content" role="region">
           <p>The Google Play Store screens apps for malware and malicious behavior. Installing apps from other sources bypasses these safety checks.</p>
@@ -3140,7 +3137,7 @@ button:focus-visible {
       <div class="accordion-item">
         <button class="accordion-btn" aria-expanded="false">
           <span class="accordion-label">Keep Google Play Protect enabled</span>
-          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+          <span class="material-symbols-rounded" aria-hidden="true">expand_more</span>
         </button>
         <div class="accordion-content" role="region">
           <p>Google Play Protect continuously scans your device for potentially harmful apps. It should always be enabled for maximum protection.</p>
@@ -3149,7 +3146,7 @@ button:focus-visible {
       <div class="accordion-item">
         <button class="accordion-btn" aria-expanded="false">
           <span class="accordion-label">If someone asks you to install an APK, it's a scam</span>
-          <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+          <span class="material-symbols-rounded" aria-hidden="true">expand_more</span>
         </button>
         <div class="accordion-content" role="region">
           <p>Legitimate companies never ask you to sideload an APK. If someone sends you an APK file and asks you to install it, treat it as a scam.</p>
@@ -3158,7 +3155,7 @@ button:focus-visible {
     </div>
 
     <button class="share-app-btn" id="btnShareApp">
-      <span class="material-symbols-outlined" aria-hidden="true">share</span>
+      <span class="material-symbols-rounded" aria-hidden="true">share</span>
       Share Safe Anot? with Friends
     </button>
 
@@ -3172,13 +3169,13 @@ button:focus-visible {
   <div class="screen" id="screen-fix">
     <div class="fix-top-bar">
       <button class="icon-btn" id="btnFixBack" aria-label="Back to Shield">
-        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+        <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
       </button>
       <h2 id="fix-title">Fix WhatsApp</h2>
     </div>
 
     <div class="risk-card">
-      <span class="material-symbols-outlined" aria-hidden="true">warning</span>
+      <span class="material-symbols-rounded" aria-hidden="true">warning</span>
       <p id="fix-risk-text"></p>
     </div>
 
@@ -3204,7 +3201,7 @@ button:focus-visible {
 
     <div class="settings-mock">
       <div class="settings-mock-header">
-        <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+        <span class="material-symbols-rounded" aria-hidden="true">settings</span>
         <span>Android Settings</span>
       </div>
       <div class="settings-mock-row">
@@ -3217,17 +3214,17 @@ button:focus-visible {
     </div>
 
     <div class="fix-hint" id="fixHint">
-      <span class="material-symbols-outlined" aria-hidden="true">info</span>
+      <span class="material-symbols-rounded" aria-hidden="true">info</span>
       <span>Turn off the toggle above before confirming</span>
     </div>
 
     <div class="fix-buttons">
       <button class="btn-fix-primary" id="btnOpenSettings">
-        <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+        <span class="material-symbols-rounded" aria-hidden="true">open_in_new</span>
         Open Settings
       </button>
       <button class="btn-fix-outlined" id="btnMarkFixed" disabled>
-        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        <span class="material-symbols-rounded" aria-hidden="true">check_circle</span>
         I've Done It
       </button>
       <button class="btn-text-skip" id="btnSkip">Skip for now</button>
@@ -3250,7 +3247,7 @@ button:focus-visible {
   <div class="screen" id="screen-guardian-pairing">
     <div class="guardian-top-bar">
       <button class="guardian-top-bar-back" id="btnGuardianPairingBack" aria-label="Back to Profile">
-        <span class="material-symbols-outlined">arrow_back</span>
+        <span class="material-symbols-rounded">arrow_back</span>
       </button>
       <span class="guardian-top-bar-title">Family Guardian</span>
     </div>
@@ -3264,23 +3261,23 @@ button:focus-visible {
     <div class="role-cards" id="guardianRoleCards">
       <div class="role-card protect" id="guardianCardProtect">
         <div class="role-card-icon">
-          <span class="material-symbols-outlined">shield_with_heart</span>
+          <span class="material-symbols-rounded">shield_with_heart</span>
         </div>
         <h3>Protect This Phone</h3>
         <p>Set up this device to be monitored by a family guardian</p>
         <div class="role-card-arrow">
-          <span class="material-symbols-outlined">chevron_right</span>
+          <span class="material-symbols-rounded">chevron_right</span>
         </div>
       </div>
 
       <div class="role-card monitor" id="guardianCardMonitor">
         <div class="role-card-icon">
-          <span class="material-symbols-outlined">monitoring</span>
+          <span class="material-symbols-rounded">monitoring</span>
         </div>
         <h3>Monitor Family Member</h3>
         <p>Enter a code from a family member's phone to start monitoring</p>
         <div class="role-card-arrow">
-          <span class="material-symbols-outlined">chevron_right</span>
+          <span class="material-symbols-rounded">chevron_right</span>
         </div>
       </div>
     </div>
@@ -3291,7 +3288,7 @@ button:focus-visible {
         <div class="code-display-label">Your Pairing Code</div>
         <div class="code-display-value" id="guardianPairingCode">A7K2M9</div>
         <div class="code-display-timer">
-          <span class="material-symbols-outlined">timer</span>
+          <span class="material-symbols-rounded">timer</span>
           <span id="guardianCodeTimer">15:00</span>
         </div>
         <div class="code-display-instruction">
@@ -3299,7 +3296,7 @@ button:focus-visible {
         </div>
       </div>
       <button class="btn-generate" id="btnGuardianRegenerate">
-        <span class="material-symbols-outlined">refresh</span>
+        <span class="material-symbols-rounded">refresh</span>
         Generate New Code
       </button>
       <button class="btn-back-to-roles" id="btnGuardianBackFromCode">Back</button>
@@ -3312,14 +3309,14 @@ button:focus-visible {
         <input type="text" class="code-input" id="guardianCodeInput" maxlength="6" placeholder="------" autocomplete="off" spellcheck="false">
       </div>
       <button class="btn-guardian-link" id="btnGuardianLinkDevice" disabled>
-        <span class="material-symbols-outlined">link</span>
+        <span class="material-symbols-rounded">link</span>
         Link Device
       </button>
       <button class="btn-back-to-roles" id="btnGuardianBackFromLink">Back</button>
 
       <div class="guardian-link-success" id="guardianLinkSuccess">
         <div class="guardian-link-success-check">
-          <span class="material-symbols-outlined">check</span>
+          <span class="material-symbols-rounded">check</span>
         </div>
         <h3>Successfully Linked!</h3>
         <p>You are now monitoring <strong id="guardianLinkedName">Mum's Phone</strong></p>
@@ -3354,13 +3351,13 @@ button:focus-visible {
   <div class="screen" id="screen-guardian-dashboard">
     <div class="guardian-top-bar">
       <button class="guardian-top-bar-back" id="btnGuardianDashBack" aria-label="Back to Profile">
-        <span class="material-symbols-outlined">arrow_back</span>
+        <span class="material-symbols-rounded">arrow_back</span>
       </button>
       <span class="guardian-top-bar-title">Family Guardian</span>
     </div>
 
     <div class="pull-refresh">
-      <span class="material-symbols-outlined">sync</span>
+      <span class="material-symbols-rounded">sync</span>
       Updated just now
     </div>
 
@@ -3378,17 +3375,17 @@ button:focus-visible {
           <div class="ward-card-info">
             <div class="ward-card-name">Mum's Phone</div>
             <div class="ward-card-heartbeat">
-              <span class="material-symbols-outlined">favorite</span>
+              <span class="material-symbols-rounded">favorite</span>
               Just now
             </div>
           </div>
           <div class="ward-card-arrow">
-            <span class="material-symbols-outlined">chevron_right</span>
+            <span class="material-symbols-rounded">chevron_right</span>
           </div>
         </div>
         <div class="ward-card-badges">
           <div class="ward-badge play-protect-on">
-            <span class="material-symbols-outlined">verified_user</span>
+            <span class="material-symbols-rounded">verified_user</span>
             Play Protect On
           </div>
         </div>
@@ -3407,17 +3404,17 @@ button:focus-visible {
           <div class="ward-card-info">
             <div class="ward-card-name">Dad's Phone</div>
             <div class="ward-card-heartbeat">
-              <span class="material-symbols-outlined">favorite</span>
+              <span class="material-symbols-rounded">favorite</span>
               2h ago
             </div>
           </div>
           <div class="ward-card-arrow">
-            <span class="material-symbols-outlined">chevron_right</span>
+            <span class="material-symbols-rounded">chevron_right</span>
           </div>
         </div>
         <div class="ward-card-badges">
           <div class="ward-badge play-protect-off">
-            <span class="material-symbols-outlined">gpp_bad</span>
+            <span class="material-symbols-rounded">gpp_bad</span>
             Play Protect Off
           </div>
         </div>
@@ -3436,21 +3433,21 @@ button:focus-visible {
           <div class="ward-card-info">
             <div class="ward-card-name">Uncle Lim's Phone</div>
             <div class="ward-card-heartbeat">
-              <span class="material-symbols-outlined">favorite</span>
+              <span class="material-symbols-rounded">favorite</span>
               3 days ago
             </div>
           </div>
           <div class="ward-card-arrow">
-            <span class="material-symbols-outlined">chevron_right</span>
+            <span class="material-symbols-rounded">chevron_right</span>
           </div>
         </div>
         <div class="ward-card-badges">
           <div class="ward-badge play-protect-off">
-            <span class="material-symbols-outlined">gpp_bad</span>
+            <span class="material-symbols-rounded">gpp_bad</span>
             Play Protect Off
           </div>
           <div class="ward-badge went-dark">
-            <span class="material-symbols-outlined">cloud_off</span>
+            <span class="material-symbols-rounded">cloud_off</span>
             Went Dark
           </div>
         </div>
@@ -3462,7 +3459,7 @@ button:focus-visible {
   <div class="screen" id="screen-guardian-detail">
     <div class="guardian-top-bar">
       <button class="guardian-top-bar-back" id="btnGuardianDetailBack" aria-label="Back to Dashboard">
-        <span class="material-symbols-outlined">arrow_back</span>
+        <span class="material-symbols-rounded">arrow_back</span>
       </button>
       <span class="guardian-top-bar-title" id="guardianDetailWardName">Mum's Phone</span>
     </div>
@@ -3483,7 +3480,7 @@ button:focus-visible {
     <div class="status-cards" id="guardianStatusCards">
       <div class="status-card">
         <div class="status-card-icon green">
-          <span class="material-symbols-outlined">verified_user</span>
+          <span class="material-symbols-rounded">verified_user</span>
         </div>
         <div class="status-card-info">
           <div class="status-card-label">Play Protect</div>
@@ -3492,7 +3489,7 @@ button:focus-visible {
       </div>
       <div class="status-card">
         <div class="status-card-icon green">
-          <span class="material-symbols-outlined">block</span>
+          <span class="material-symbols-rounded">block</span>
         </div>
         <div class="status-card-info">
           <div class="status-card-label">Unknown Sources</div>
@@ -3501,7 +3498,7 @@ button:focus-visible {
       </div>
       <div class="status-card">
         <div class="status-card-icon green">
-          <span class="material-symbols-outlined">event_available</span>
+          <span class="material-symbols-rounded">event_available</span>
         </div>
         <div class="status-card-info">
           <div class="status-card-label">Last Audit</div>
@@ -3548,7 +3545,7 @@ button:focus-visible {
 
     <div class="detail-actions">
       <button class="btn-unlink-danger" id="btnGuardianUnlinkDanger">
-        <span class="material-symbols-outlined">link_off</span>
+        <span class="material-symbols-rounded">link_off</span>
         Unlink Device
       </button>
     </div>
@@ -3557,19 +3554,19 @@ button:focus-visible {
   <!-- Bottom Navigation -->
   <nav class="bottom-nav" id="bottomNav" aria-label="Main navigation">
     <button class="nav-item active" data-screen="screen-shield" aria-label="Phone shield" aria-current="page">
-      <span class="material-symbols-outlined">shield</span>
+      <span class="material-symbols-rounded">shield</span>
       <span class="nav-label">Shield</span>
     </button>
     <button class="nav-item" data-screen="screen-check" aria-label="Check links">
-      <span class="material-symbols-outlined">search</span>
+      <span class="material-symbols-rounded">search</span>
       <span class="nav-label">Check</span>
     </button>
     <button class="nav-item" data-screen="screen-alerts" aria-label="Scam alerts">
-      <span class="material-symbols-outlined">notifications</span>
+      <span class="material-symbols-rounded">notifications</span>
       <span class="nav-label">Alerts</span>
     </button>
     <button class="nav-item" data-screen="screen-profile" aria-label="Profile and settings">
-      <span class="material-symbols-outlined">person</span>
+      <span class="material-symbols-rounded">person</span>
       <span class="nav-label">Profile</span>
     </button>
   </nav>
@@ -3648,7 +3645,7 @@ function renderCards() {
     card.dataset.app = app.id;
 
     const iconContent = app.id === 'playprotect'
-      ? '<span class="material-symbols-outlined" style="font-size:20px;color:white;font-variation-settings:\'FILL\' 1;">verified_user</span>'
+      ? '<span class="material-symbols-rounded" style="font-size:20px;color:white;font-variation-settings:\'FILL\' 1;">verified_user</span>'
       : app.abbr;
 
     const descText = app.status === 'secured' ? (app.id === 'playprotect' ? 'Active and up to date' : 'Install permission disabled')
@@ -3656,7 +3653,7 @@ function renderCards() {
 
     let badgeHtml, actionHtml = '';
     if (app.status === 'secured') {
-      badgeHtml = '<span class="badge badge-green"><span class="material-symbols-outlined" style="font-size:12px;" aria-hidden="true">check</span> Secured</span>';
+      badgeHtml = '<span class="badge badge-green"><span class="material-symbols-rounded" style="font-size:12px;" aria-hidden="true">check</span> Secured</span>';
     } else if (app.status === 'not-installed') {
       badgeHtml = '<span class="badge badge-gray">Not Installed</span>';
     } else {
@@ -3836,7 +3833,7 @@ function showVerdict(url, verdict) {
 
   let html =
     '<div class="verdict-shield ' + (verdict.type === 'danger' ? 'red' : verdict.type === 'safe' ? 'green' : 'orange') + '">' +
-      '<span class="material-symbols-outlined" style="font-variation-settings:\'FILL\' 1;">' + verdict.icon + '</span>' +
+      '<span class="material-symbols-rounded" style="font-variation-settings:\'FILL\' 1;">' + verdict.icon + '</span>' +
     '</div>' +
     '<div class="verdict-label ' + (verdict.type === 'danger' ? 'red' : verdict.type === 'safe' ? 'green' : 'orange') + '">' + verdict.label + '</div>' +
     '<div class="verdict-desc">' + verdict.desc + '</div>';
@@ -3845,7 +3842,7 @@ function showVerdict(url, verdict) {
     html += '<div class="verdict-detail">' + verdict.detail + '</div>';
   }
   if (verdict.warning) {
-    html += '<div class="verdict-warning"><span class="material-symbols-outlined">warning</span> ' + verdict.warning + '</div>';
+    html += '<div class="verdict-warning"><span class="material-symbols-rounded">warning</span> ' + verdict.warning + '</div>';
   }
 
   content.innerHTML = html;
@@ -3853,13 +3850,13 @@ function showVerdict(url, verdict) {
   let actionsHtml = '';
   if (verdict.type === 'danger') {
     actionsHtml =
-      '<button class="btn-verdict-primary red"><span class="material-symbols-outlined">share</span> Share Warning</button>' +
-      '<button class="btn-verdict-outlined"><span class="material-symbols-outlined">flag</span> Report</button>';
+      '<button class="btn-verdict-primary red"><span class="material-symbols-rounded">share</span> Share Warning</button>' +
+      '<button class="btn-verdict-outlined"><span class="material-symbols-rounded">flag</span> Report</button>';
   } else if (verdict.type === 'safe') {
     actionsHtml = '<button class="btn-verdict-primary green">OK, Got It</button>';
   } else {
     actionsHtml =
-      '<button class="btn-verdict-primary orange"><span class="material-symbols-outlined">share</span> Share Warning</button>' +
+      '<button class="btn-verdict-primary orange"><span class="material-symbols-rounded">share</span> Share Warning</button>' +
       '<button class="btn-verdict-outlined">OK</button>';
   }
   actionsHtml += '<button class="btn-verdict-close">Close</button>';
@@ -3945,7 +3942,7 @@ function markFixed() {
           scoreEl.textContent = '100%';
           scoreEl.style.color = 'var(--green)';
           scoreEl.parentElement.style.borderColor = 'var(--green)';
-          scoreEl.parentElement.style.boxShadow = '0 0 30px var(--green-glow)';
+          scoreEl.parentElement.style.boxShadow = '0 0 30px var(--green-dim)';
           document.querySelector('.share-prompt-title').textContent = 'Your phone is fully protected!';
           document.querySelector('.share-prompt-desc').innerHTML = 'Amazing! Now protect your family too.<br>Share Safe Anot? — <strong>be the one who keeps them safe.</strong>';
           sharePrompt.classList.add('show');
@@ -4172,13 +4169,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const ring = scoreEl.parentElement;
       if (pct >= 80) {
         ring.style.borderColor = 'var(--green)';
-        ring.style.boxShadow = '0 0 30px var(--green-glow)';
+        ring.style.boxShadow = '0 0 30px var(--green-dim)';
         scoreEl.style.color = 'var(--green)';
         document.querySelector('.share-prompt-title').textContent = 'Your phone looks good!';
         document.querySelector('.share-prompt-desc').innerHTML = 'But is your family safe too?<br>Share Safe Anot? — protect the people you love.';
       } else if (pct >= 50) {
         ring.style.borderColor = 'var(--orange)';
-        ring.style.boxShadow = '0 0 30px var(--orange-glow)';
+        ring.style.boxShadow = '0 0 30px var(--orange-dim)';
         scoreEl.style.color = 'var(--orange)';
         document.querySelector('.share-prompt-title').textContent = 'Your phone needs attention';
         document.querySelector('.share-prompt-desc').innerHTML = 'Your parents\' phone could be worse.<br>Share Safe Anot? with your family — it takes 10 seconds to protect them.';
@@ -4343,11 +4340,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnGuardianLinkDevice.addEventListener('click', () => {
     if (guardianCodeInput.value.length < 6) return;
-    btnGuardianLinkDevice.innerHTML = '<span class="material-symbols-outlined" style="animation: guardianSpin 1s linear infinite;">sync</span> Linking...';
+    btnGuardianLinkDevice.innerHTML = '<span class="material-symbols-rounded" style="animation: guardianSpin 1s linear infinite;">sync</span> Linking...';
     btnGuardianLinkDevice.disabled = true;
 
     setTimeout(() => {
-      btnGuardianLinkDevice.innerHTML = '<span class="material-symbols-outlined">link</span> Link Device';
+      btnGuardianLinkDevice.innerHTML = '<span class="material-symbols-rounded">link</span> Link Device';
       guardianLinkSuccess.classList.add('visible');
       guardianCodeInput.style.display = 'none';
       document.querySelector('#guardianLinkPanel .code-input-wrapper').style.display = 'none';
@@ -4436,7 +4433,7 @@ document.addEventListener('DOMContentLoaded', () => {
       statusCards.innerHTML =
         '<div class="status-card">' +
           '<div class="status-card-icon ' + (ward.playProtect.on ? 'green' : 'red') + '">' +
-            '<span class="material-symbols-outlined">' + (ward.playProtect.on ? 'verified_user' : 'gpp_bad') + '</span>' +
+            '<span class="material-symbols-rounded">' + (ward.playProtect.on ? 'verified_user' : 'gpp_bad') + '</span>' +
           '</div>' +
           '<div class="status-card-info">' +
             '<div class="status-card-label">Play Protect</div>' +
@@ -4445,7 +4442,7 @@ document.addEventListener('DOMContentLoaded', () => {
         '</div>' +
         '<div class="status-card">' +
           '<div class="status-card-icon ' + ward.unknownSources.iconClass + '">' +
-            '<span class="material-symbols-outlined">' + ward.unknownSources.icon + '</span>' +
+            '<span class="material-symbols-rounded">' + ward.unknownSources.icon + '</span>' +
           '</div>' +
           '<div class="status-card-info">' +
             '<div class="status-card-label">Unknown Sources</div>' +
@@ -4454,7 +4451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         '</div>' +
         '<div class="status-card">' +
           '<div class="status-card-icon green">' +
-            '<span class="material-symbols-outlined">event_available</span>' +
+            '<span class="material-symbols-rounded">event_available</span>' +
           '</div>' +
           '<div class="status-card-info">' +
             '<div class="status-card-label">Last Audit</div>' +
