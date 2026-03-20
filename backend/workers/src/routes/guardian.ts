@@ -4,6 +4,7 @@
 // LOGGING POLICY: Never log device IDs or pairing codes.
 
 import { verifyDeviceHmac } from '../middleware/guardian-auth';
+import { sendFcmNotification } from '../lib/fcm';
 
 /** Maximum request body size in bytes (10 KB). */
 const MAX_BODY_SIZE = 10 * 1024;
@@ -22,6 +23,15 @@ const MAX_GUARDIANS_PER_WARD = 3;
 
 /** Rate limit: max pairing code generations per device per hour. */
 const GENERATE_RATE_LIMIT = 10;
+
+/** Maximum guardian alerts per ward per day (anti-spam). */
+const MAX_ALERTS_PER_DAY = 3;
+
+/** Score drop threshold that triggers an alert. */
+const SCORE_DROP_THRESHOLD = 20;
+
+/** Security score RED band threshold. */
+const RED_BAND_THRESHOLD = 50;
 
 /** Characters used for pairing codes (no 0/O/1/I/L). */
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -433,6 +443,17 @@ export async function handlePostHeartbeat(
     return jsonResponse({ error: 'Device has no guardian pairings' }, 403);
   }
 
+  // Query previous heartbeat before inserting the new one
+  const prevHeartbeat = await env.DB.prepare(
+    `SELECT security_score, play_protect_enabled
+     FROM guardian_heartbeats
+     WHERE ward_device_id = ?
+     ORDER BY timestamp DESC
+     LIMIT 1`,
+  )
+    .bind(deviceId)
+    .first<{ security_score: number; play_protect_enabled: number }>();
+
   // Insert heartbeat
   await env.DB.prepare(
     `INSERT INTO guardian_heartbeats (ward_device_id, security_score, secured_items, total_items, play_protect_enabled, timestamp)
@@ -448,6 +469,83 @@ export async function handlePostHeartbeat(
   )
     .bind(cutoff)
     .run();
+
+  // Check alert conditions (only if there was a previous heartbeat)
+  if (prevHeartbeat) {
+    const alertReasons: string[] = [];
+
+    const scoreDrop = prevHeartbeat.security_score - securityScore;
+    if (scoreDrop >= SCORE_DROP_THRESHOLD) {
+      alertReasons.push(`Security score dropped by ${scoreDrop} points (${prevHeartbeat.security_score}% → ${securityScore}%)`);
+    }
+
+    if (prevHeartbeat.play_protect_enabled === 1 && !playProtectEnabled) {
+      alertReasons.push('Play Protect was disabled');
+    }
+
+    if (securityScore < RED_BAND_THRESHOLD && prevHeartbeat.security_score >= RED_BAND_THRESHOLD) {
+      alertReasons.push(`Security score entered RED zone (${securityScore}%)`);
+    }
+
+    if (alertReasons.length > 0) {
+      // Check daily alert limit
+      const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+      const dailyAlerts = await env.DB.prepare(
+        'SELECT alert_count FROM guardian_daily_alerts WHERE ward_device_id = ? AND alert_date = ?',
+      )
+        .bind(deviceId, today)
+        .first<{ alert_count: number }>();
+
+      const currentCount = dailyAlerts?.alert_count ?? 0;
+
+      if (currentCount < MAX_ALERTS_PER_DAY) {
+        // Increment daily alert counter
+        await env.DB.prepare(
+          `INSERT INTO guardian_daily_alerts (ward_device_id, alert_date, alert_count)
+           VALUES (?, ?, 1)
+           ON CONFLICT(ward_device_id, alert_date)
+           DO UPDATE SET alert_count = alert_count + 1`,
+        )
+          .bind(deviceId, today)
+          .run();
+
+        // Get ward display name from any pairing
+        const wardInfo = await env.DB.prepare(
+          'SELECT ward_display_name FROM guardian_pairings WHERE ward_device_id = ? LIMIT 1',
+        )
+          .bind(deviceId)
+          .first<{ ward_display_name: string }>();
+
+        const wardName = wardInfo?.ward_display_name || 'Your ward';
+        const alertReason = alertReasons[0];
+        const title = `${wardName} — Security Alert`;
+        const body = alertReason;
+
+        // Get all guardians' FCM tokens
+        const guardianTokens = await env.DB.prepare(
+          `SELECT t.fcm_token
+           FROM guardian_pairings p
+           JOIN guardian_fcm_tokens t ON t.device_id = p.guardian_device_id
+           WHERE p.ward_device_id = ?`,
+        )
+          .bind(deviceId)
+          .all<{ fcm_token: string }>();
+
+        const tokens = guardianTokens.results ?? [];
+        const data: Record<string, string> = {
+          type: 'guardian_alert',
+          ward_device_id: deviceId,
+          alert_reason: alertReason,
+          security_score: String(securityScore),
+        };
+
+        // Send notifications (fire-and-forget, don't block response)
+        for (const row of tokens) {
+          await sendFcmNotification(env, row.fcm_token, title, body, data);
+        }
+      }
+    }
+  }
 
   return jsonResponse({ status: 'ok' }, 200);
 }
@@ -496,4 +594,45 @@ export async function handleGetWardHeartbeats(
     .all();
 
   return jsonResponse({ heartbeats: heartbeats.results ?? [] }, 200);
+}
+
+/**
+ * POST /api/guardian/fcm-token
+ * Registers or updates an FCM token for a device.
+ */
+export async function handleRegisterFcmToken(
+  request: Request,
+  env: Env,
+  _params: Record<string, string>,
+): Promise<Response> {
+  const result = await readBody(request);
+  if (result instanceof Response) return result;
+  const [bodyText, body] = result;
+
+  // Verify HMAC
+  const hmacError = await verifyDeviceHmac(request, bodyText, env);
+  if (hmacError) return hmacError;
+
+  const deviceId = body.device_id;
+  if (typeof deviceId !== 'string' || !deviceId.trim()) {
+    return jsonResponse({ error: 'Missing or invalid device_id' }, 400);
+  }
+
+  const fcmToken = body.fcm_token;
+  if (typeof fcmToken !== 'string' || !fcmToken.trim()) {
+    return jsonResponse({ error: 'Missing or invalid fcm_token' }, 400);
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+
+  await env.DB.prepare(
+    `INSERT INTO guardian_fcm_tokens (device_id, fcm_token, updated_at)
+     VALUES (?, ?, ?)
+     ON CONFLICT(device_id)
+     DO UPDATE SET fcm_token = excluded.fcm_token, updated_at = excluded.updated_at`,
+  )
+    .bind(deviceId, fcmToken, now)
+    .run();
+
+  return jsonResponse({ status: 'ok' }, 200);
 }

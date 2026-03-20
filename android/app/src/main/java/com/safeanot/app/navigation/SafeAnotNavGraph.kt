@@ -37,7 +37,9 @@ import com.safeanot.app.feature.alerts.AlertsScreen
 import com.safeanot.app.feature.check.CheckScreen
 import com.safeanot.app.feature.check.CheckViewModel
 import com.safeanot.app.feature.fix.FixScreen
+import com.safeanot.app.feature.guardian.GuardianDashboardScreen
 import com.safeanot.app.feature.guardian.PairingScreen
+import com.safeanot.app.feature.guardian.WardDetailScreen
 import com.safeanot.app.feature.profile.ProfileScreen
 import com.safeanot.app.feature.shield.ShieldScreen
 
@@ -147,6 +149,9 @@ fun SafeAnotNavGraph(pendingUrl: String? = null) {
                     onNavigateToGuardian = {
                         navController.navigate(Screen.GuardianPairing.route)
                     },
+                    onNavigateToGuardianDashboard = {
+                        navController.navigate(Screen.GuardianDashboard.route)
+                    },
                 )
             }
 
@@ -175,6 +180,29 @@ fun SafeAnotNavGraph(pendingUrl: String? = null) {
 
             composable(Screen.GuardianPairing.route) {
                 PairingScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
+
+            composable(Screen.GuardianDashboard.route) {
+                GuardianDashboardScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToWardDetail = { deviceId ->
+                        navController.navigate(Screen.GuardianWardDetail.createRoute(deviceId))
+                    },
+                    onNavigateToPairing = {
+                        navController.navigate(Screen.GuardianPairing.route)
+                    },
+                )
+            }
+
+            composable(
+                route = Screen.GuardianWardDetail.route,
+                arguments = listOf(
+                    navArgument("deviceId") { type = NavType.StringType },
+                ),
+            ) {
+                WardDetailScreen(
                     onNavigateBack = { navController.popBackStack() },
                 )
             }

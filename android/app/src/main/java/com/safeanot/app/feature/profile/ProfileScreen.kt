@@ -52,6 +52,7 @@ import com.safeanot.app.util.Constants
 @Composable
 fun ProfileScreen(
     onNavigateToGuardian: () -> Unit = {},
+    onNavigateToGuardianDashboard: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -155,6 +156,45 @@ fun ProfileScreen(
                         contentDescription = "Open Guardian Mode",
                         tint = TextSecondary,
                     )
+                }
+            }
+        }
+
+        // Family Dashboard (visible when there are active pairings)
+        if (uiState.guardianCount > 0) {
+            item {
+                Card(
+                    onClick = onNavigateToGuardianDashboard,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = DarkCard),
+                    shape = RoundedCornerShape(12.dp),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Family Dashboard",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "View your family members' security status",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextSecondary,
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = "Open Family Dashboard",
+                            tint = TextSecondary,
+                        )
+                    }
                 }
             }
         }

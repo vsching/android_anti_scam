@@ -25,6 +25,7 @@ import {
   handleDeletePairing,
   handlePostHeartbeat,
   handleGetWardHeartbeats,
+  handleRegisterFcmToken,
 } from './routes/guardian';
 
 const router = new Router();
@@ -46,6 +47,7 @@ router.get('/api/guardian/guardians', handleGetGuardians);
 router.delete('/api/guardian/pair/:pairingId', handleDeletePairing);
 router.post('/api/guardian/heartbeat', handlePostHeartbeat);
 router.get('/api/guardian/wards/:deviceId/heartbeats', handleGetWardHeartbeats);
+router.post('/api/guardian/fcm-token', handleRegisterFcmToken);
 
 // Data download endpoints (R2 artifacts)
 router.get('/api/data/latest', handleDataLatest);

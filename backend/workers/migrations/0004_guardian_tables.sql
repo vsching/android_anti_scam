@@ -41,3 +41,18 @@ CREATE INDEX IF NOT EXISTS idx_guardian_pairings_ward
 
 CREATE INDEX IF NOT EXISTS idx_guardian_pairings_guardian
     ON guardian_pairings (guardian_device_id);
+
+-- FCM tokens for push notifications to guardian devices.
+CREATE TABLE IF NOT EXISTS guardian_fcm_tokens (
+    device_id TEXT PRIMARY KEY,
+    fcm_token TEXT NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+-- Daily alert counters for anti-spam (max 3 alerts per ward per day).
+CREATE TABLE IF NOT EXISTS guardian_daily_alerts (
+    ward_device_id TEXT NOT NULL,
+    alert_date TEXT NOT NULL,
+    alert_count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (ward_device_id, alert_date)
+);

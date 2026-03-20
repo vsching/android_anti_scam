@@ -32,4 +32,13 @@ sealed class Screen(val route: String) {
 
     /** Guardian pairing screen. */
     data object GuardianPairing : Screen("guardian/pairing")
+
+    /** Guardian dashboard showing monitored wards. */
+    data object GuardianDashboard : Screen("guardian/dashboard")
+
+    /** Ward detail screen showing security history for a specific ward. */
+    data object GuardianWardDetail : Screen("guardian/ward/{deviceId}") {
+        fun createRoute(deviceId: String): String =
+            "guardian/ward/$deviceId"
+    }
 }

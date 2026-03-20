@@ -82,6 +82,15 @@
             </intent-filter>
         </activity>
 
+        <!-- Firebase Cloud Messaging service for guardian alerts -->
+        <service
+            android:name=".service.SafeAnotMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
         <!-- FileProvider for sharing verdict card images -->
         <provider
             android:name="androidx.core.content.FileProvider"

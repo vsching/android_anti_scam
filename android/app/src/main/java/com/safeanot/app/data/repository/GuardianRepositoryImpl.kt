@@ -12,7 +12,10 @@ import com.safeanot.app.data.remote.model.DeletePairingRequest
 import com.safeanot.app.data.remote.model.GeneratePairingCodeRequest
 import com.safeanot.app.data.remote.model.HeartbeatRequest
 import com.safeanot.app.domain.model.GuardianPairing
+import com.safeanot.app.domain.model.GuardianRole
+import com.safeanot.app.domain.model.HeartbeatEntry
 import com.safeanot.app.domain.model.PairingCode
+import com.safeanot.app.domain.model.WardHeartbeatHistory
 import com.safeanot.app.domain.repository.GuardianRepository
 import com.safeanot.app.util.DeviceIdProvider
 import kotlinx.coroutines.flow.Flow
@@ -100,5 +103,46 @@ class GuardianRepositoryImpl @Inject constructor(
             timestamp = System.currentTimeMillis() / 1000,
         )
         api.postHeartbeat(request)
+    }
+
+    override fun getWards(deviceId: String): Flow<List<GuardianPairing>> {
+        return guardianDao.getAllPairings().map { entities ->
+            entities.map { it.toDomain() }
+                .filter { it.role == GuardianRole.GUARDIAN }
+        }
+    }
+
+    override suspend fun refreshWards(deviceId: String) {
+        val wards = api.getWards(deviceId)
+        val wardEntities = wards.map { dto ->
+            GuardianPairingEntity.fromDomain(dto.toDomain())
+        }
+        // Update only ward pairings, preserving guardian pairings
+        guardianDao.deleteAll()
+        val guardians = api.getGuardians(deviceId)
+        val allEntities = wardEntities + guardians.map { dto ->
+            GuardianPairingEntity.fromDomain(dto.toDomain())
+        }
+        guardianDao.insertAll(allEntities)
+    }
+
+    override suspend fun getWardHeartbeatHistory(
+        wardDeviceId: String,
+        days: Int,
+    ): WardHeartbeatHistory {
+        val dtos = api.getWardHeartbeats(wardDeviceId, days)
+        return WardHeartbeatHistory(
+            deviceId = wardDeviceId,
+            displayName = dtos.firstOrNull()?.displayName ?: "",
+            heartbeats = dtos.map { dto ->
+                HeartbeatEntry(
+                    securityScore = dto.securityScore,
+                    securedItems = dto.securedItems,
+                    totalItems = dto.totalItems,
+                    playProtectEnabled = dto.playProtectEnabled,
+                    timestamp = dto.timestamp,
+                )
+            },
+        )
     }
 }

@@ -62,4 +62,22 @@ interface GuardianRepository {
         totalItems: Int,
         playProtectEnabled: Boolean,
     )
+
+    /**
+     * Get wards (devices this user is monitoring) as a Flow.
+     * Filters pairings where role is GUARDIAN.
+     */
+    fun getWards(deviceId: String): Flow<List<GuardianPairing>>
+
+    /**
+     * Refresh wards from the backend and update local cache.
+     */
+    suspend fun refreshWards(deviceId: String)
+
+    /**
+     * Get heartbeat history for a specific ward.
+     * @param wardDeviceId The device ID of the ward.
+     * @param days Number of days of history to fetch.
+     */
+    suspend fun getWardHeartbeatHistory(wardDeviceId: String, days: Int = 7): com.safeanot.app.domain.model.WardHeartbeatHistory
 }

@@ -9,7 +9,9 @@ import com.safeanot.app.data.remote.model.ClaimPairingCodeRequest
 import com.safeanot.app.data.remote.model.DeletePairingRequest
 import com.safeanot.app.data.remote.model.GeneratePairingCodeRequest
 import com.safeanot.app.data.remote.model.HeartbeatRequest
+import com.safeanot.app.data.remote.model.RegisterFcmTokenRequest
 import com.safeanot.app.data.remote.model.GuardianPairingDto
+import com.safeanot.app.data.remote.model.WardHeartbeatDto
 import com.safeanot.app.data.remote.model.LatestMetadataResponse
 import com.safeanot.app.data.remote.model.PairingCodeResponse
 import okhttp3.ResponseBody
@@ -66,4 +68,13 @@ interface SafeAnotApi {
 
     @POST("api/guardian/heartbeat")
     suspend fun postHeartbeat(@Body request: HeartbeatRequest): Response<Unit>
+
+    @POST("api/guardian/fcm-token")
+    suspend fun registerFcmToken(@Body request: RegisterFcmTokenRequest): Response<Unit>
+
+    @GET("api/guardian/wards/heartbeats")
+    suspend fun getWardHeartbeats(
+        @Query("device_id") wardDeviceId: String,
+        @Query("days") days: Int = 7,
+    ): List<WardHeartbeatDto>
 }

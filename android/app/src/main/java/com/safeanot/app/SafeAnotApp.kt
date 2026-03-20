@@ -15,6 +15,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.safeanot.app.data.local.ReminderConfigDao
+import com.safeanot.app.data.remote.FcmTokenManager
 import com.safeanot.app.domain.repository.SyncRepository
 import com.safeanot.app.util.Constants
 import com.safeanot.app.worker.AuditReminderScheduler
@@ -42,6 +43,9 @@ class SafeAnotApp : Application(), Configuration.Provider {
     @Inject
     lateinit var reminderConfigDao: ReminderConfigDao
 
+    @Inject
+    lateinit var fcmTokenManager: FcmTokenManager
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
@@ -52,6 +56,7 @@ class SafeAnotApp : Application(), Configuration.Provider {
         scheduleDatabaseSync()
         scheduleAuditReminders()
         scheduleShareEventSync()
+        registerFcmToken()
     }
 
     private fun scheduleDatabaseSync() {
@@ -121,6 +126,12 @@ class SafeAnotApp : Application(), Configuration.Provider {
             ExistingWorkPolicy.KEEP,
             immediateRequest,
         )
+    }
+
+    private fun registerFcmToken() {
+        CoroutineScope(Dispatchers.IO).launch {
+            fcmTokenManager.registerToken()
+        }
     }
 
     private fun scheduleAuditReminders() {

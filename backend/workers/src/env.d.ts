@@ -18,6 +18,9 @@ interface Env {
   FIREBASE_API_KEY: string;
   FIREBASE_PROJECT_ID: string;
 
+  // Firebase service account JSON (for FCM HTTP v1 API server-side auth)
+  FIREBASE_SERVICE_ACCOUNT_JSON: string;
+
   // Guardian pairing HMAC secret
   GUARDIAN_HMAC_SECRET: string;
 }

@@ -2,7 +2,9 @@ package com.safeanot.app.testutil
 
 import com.safeanot.app.domain.model.GuardianPairing
 import com.safeanot.app.domain.model.GuardianRole
+import com.safeanot.app.domain.model.HeartbeatEntry
 import com.safeanot.app.domain.model.PairingCode
+import com.safeanot.app.domain.model.WardHeartbeatHistory
 import com.safeanot.app.domain.repository.GuardianRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,8 +25,14 @@ class FakeGuardianRepository : GuardianRepository {
     var shouldThrow: Boolean = false
     var deletedPairingIds = mutableListOf<String>()
     var refreshCalled = false
+    var refreshWardsCalled = false
     var heartbeatSent = false
     var lastHeartbeatScore: Int? = null
+    var wardHeartbeatHistory: WardHeartbeatHistory = WardHeartbeatHistory(
+        deviceId = "ward-device",
+        displayName = "Ward Device",
+        heartbeats = emptyList(),
+    )
 
     override suspend fun generatePairingCode(role: String, label: String): PairingCode {
         if (shouldThrow) throw RuntimeException("Test error")
@@ -64,5 +72,21 @@ class FakeGuardianRepository : GuardianRepository {
         if (shouldThrow) throw RuntimeException("Test error")
         heartbeatSent = true
         lastHeartbeatScore = securityScore
+    }
+
+    override fun getWards(deviceId: String): Flow<List<GuardianPairing>> {
+        return pairingsFlow.map { pairings ->
+            pairings.filter { it.role == GuardianRole.GUARDIAN }
+        }
+    }
+
+    override suspend fun refreshWards(deviceId: String) {
+        if (shouldThrow) throw RuntimeException("Test error")
+        refreshWardsCalled = true
+    }
+
+    override suspend fun getWardHeartbeatHistory(wardDeviceId: String, days: Int): WardHeartbeatHistory {
+        if (shouldThrow) throw RuntimeException("Test error")
+        return wardHeartbeatHistory
     }
 }
