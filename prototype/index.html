@@ -2693,6 +2693,622 @@ button:focus-visible {
     box-shadow: none;
   }
 }
+
+/* ========== ACHIEVEMENTS SCREEN ========== */
+#screen-achievements { padding-bottom: 24px; }
+#screen-quiz { padding-bottom: 24px; }
+
+.achievements-top-bar {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
+}
+.achievements-top-bar-back {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.achievements-top-bar-back:hover { background: var(--bg-card); }
+.achievements-top-bar-back .material-symbols-rounded { font-size: 24px; }
+.achievements-top-bar-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+/* Streak Banner */
+.streak-banner {
+  margin: 0 16px 16px;
+  background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(239,68,68,0.08));
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  text-align: center;
+  border: 1px solid rgba(245,158,11,0.2);
+  position: relative;
+  overflow: hidden;
+}
+.streak-banner::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.streak-flame {
+  font-size: 48px;
+  line-height: 1;
+  margin-bottom: 8px;
+  display: inline-block;
+  animation: flameFloat 1.5s ease-in-out infinite;
+}
+@keyframes flameFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.05); }
+}
+.streak-count {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -1px;
+  line-height: 1.2;
+}
+.streak-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Badge Grid */
+.badge-grid-title {
+  padding: 4px 20px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 0 16px 16px;
+}
+.badge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 8px 12px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.badge-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.badge-item:active { transform: scale(0.97); }
+.badge-item.earned {
+  border-color: rgba(79,70,229,0.2);
+}
+.badge-item.locked {
+  opacity: 0.6;
+}
+.badge-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  position: relative;
+}
+.badge-item.earned .badge-circle {
+  background: linear-gradient(135deg, rgba(79,70,229,0.15), rgba(13,148,136,0.15));
+  box-shadow: 0 0 16px rgba(79,70,229,0.15);
+}
+.badge-item.earned .badge-circle .material-symbols-rounded {
+  color: var(--indigo);
+  font-size: 26px;
+  font-variation-settings: 'FILL' 1;
+}
+.badge-item.locked .badge-circle {
+  background: rgba(0,0,0,0.05);
+}
+.badge-item.locked .badge-circle .material-symbols-rounded {
+  color: var(--text-tertiary);
+  font-size: 26px;
+}
+.badge-checkmark {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.badge-checkmark .material-symbols-rounded {
+  font-size: 14px;
+  color: white;
+}
+.badge-lock {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.badge-lock .material-symbols-rounded {
+  font-size: 12px;
+  color: white;
+}
+.badge-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  line-height: 1.3;
+}
+.badge-desc {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-align: center;
+  margin-top: 2px;
+}
+
+/* Badge tooltip */
+.badge-tooltip {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--text-primary);
+  color: white;
+  padding: 10px 16px;
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  z-index: 50;
+}
+.badge-tooltip.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Progress section */
+.achievements-progress {
+  margin: 0 16px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.achievements-progress-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+.achievements-progress-bar {
+  height: 8px;
+  background: rgba(0,0,0,0.06);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.achievements-progress-fill {
+  height: 100%;
+  background: var(--gradient-accent);
+  border-radius: 4px;
+  width: 0;
+  transition: width 1s ease;
+}
+
+/* Take the Quiz button */
+.btn-take-quiz {
+  margin: 0 16px 16px;
+  width: calc(100% - 32px);
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--gradient-teal);
+  color: white;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(13,148,136,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-take-quiz:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(13,148,136,0.35); }
+.btn-take-quiz:active { transform: scale(0.97); }
+
+/* ========== QUIZ SCREEN ========== */
+.quiz-intro-card {
+  margin: 0 16px 16px;
+  background: linear-gradient(135deg, rgba(79,70,229,0.08), rgba(13,148,136,0.08));
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  text-align: center;
+  border: 1px solid rgba(79,70,229,0.15);
+}
+.quiz-intro-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: var(--gradient-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+.quiz-intro-icon .material-symbols-rounded { font-size: 32px; color: white; }
+.quiz-intro-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+.quiz-intro-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Quiz progress dots */
+.quiz-progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px 16px;
+}
+.quiz-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+}
+.quiz-dot.active { background: var(--indigo); transform: scale(1.2); }
+.quiz-dot.correct { background: var(--green); }
+.quiz-dot.wrong { background: var(--red); }
+
+/* Quiz question card */
+.quiz-question-card {
+  margin: 0 16px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+.quiz-question-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+.quiz-question-url {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  word-break: break-all;
+  padding: 16px;
+  background: rgba(0,0,0,0.03);
+  border-radius: var(--radius-xs);
+  margin-bottom: 16px;
+  text-align: center;
+}
+.quiz-question-prompt {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: 16px;
+}
+.quiz-answer-btns {
+  display: flex;
+  gap: 12px;
+}
+.quiz-btn-safe, .quiz-btn-scam {
+  flex: 1;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  border: 2px solid;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.quiz-btn-safe {
+  background: rgba(22,163,74,0.08);
+  border-color: rgba(22,163,74,0.3);
+  color: var(--green);
+}
+.quiz-btn-safe:hover { background: rgba(22,163,74,0.15); transform: translateY(-1px); }
+.quiz-btn-scam {
+  background: rgba(220,38,38,0.08);
+  border-color: rgba(220,38,38,0.3);
+  color: var(--red);
+}
+.quiz-btn-scam:hover { background: rgba(220,38,38,0.15); transform: translateY(-1px); }
+.quiz-btn-safe:disabled, .quiz-btn-scam:disabled {
+  cursor: default;
+  opacity: 0.5;
+  transform: none;
+}
+.quiz-btn-safe.selected { background: var(--green); color: white; border-color: var(--green); }
+.quiz-btn-scam.selected { background: var(--red); color: white; border-color: var(--red); }
+
+/* Quiz feedback */
+.quiz-feedback {
+  margin: 0 16px 16px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  display: none;
+  gap: 10px;
+  align-items: flex-start;
+}
+.quiz-feedback.show { display: flex; }
+.quiz-feedback.correct {
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(22,163,74,0.2);
+}
+.quiz-feedback.wrong {
+  background: var(--red-dim);
+  color: var(--red);
+  border: 1px solid rgba(220,38,38,0.2);
+}
+.quiz-feedback .material-symbols-rounded { font-size: 20px; min-width: 20px; margin-top: 1px; }
+.quiz-next-btn {
+  margin: 0 16px 16px;
+  width: calc(100% - 32px);
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--gradient-accent);
+  color: white;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: none;
+  transition: transform 0.2s;
+}
+.quiz-next-btn.show { display: block; }
+.quiz-next-btn:hover { transform: translateY(-1px); }
+.quiz-next-btn:active { transform: scale(0.97); }
+
+/* Quiz results */
+.quiz-results {
+  margin: 0 16px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 32px 24px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+  display: none;
+}
+.quiz-results.show { display: block; }
+.quiz-results-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.quiz-results-icon.perfect {
+  background: var(--green-dim);
+}
+.quiz-results-icon.perfect .material-symbols-rounded { color: var(--green); font-size: 36px; font-variation-settings: 'FILL' 1; }
+.quiz-results-icon.good {
+  background: var(--orange-dim);
+}
+.quiz-results-icon.good .material-symbols-rounded { color: var(--orange); font-size: 36px; font-variation-settings: 'FILL' 1; }
+.quiz-results-score {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -1px;
+}
+.quiz-results-label {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+.quiz-results-badge {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 100px;
+  background: var(--green-dim);
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 auto 16px;
+  width: fit-content;
+}
+.quiz-results-badge.show { display: inline-flex; }
+.quiz-results-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.btn-quiz-share {
+  flex: 1;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--gradient-accent);
+  color: white;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.2s;
+}
+.btn-quiz-share:hover { transform: translateY(-1px); }
+.btn-quiz-retry {
+  flex: 1;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.2s;
+}
+.btn-quiz-retry:hover { transform: translateY(-1px); background: var(--bg-card-hover); }
+
+/* Quiz answer animation */
+@keyframes quizCorrectFlash {
+  0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(22,163,74,0); }
+  100% { box-shadow: none; }
+}
+@keyframes quizWrongShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+.quiz-question-card.correct-flash {
+  animation: quizCorrectFlash 0.6s ease;
+  border-color: rgba(22,163,74,0.3);
+}
+.quiz-question-card.wrong-shake {
+  animation: quizWrongShake 0.4s ease;
+  border-color: rgba(220,38,38,0.3);
+}
+
+/* ========== STREAK CHIP ON SHIELD ========== */
+.streak-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 100px;
+  margin-top: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--orange);
+}
+.streak-chip:hover { background: rgba(245,158,11,0.18); transform: translateY(-1px); }
+.streak-chip:active { transform: scale(0.97); }
+.streak-chip .flame-mini {
+  display: inline-block;
+  animation: flameFloat 1.5s ease-in-out infinite;
+}
+
+/* ========== ACHIEVEMENTS PROFILE CARD ========== */
+.achievements-profile-card {
+  margin: 0 16px 12px;
+  background: linear-gradient(135deg, rgba(79,70,229,0.08), rgba(245,158,11,0.08));
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  border: 1px solid rgba(79,70,229,0.15);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.achievements-profile-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.achievements-profile-card:active { transform: scale(0.98); }
+.achievements-profile-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--gradient-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+}
+.achievements-profile-icon .material-symbols-rounded { font-size: 24px; color: white; }
+.achievements-profile-info { flex: 1; }
+.achievements-profile-info h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.achievements-profile-info p {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.achievements-profile-card .material-symbols-rounded.chevron {
+  font-size: 20px;
+  color: var(--text-tertiary);
+}
 </style>
 </head>
 <body>
@@ -2967,6 +3583,9 @@ button:focus-visible {
         </div>
         <div class="shield-score" id="shieldScore" aria-label="Security score">72%</div>
         <div class="shield-score-label" id="shieldScoreLabel">5 of 7 items secured</div>
+        <div class="streak-chip" id="streakChip" role="button" tabindex="0" aria-label="14 day streak - view achievements">
+          <span class="flame-mini">&#128293;</span> 14 day streak
+        </div>
       </div>
 
       <div class="shield-section-title">Messaging Apps</div>
@@ -3092,6 +3711,18 @@ button:focus-visible {
           <div class="stat-label">Protected Since</div>
         </div>
       </div>
+    </div>
+
+    <!-- Achievements & Streaks Card -->
+    <div class="achievements-profile-card" id="btnAchievementsProfile" role="button" tabindex="0">
+      <div class="achievements-profile-icon">
+        <span class="material-symbols-rounded">emoji_events</span>
+      </div>
+      <div class="achievements-profile-info">
+        <h3>Achievements & Streaks</h3>
+        <p>5 badges earned &middot; &#128293; 14 day streak</p>
+      </div>
+      <span class="material-symbols-rounded chevron">chevron_right</span>
     </div>
 
     <!-- Guardian Card: Setup mode -->
@@ -3596,6 +4227,183 @@ button:focus-visible {
     </div>
   </div>
 
+  <!-- ========== SCREEN: ACHIEVEMENTS ========== -->
+  <div class="screen" id="screen-achievements">
+    <div class="achievements-top-bar">
+      <button class="achievements-top-bar-back" id="btnAchievementsBack" aria-label="Back to Profile">
+        <span class="material-symbols-rounded">arrow_back</span>
+      </button>
+      <span class="achievements-top-bar-title">Achievements</span>
+    </div>
+
+    <div class="streak-banner">
+      <div class="streak-flame">&#128293;</div>
+      <div class="streak-count">14 Day Streak!</div>
+      <div class="streak-subtitle">Your phone has been secure for 14 days straight</div>
+    </div>
+
+    <div class="badge-grid-title">Your Badges</div>
+    <div class="badge-grid" id="badgeGrid">
+      <div class="badge-item earned" data-badge="hardened">
+        <div class="badge-circle">
+          <span class="material-symbols-rounded">shield</span>
+          <div class="badge-checkmark"><span class="material-symbols-rounded">check</span></div>
+        </div>
+        <div class="badge-name">Phone Hardened</div>
+        <div class="badge-desc">Score 80%+</div>
+      </div>
+      <div class="badge-item earned" data-badge="first-check">
+        <div class="badge-circle">
+          <span class="material-symbols-rounded">search</span>
+          <div class="badge-checkmark"><span class="material-symbols-rounded">check</span></div>
+        </div>
+        <div class="badge-name">First Check</div>
+        <div class="badge-desc">Check your first link</div>
+      </div>
+      <div class="badge-item earned" data-badge="scam-spotter">
+        <div class="badge-circle">
+          <span class="material-symbols-rounded">visibility</span>
+          <div class="badge-checkmark"><span class="material-symbols-rounded">check</span></div>
+        </div>
+        <div class="badge-name">Scam Spotter</div>
+        <div class="badge-desc">Caught 5 scams</div>
+      </div>
+      <div class="badge-item earned" data-badge="family-guardian">
+        <div class="badge-circle">
+          <span class="material-symbols-rounded">favorite</span>
+          <div class="badge-checkmark"><span class="material-symbols-rounded">check</span></div>
+        </div>
+        <div class="badge-name">Family Guardian</div>
+        <div class="badge-desc">Protect a family member</div>
+      </div>
+      <div class="badge-item earned" data-badge="quiz-whiz">
+        <div class="badge-circle">
+          <span class="material-symbols-rounded">psychology</span>
+          <div class="badge-checkmark"><span class="material-symbols-rounded">check</span></div>
+        </div>
+        <div class="badge-name">Quiz Whiz</div>
+        <div class="badge-desc">Complete a quiz</div>
+      </div>
+      <div class="badge-item locked" data-badge="share-hero" data-unlock="Share Safe Anot? 10 times">
+        <div class="badge-circle">
+          <span class="material-symbols-rounded">share</span>
+          <div class="badge-lock"><span class="material-symbols-rounded">lock</span></div>
+        </div>
+        <div class="badge-name">Share Hero</div>
+        <div class="badge-desc">Not yet</div>
+      </div>
+      <div class="badge-item locked" data-badge="quiz-master" data-unlock="Score 100% on quiz">
+        <div class="badge-circle">
+          <span class="material-symbols-rounded">school</span>
+          <div class="badge-lock"><span class="material-symbols-rounded">lock</span></div>
+        </div>
+        <div class="badge-name">Quiz Master</div>
+        <div class="badge-desc">Not yet</div>
+      </div>
+      <div class="badge-item locked" data-badge="30-day-streak" data-unlock="Keep your phone secure for 30 days">
+        <div class="badge-circle">
+          <span class="material-symbols-rounded">local_fire_department</span>
+          <div class="badge-lock"><span class="material-symbols-rounded">lock</span></div>
+        </div>
+        <div class="badge-name">30 Day Streak</div>
+        <div class="badge-desc">Not yet</div>
+      </div>
+      <div class="badge-item locked" data-badge="clean-machine" data-unlock="Reach a 100% security score">
+        <div class="badge-circle">
+          <span class="material-symbols-rounded">verified</span>
+          <div class="badge-lock"><span class="material-symbols-rounded">lock</span></div>
+        </div>
+        <div class="badge-name">Clean Machine</div>
+        <div class="badge-desc">Not yet</div>
+      </div>
+      <div class="badge-item locked" data-badge="community-hero" data-unlock="Report 5 scams to the community">
+        <div class="badge-circle">
+          <span class="material-symbols-rounded">people</span>
+          <div class="badge-lock"><span class="material-symbols-rounded">lock</span></div>
+        </div>
+        <div class="badge-name">Community Hero</div>
+        <div class="badge-desc">Not yet</div>
+      </div>
+    </div>
+
+    <div class="achievements-progress">
+      <div class="achievements-progress-label">5 of 10 badges earned</div>
+      <div class="achievements-progress-bar">
+        <div class="achievements-progress-fill" id="achievementsProgressFill"></div>
+      </div>
+    </div>
+
+    <button class="btn-take-quiz" id="btnTakeQuiz">
+      <span class="material-symbols-rounded">quiz</span>
+      Take the Quiz
+    </button>
+  </div>
+
+  <!-- ========== SCREEN: QUIZ ========== -->
+  <div class="screen" id="screen-quiz">
+    <div class="achievements-top-bar">
+      <button class="achievements-top-bar-back" id="btnQuizBack" aria-label="Back to Achievements">
+        <span class="material-symbols-rounded">arrow_back</span>
+      </button>
+      <span class="achievements-top-bar-title">Spot the Scam</span>
+    </div>
+
+    <div class="quiz-intro-card" id="quizIntro">
+      <div class="quiz-intro-icon">
+        <span class="material-symbols-rounded">shield</span>
+      </div>
+      <div class="quiz-intro-title">Can you tell real from fake?</div>
+      <div class="quiz-intro-desc">5 quick questions to test your scam-spotting skills</div>
+    </div>
+
+    <div class="quiz-progress" id="quizProgress">
+      <div class="quiz-dot active"></div>
+      <div class="quiz-dot"></div>
+      <div class="quiz-dot"></div>
+      <div class="quiz-dot"></div>
+      <div class="quiz-dot"></div>
+    </div>
+
+    <div class="quiz-question-card" id="quizQuestionCard">
+      <div class="quiz-question-label" id="quizQuestionLabel">Question 1 of 5</div>
+      <div class="quiz-question-url" id="quizQuestionUrl">maybank-secure.com.my</div>
+      <div class="quiz-question-prompt">Safe or Scam?</div>
+      <div class="quiz-answer-btns">
+        <button class="quiz-btn-safe" id="quizBtnSafe">Safe &#10003;</button>
+        <button class="quiz-btn-scam" id="quizBtnScam">Scam &#10007;</button>
+      </div>
+    </div>
+
+    <div class="quiz-feedback" id="quizFeedback">
+      <span class="material-symbols-rounded" id="quizFeedbackIcon">check_circle</span>
+      <span id="quizFeedbackText"></span>
+    </div>
+
+    <button class="quiz-next-btn" id="quizNextBtn">Next Question</button>
+
+    <div class="quiz-results" id="quizResults">
+      <div class="quiz-results-icon" id="quizResultsIcon">
+        <span class="material-symbols-rounded">emoji_events</span>
+      </div>
+      <div class="quiz-results-score" id="quizResultsScore">0/5</div>
+      <div class="quiz-results-label" id="quizResultsLabel">correct answers</div>
+      <div class="quiz-results-badge" id="quizResultsBadge">
+        <span class="material-symbols-rounded">school</span> Quiz Master badge earned!
+      </div>
+      <div class="quiz-results-actions">
+        <button class="btn-quiz-share" id="btnQuizShare">
+          <span class="material-symbols-rounded">share</span> Share Score
+        </button>
+        <button class="btn-quiz-retry" id="btnQuizRetry">
+          <span class="material-symbols-rounded">refresh</span> Try Again
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Badge tooltip (floating) -->
+  <div class="badge-tooltip" id="badgeTooltip"></div>
+
   <!-- Bottom Navigation -->
   <nav class="bottom-nav" id="bottomNav" aria-label="Main navigation">
     <button class="nav-item active" data-screen="screen-shield" aria-label="Phone shield" aria-current="page">
@@ -3794,7 +4602,7 @@ function showScreen(id) {
 
   // Hide bottom nav for sub-screens (fix flow and guardian screens)
   const bottomNav = document.getElementById('bottomNav');
-  const isSubScreen = id === 'screen-fix' || id.startsWith('screen-guardian');
+  const isSubScreen = id === 'screen-fix' || id.startsWith('screen-guardian') || id === 'screen-achievements' || id === 'screen-quiz';
   bottomNav.style.display = isSubScreen ? 'none' : '';
 
   // Update nav highlights (only for main screens)
@@ -4589,6 +5397,215 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Member unlinked');
       }, 300);
     });
+  });
+
+  // ========== ACHIEVEMENTS & QUIZ ==========
+
+  // Navigation: Profile -> Achievements
+  document.getElementById('btnAchievementsProfile').addEventListener('click', () => {
+    showScreen('screen-achievements');
+    // Animate progress bar
+    setTimeout(() => {
+      document.getElementById('achievementsProgressFill').style.width = '50%';
+    }, 200);
+  });
+
+  // Navigation: Streak chip -> Achievements
+  document.getElementById('streakChip').addEventListener('click', () => {
+    showScreen('screen-achievements');
+    setTimeout(() => {
+      document.getElementById('achievementsProgressFill').style.width = '50%';
+    }, 200);
+  });
+  addKeyboardActivation(document.getElementById('streakChip'));
+  addKeyboardActivation(document.getElementById('btnAchievementsProfile'));
+
+  // Achievements back -> Profile
+  document.getElementById('btnAchievementsBack').addEventListener('click', () => showScreen('screen-profile'));
+
+  // Achievements -> Quiz
+  document.getElementById('btnTakeQuiz').addEventListener('click', () => {
+    quizReset();
+    showScreen('screen-quiz');
+  });
+
+  // Quiz back -> Achievements
+  document.getElementById('btnQuizBack').addEventListener('click', () => {
+    showScreen('screen-achievements');
+    setTimeout(() => {
+      document.getElementById('achievementsProgressFill').style.width = '50%';
+    }, 200);
+  });
+
+  // Badge tooltip for locked badges
+  const badgeTooltip = document.getElementById('badgeTooltip');
+  let tooltipTimer = null;
+  document.querySelectorAll('.badge-item.locked').forEach(badge => {
+    badge.addEventListener('click', () => {
+      const unlockText = badge.dataset.unlock;
+      if (!unlockText) return;
+      badgeTooltip.textContent = unlockText;
+      badgeTooltip.classList.add('show');
+      clearTimeout(tooltipTimer);
+      tooltipTimer = setTimeout(() => {
+        badgeTooltip.classList.remove('show');
+      }, 2000);
+    });
+  });
+
+  // --- Quiz Data ---
+  const quizQuestions = [
+    { url: 'maybank-secure.com.my', answer: 'scam', explanation: 'This is a fake domain. The real Maybank site is maybank2u.com.my. Scammers add words like "secure" to trick you.' },
+    { url: 'shopee.com.my/deals', answer: 'safe', explanation: 'This is the official Shopee Malaysia domain. It is safe to visit.' },
+    { url: 'bit.ly/free-tng-reload', answer: 'scam', explanation: 'URL shorteners hide the real destination. "Free TNG reload" is a common scam lure. Never click shortened links from unknown sources.' },
+    { url: 'grab.com/my', answer: 'safe', explanation: 'This is the official Grab Malaysia website. It is safe to visit.' },
+    { url: 'cimbbank-verify.net', answer: 'scam', explanation: 'Fake domain impersonating CIMB Bank. The real site is cimbclicks.com.my. Banks never use .net domains for verification.' },
+  ];
+
+  let quizCurrent = 0;
+  let quizScore = 0;
+  let quizAnswered = false;
+
+  function quizReset() {
+    quizCurrent = 0;
+    quizScore = 0;
+    quizAnswered = false;
+    document.getElementById('quizIntro').style.display = '';
+    document.getElementById('quizQuestionCard').style.display = '';
+    document.getElementById('quizResults').classList.remove('show');
+    document.getElementById('quizFeedback').classList.remove('show', 'correct', 'wrong');
+    document.getElementById('quizNextBtn').classList.remove('show');
+    quizRenderQuestion();
+  }
+
+  function quizRenderQuestion() {
+    const q = quizQuestions[quizCurrent];
+    document.getElementById('quizQuestionLabel').textContent = 'Question ' + (quizCurrent + 1) + ' of 5';
+    document.getElementById('quizQuestionUrl').textContent = q.url;
+
+    // Reset buttons
+    const safeBtn = document.getElementById('quizBtnSafe');
+    const scamBtn = document.getElementById('quizBtnScam');
+    safeBtn.disabled = false;
+    scamBtn.disabled = false;
+    safeBtn.classList.remove('selected');
+    scamBtn.classList.remove('selected');
+
+    // Reset feedback
+    document.getElementById('quizFeedback').classList.remove('show', 'correct', 'wrong');
+    document.getElementById('quizNextBtn').classList.remove('show');
+    document.getElementById('quizQuestionCard').classList.remove('correct-flash', 'wrong-shake');
+
+    // Update dots
+    const dots = document.querySelectorAll('#quizProgress .quiz-dot');
+    dots.forEach((dot, i) => {
+      dot.className = 'quiz-dot';
+      if (i === quizCurrent) dot.classList.add('active');
+    });
+
+    quizAnswered = false;
+  }
+
+  function quizAnswer(userAnswer) {
+    if (quizAnswered) return;
+    quizAnswered = true;
+
+    const q = quizQuestions[quizCurrent];
+    const isCorrect = userAnswer === q.answer;
+    const safeBtn = document.getElementById('quizBtnSafe');
+    const scamBtn = document.getElementById('quizBtnScam');
+    const card = document.getElementById('quizQuestionCard');
+    const feedback = document.getElementById('quizFeedback');
+    const feedbackIcon = document.getElementById('quizFeedbackIcon');
+    const feedbackText = document.getElementById('quizFeedbackText');
+
+    // Disable buttons
+    safeBtn.disabled = true;
+    scamBtn.disabled = true;
+
+    // Highlight selected button
+    if (userAnswer === 'safe') safeBtn.classList.add('selected');
+    else scamBtn.classList.add('selected');
+
+    // Update dot
+    const dots = document.querySelectorAll('#quizProgress .quiz-dot');
+    if (isCorrect) {
+      quizScore++;
+      dots[quizCurrent].classList.add('correct');
+      card.classList.add('correct-flash');
+      feedback.className = 'quiz-feedback show correct';
+      feedbackIcon.textContent = 'check_circle';
+      feedbackText.textContent = 'Correct! ' + q.explanation;
+    } else {
+      dots[quizCurrent].classList.add('wrong');
+      card.classList.add('wrong-shake');
+      feedback.className = 'quiz-feedback show wrong';
+      feedbackIcon.textContent = 'cancel';
+      feedbackText.textContent = 'Wrong. ' + q.explanation;
+    }
+
+    // Show next button
+    const nextBtn = document.getElementById('quizNextBtn');
+    if (quizCurrent < 4) {
+      nextBtn.textContent = 'Next Question';
+    } else {
+      nextBtn.textContent = 'See Results';
+    }
+    nextBtn.classList.add('show');
+  }
+
+  function quizNext() {
+    if (quizCurrent < 4) {
+      quizCurrent++;
+      quizRenderQuestion();
+    } else {
+      quizShowResults();
+    }
+  }
+
+  function quizShowResults() {
+    document.getElementById('quizIntro').style.display = 'none';
+    document.getElementById('quizQuestionCard').style.display = 'none';
+    document.getElementById('quizFeedback').classList.remove('show');
+    document.getElementById('quizNextBtn').classList.remove('show');
+    document.getElementById('quizProgress').style.display = 'none';
+
+    const results = document.getElementById('quizResults');
+    const icon = document.getElementById('quizResultsIcon');
+    const scoreEl = document.getElementById('quizResultsScore');
+    const labelEl = document.getElementById('quizResultsLabel');
+    const badgeEl = document.getElementById('quizResultsBadge');
+
+    scoreEl.textContent = quizScore + '/5';
+
+    if (quizScore === 5) {
+      icon.className = 'quiz-results-icon perfect';
+      icon.innerHTML = '<span class="material-symbols-rounded">emoji_events</span>';
+      labelEl.textContent = 'Perfect score! You are a scam-spotting expert!';
+      badgeEl.classList.add('show');
+    } else if (quizScore >= 3) {
+      icon.className = 'quiz-results-icon good';
+      icon.innerHTML = '<span class="material-symbols-rounded">thumb_up</span>';
+      labelEl.textContent = 'Good job! Keep learning to stay safe.';
+      badgeEl.classList.remove('show');
+    } else {
+      icon.className = 'quiz-results-icon good';
+      icon.innerHTML = '<span class="material-symbols-rounded">psychology</span>';
+      labelEl.textContent = 'Keep practicing! Scammers are tricky.';
+      badgeEl.classList.remove('show');
+    }
+
+    results.classList.add('show');
+  }
+
+  // Quiz event listeners
+  document.getElementById('quizBtnSafe').addEventListener('click', () => quizAnswer('safe'));
+  document.getElementById('quizBtnScam').addEventListener('click', () => quizAnswer('scam'));
+  document.getElementById('quizNextBtn').addEventListener('click', quizNext);
+  document.getElementById('btnQuizShare').addEventListener('click', () => showToast('Score shared!'));
+  document.getElementById('btnQuizRetry').addEventListener('click', () => {
+    document.getElementById('quizProgress').style.display = '';
+    quizReset();
   });
 
   // Initial render
