@@ -28,16 +28,24 @@ class MainActivity : ComponentActivity() {
     var pendingUrl by mutableStateOf<String?>(null)
         private set
 
+    /** Navigation route requested by a notification deep-link (e.g. guardian ward detail). */
+    var pendingNavigationRoute by mutableStateOf<String?>(null)
+        private set
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         pendingUrl = extractUrlFromIntent(intent)
+        pendingNavigationRoute = extractNavigationRouteFromIntent(intent)
 
         setContent {
             SafeAnotTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    SafeAnotNavGraph(pendingUrl = pendingUrl)
+                    SafeAnotNavGraph(
+                        pendingUrl = pendingUrl,
+                        pendingNavigationRoute = pendingNavigationRoute,
+                    )
                 }
             }
         }
@@ -46,6 +54,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         pendingUrl = extractUrlFromIntent(intent)
+        pendingNavigationRoute = extractNavigationRouteFromIntent(intent)
     }
 
     private fun extractUrlFromIntent(intent: Intent?): String? {
@@ -73,6 +82,24 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+            else -> null
+        }
+    }
+
+    /**
+     * Extracts a navigation route from notification extras.
+     * Notifications may set "navigate_to" (e.g. "guardian_ward_detail") and
+     * "ward_device_id" to deep-link into a specific screen.
+     */
+    private fun extractNavigationRouteFromIntent(intent: Intent?): String? {
+        if (intent == null) return null
+        val navigateTo = intent.getStringExtra("navigate_to") ?: return null
+        return when (navigateTo) {
+            "guardian_ward_detail" -> {
+                val wardDeviceId = intent.getStringExtra("ward_device_id") ?: return null
+                "guardian/ward/$wardDeviceId"
+            }
+            "guardian_dashboard" -> "guardian/dashboard"
             else -> null
         }
     }

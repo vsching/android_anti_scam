@@ -27,7 +27,7 @@ data class PairingCodeResponse(
 data class ClaimPairingCodeRequest(
     @SerializedName("device_id") val deviceId: String,
     @SerializedName("code") val code: String,
-    @SerializedName("label") val label: String,
+    @SerializedName("display_name") val label: String,
 )
 
 data class GuardianPairingDto(

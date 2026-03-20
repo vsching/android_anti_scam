@@ -153,10 +153,13 @@ export async function handleGeneratePairingCode(
 
   const expiresAt = now + CODE_TTL_SECONDS;
 
+  const wardDisplayName =
+    typeof body.label === 'string' ? body.label : '';
+
   await env.DB.prepare(
-    'INSERT INTO guardian_pairing_codes (code, ward_device_id, created_at, expires_at, claimed) VALUES (?, ?, ?, ?, 0)',
+    'INSERT INTO guardian_pairing_codes (code, ward_device_id, ward_display_name, created_at, expires_at, claimed) VALUES (?, ?, ?, ?, ?, 0)',
   )
-    .bind(code, deviceId, now, expiresAt)
+    .bind(code, deviceId, wardDisplayName, now, expiresAt)
     .run();
 
   return jsonResponse({ code, expires_at: expiresAt }, 200);
@@ -200,6 +203,7 @@ export async function handleClaimPairingCode(
     .first<{
       code: string;
       ward_device_id: string;
+      ward_display_name: string;
       created_at: number;
       expires_at: number;
       claimed: number;
@@ -258,8 +262,8 @@ export async function handleClaimPairingCode(
     ).bind(code.toUpperCase()),
     env.DB.prepare(
       `INSERT INTO guardian_pairings (ward_device_id, guardian_device_id, ward_display_name, guardian_display_name, created_at)
-       VALUES (?, ?, '', ?, ?)`,
-    ).bind(pairingCode.ward_device_id, guardianDeviceId, guardianDisplayName, now),
+       VALUES (?, ?, ?, ?, ?)`,
+    ).bind(pairingCode.ward_device_id, guardianDeviceId, pairingCode.ward_display_name || '', guardianDisplayName, now),
   ]);
 
   // Retrieve the newly created pairing to return a full DTO
@@ -270,7 +274,7 @@ export async function handleClaimPairingCode(
     id: newPairingId,
     ward_device_id: pairingCode.ward_device_id,
     guardian_device_id: guardianDeviceId,
-    ward_display_name: '',
+    ward_display_name: pairingCode.ward_display_name || '',
     guardian_display_name: guardianDisplayName,
     created_at: now,
     status: 'paired',
@@ -568,6 +572,10 @@ export async function handlePostHeartbeat(
 /**
  * GET /api/guardian/wards/:deviceId/heartbeats?days=7
  * Returns heartbeat history for a ward device.
+ *
+ * TODO: In production, HMAC should sign both ward_device_id and guardian_device_id
+ * to prevent a guardian from requesting heartbeats for wards they are not paired with
+ * by tampering with the query parameter.
  */
 export async function handleGetWardHeartbeats(
   request: Request,

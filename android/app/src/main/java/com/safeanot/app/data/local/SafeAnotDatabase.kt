@@ -30,7 +30,7 @@ import com.safeanot.app.data.local.entity.SyncMetadataEntity
         ShareEventEntity::class,
         GuardianPairingEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
 )
 abstract class SafeAnotDatabase : RoomDatabase() {
@@ -80,6 +80,14 @@ abstract class SafeAnotDatabase : RoomDatabase() {
                     )
                     """.trimIndent()
                 )
+            }
+        }
+
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE guardian_pairings ADD COLUMN last_security_score INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE guardian_pairings ADD COLUMN last_heartbeat_at INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE guardian_pairings ADD COLUMN play_protect_enabled INTEGER DEFAULT NULL")
             }
         }
     }

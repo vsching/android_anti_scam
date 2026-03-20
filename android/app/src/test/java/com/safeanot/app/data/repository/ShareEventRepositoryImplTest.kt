@@ -248,6 +248,10 @@ class ShareEventRepositoryImplTest {
         override suspend fun claimPairingCode(request: ClaimPairingCodeRequest): GuardianPairingDto = throw NotImplementedError()
         override suspend fun getWards(deviceId: String): List<GuardianPairingDto> = throw NotImplementedError()
         override suspend fun getGuardians(deviceId: String): List<GuardianPairingDto> = throw NotImplementedError()
-        override suspend fun deletePairing(request: DeletePairingRequest): Response<Unit> = throw NotImplementedError()
+        override suspend fun deletePairing(pairingId: Long, request: DeletePairingRequest): Response<Unit> = throw NotImplementedError()
+        override suspend fun postHeartbeat(request: com.safeanot.app.data.remote.model.HeartbeatRequest): Response<Unit> = throw NotImplementedError()
+        override suspend fun registerFcmToken(request: com.safeanot.app.data.remote.model.RegisterFcmTokenRequest): Response<Unit> = throw NotImplementedError()
+        override suspend fun getWardHeartbeats(wardDeviceId: String, days: Int, guardianDeviceId: String): List<com.safeanot.app.data.remote.model.WardHeartbeatDto> = throw NotImplementedError()
+        override suspend fun sendHelpRequest(request: com.safeanot.app.data.remote.model.HelpRequestBody): Response<Unit> = throw NotImplementedError()
     }
 }

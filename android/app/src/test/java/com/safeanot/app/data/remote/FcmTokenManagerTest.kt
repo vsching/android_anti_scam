@@ -37,9 +37,10 @@ class FcmTokenManagerTest {
         override suspend fun claimPairingCode(request: com.safeanot.app.data.remote.model.ClaimPairingCodeRequest) = throw NotImplementedError()
         override suspend fun getWards(deviceId: String) = throw NotImplementedError()
         override suspend fun getGuardians(deviceId: String) = throw NotImplementedError()
-        override suspend fun deletePairing(request: com.safeanot.app.data.remote.model.DeletePairingRequest) = throw NotImplementedError()
+        override suspend fun deletePairing(pairingId: Long, request: com.safeanot.app.data.remote.model.DeletePairingRequest) = throw NotImplementedError()
         override suspend fun postHeartbeat(request: com.safeanot.app.data.remote.model.HeartbeatRequest) = throw NotImplementedError()
         override suspend fun getWardHeartbeats(wardDeviceId: String, days: Int, guardianDeviceId: String) = throw NotImplementedError()
+        override suspend fun sendHelpRequest(request: com.safeanot.app.data.remote.model.HelpRequestBody): retrofit2.Response<Unit> = throw NotImplementedError()
     }
 
     /**
