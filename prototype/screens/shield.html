@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Safe Anot? — Shield</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<!-- Scan Overlay -->
+<div class="scan-overlay" id="scanOverlay" role="status" aria-live="polite">
+  <div class="scan-shield" aria-hidden="true">
+    <span class="material-symbols-rounded">shield</span>
+  </div>
+  <div class="scan-text">Scanning your device...</div>
+</div>
+
+<!-- Success Overlay -->
+<div class="success-overlay" id="successOverlay" role="status" aria-live="assertive">
+  <div class="success-check" aria-hidden="true">
+    <span class="material-symbols-rounded">check</span>
+  </div>
+  <div class="success-text">Secured!</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="screen-standalone" id="screen-shield">
+
+  <!-- EDUCATION VIEW (shown first time) -->
+  <div id="shieldEducation">
+    <div class="shield-header">
+      <h2>Your Phone Shield</h2>
+    </div>
+
+    <div class="edu-hero">
+      <div class="edu-icon-wrapper">
+        <div class="edu-icon-bg"></div>
+        <div class="edu-icon-inner">
+          <span class="material-symbols-rounded">warning</span>
+        </div>
+      </div>
+      <h3 class="edu-title">Did you know?</h3>
+      <p class="edu-subtitle">Your phone might be allowing scam apps to install without you realizing it.</p>
+    </div>
+
+    <div class="edu-steps">
+      <div class="edu-step">
+        <div class="edu-step-num">1</div>
+        <div class="edu-step-content">
+          <div class="edu-step-icon"><span class="material-symbols-rounded">chat</span></div>
+          <div>
+            <div class="edu-step-title">Scammer sends a file</div>
+            <div class="edu-step-desc">They send a dangerous APK file disguised as a "bank update" or "trading app" via WhatsApp or Telegram.</div>
+          </div>
+        </div>
+      </div>
+      <div class="edu-step-arrow"><span class="material-symbols-rounded">arrow_downward</span></div>
+      <div class="edu-step">
+        <div class="edu-step-num">2</div>
+        <div class="edu-step-content">
+          <div class="edu-step-icon"><span class="material-symbols-rounded">download</span></div>
+          <div>
+            <div class="edu-step-title">Your phone installs it</div>
+            <div class="edu-step-desc">If "Install unknown apps" is ON for WhatsApp, your phone allows the scam app to be installed — no warning.</div>
+          </div>
+        </div>
+      </div>
+      <div class="edu-step-arrow"><span class="material-symbols-rounded">arrow_downward</span></div>
+      <div class="edu-step">
+        <div class="edu-step-num">3</div>
+        <div class="edu-step-content">
+          <div class="edu-step-icon"><span class="material-symbols-rounded">credit_card_off</span></div>
+          <div>
+            <div class="edu-step-title">Money gone</div>
+            <div class="edu-step-desc">The scam app steals your banking login, OTP codes, or takes control of your phone. Victims lose thousands.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="edu-stat-card">
+      <span class="material-symbols-rounded" aria-hidden="true">trending_up</span>
+      <div>
+        <div class="edu-stat-number">RM 2.7 billion</div>
+        <div class="edu-stat-label">lost to scams in Malaysia in 2025</div>
+      </div>
+    </div>
+
+    <div class="edu-bottom">
+      <p class="edu-cta-text">Let's check if your phone is vulnerable.</p>
+      <button class="edu-scan-btn" id="btnStartShieldScan">
+        <span class="material-symbols-rounded" aria-hidden="true">radar</span>
+        Scan My Phone
+      </button>
+      <p class="edu-reassure">Takes 3 seconds. No data leaves your phone.</p>
+    </div>
+  </div>
+
+  <!-- SCAN RESULTS VIEW (shown after scan) -->
+  <div id="shieldResults" style="display:none;">
+    <div class="shield-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <h2>Your Phone Shield</h2>
+      <button class="btn-text-why" id="btnWhyThisMatters" aria-label="Why this matters">
+        <span class="material-symbols-rounded" aria-hidden="true">help</span> Why?
+      </button>
+    </div>
+
+    <div class="shield-hero">
+      <div class="shield-icon-wrapper">
+        <div class="shield-icon-bg" id="shieldGlowBg"></div>
+        <div class="shield-icon-inner">
+          <span class="material-symbols-rounded" id="shieldIconSymbol">shield</span>
+        </div>
+      </div>
+      <div class="shield-score" id="shieldScore" aria-label="Security score">72%</div>
+      <div class="shield-score-label" id="shieldScoreLabel">5 of 7 items secured</div>
+    </div>
+
+    <div class="shield-section-title">Messaging Apps</div>
+    <div id="cards-messaging"></div>
+
+    <div class="shield-section-title">Browsers</div>
+    <div id="cards-browsers"></div>
+
+    <div class="shield-section-title">File Managers</div>
+    <div id="cards-files"></div>
+
+    <div class="shield-section-title">Protection Status</div>
+    <div id="cards-protection"></div>
+
+    <div class="recheck-container">
+      <button class="btn-recheck" id="btnRecheck">
+        <span class="material-symbols-rounded" aria-hidden="true">refresh</span>
+        Recheck All
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== APP DATA ==========
+const apps = [
+  { id: 'whatsapp', name: 'WhatsApp', abbr: 'WA', color: '#25D366', category: 'messaging', status: 'needs-review', desc: 'Can receive and install APK files', riskText: 'WhatsApp can be used to send you dangerous APK files.', whyText: 'Scammers send APK files via WhatsApp disguised as "bank updates" or "security apps". If WhatsApp is allowed to install apps, <strong>tapping the file installs it directly</strong> — no Play Store safety check.' },
+  { id: 'telegram', name: 'Telegram', abbr: 'TG', color: '#0088cc', category: 'messaging', status: 'needs-review', desc: 'Can receive and install APK files', riskText: 'Telegram can be used to send you dangerous APK files.', whyText: 'Telegram groups are a top channel for scam APK distribution.' },
+  { id: 'chrome', name: 'Chrome', abbr: 'CR', color: '#4285F4', category: 'browsers', status: 'needs-review', desc: 'Common source for APK downloads', riskText: 'Chrome can be used to download dangerous APK files.', whyText: 'Scam websites trick users into downloading APK files through Chrome.' },
+  { id: 'firefox', name: 'Firefox', abbr: 'FF', color: '#FF7139', category: 'browsers', status: 'secured', desc: 'Install permission disabled', riskText: 'Firefox can be used to download dangerous APK files.', whyText: 'Same risk as Chrome — this one is already secured.' },
+  { id: 'uc-browser', name: 'UC Browser', abbr: 'UC', color: '#F58220', category: 'browsers', status: 'needs-review', desc: 'Can download and install APK files', riskText: 'UC Browser can be used to download dangerous APK files.', whyText: 'UC Browser is popular in SE Asia and is a common target for scam redirects.' },
+  { id: 'files-google', name: 'Files by Google', abbr: 'FG', color: '#34a853', category: 'files', status: 'secured', desc: 'Install permission disabled', riskText: '', whyText: 'File managers can open APK files saved on your device. This one is already secured.' },
+  { id: 'playprotect', name: 'Play Protect', abbr: null, color: '#34a853', category: 'protection', status: 'secured', desc: 'Active and up to date', riskText: '', whyText: 'Google Play Protect scans your device for harmful apps.' },
+];
+
+function renderCards() {
+  const containers = {
+    messaging: document.getElementById('cards-messaging'),
+    browsers: document.getElementById('cards-browsers'),
+    files: document.getElementById('cards-files'),
+    protection: document.getElementById('cards-protection'),
+  };
+  Object.values(containers).forEach(c => { if (c) c.innerHTML = ''; });
+
+  apps.forEach(app => {
+    const container = containers[app.category];
+    if (!container) return;
+    const card = document.createElement('div');
+    card.className = 'app-card';
+    card.dataset.status = app.status;
+    const iconContent = app.id === 'playprotect'
+      ? '<span class="material-symbols-rounded" style="font-size:20px;color:white;font-variation-settings:\'FILL\' 1;">verified_user</span>'
+      : app.abbr;
+    const descText = app.status === 'secured' ? (app.id === 'playprotect' ? 'Active and up to date' : 'Install permission disabled') : app.desc;
+    let badgeHtml;
+    if (app.status === 'secured') {
+      badgeHtml = '<span class="badge badge-green"><span class="material-symbols-rounded" style="font-size:12px;">check</span> Secured</span>';
+    } else {
+      badgeHtml = '<span class="badge badge-red">Needs Review</span>';
+    }
+    const whyHtml = app.whyText ? '<div class="app-card-why">' + app.whyText + '</div>' : '';
+    card.innerHTML =
+      '<div class="app-card-icon" style="background:' + app.color + ';">' + iconContent + '</div>' +
+      '<div class="app-card-body"><div class="app-card-name">' + app.name + '</div><div class="app-card-desc">' + descText + '</div>' + whyHtml + '</div>' +
+      '<div class="app-card-right">' + badgeHtml + '</div>';
+    card.addEventListener('click', () => card.classList.toggle('expanded'));
+    container.appendChild(card);
+  });
+}
+
+function getScorePercent() {
+  const installed = apps.filter(a => a.status !== 'not-installed');
+  const secured = apps.filter(a => a.status === 'secured').length;
+  return installed.length === 0 ? 100 : Math.round((secured / installed.length) * 100);
+}
+
+function updateShield() {
+  const pct = getScorePercent();
+  const secured = apps.filter(a => a.status === 'secured').length;
+  const total = apps.filter(a => a.status !== 'not-installed').length;
+  document.getElementById('shieldScore').textContent = pct + '%';
+  document.getElementById('shieldScoreLabel').textContent = secured + ' of ' + total + ' items secured';
+  let color;
+  const glowBg = document.getElementById('shieldGlowBg');
+  const iconSym = document.getElementById('shieldIconSymbol');
+  if (pct >= 80) { color = 'var(--green)'; glowBg.className = 'shield-icon-bg score-green'; }
+  else if (pct >= 50) { color = 'var(--orange)'; glowBg.className = 'shield-icon-bg'; }
+  else { color = 'var(--red)'; glowBg.className = 'shield-icon-bg score-red'; }
+  document.getElementById('shieldScore').style.color = color;
+  iconSym.style.color = color;
+  renderCards();
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btnStartShieldScan').addEventListener('click', () => {
+    const scanOv = document.getElementById('scanOverlay');
+    scanOv.classList.add('show');
+    setTimeout(() => {
+      scanOv.classList.remove('show');
+      document.getElementById('shieldEducation').style.display = 'none';
+      document.getElementById('shieldResults').style.display = 'block';
+      updateShield();
+    }, 1800);
+  });
+  document.getElementById('btnWhyThisMatters').addEventListener('click', () => {
+    document.getElementById('shieldResults').style.display = 'none';
+    document.getElementById('shieldEducation').style.display = 'block';
+  });
+  document.getElementById('btnRecheck').addEventListener('click', () => {
+    const overlay = document.getElementById('scanOverlay');
+    document.querySelector('#scanOverlay .scan-text').textContent = 'Rechecking security...';
+    overlay.classList.add('show');
+    setTimeout(() => {
+      overlay.classList.remove('show');
+      document.querySelector('#scanOverlay .scan-text').textContent = 'Scanning your device...';
+      updateShield();
+      showToast('Security check complete');
+    }, 1500);
+  });
+  renderCards();
+  updateShield();
+});
+</script>
+</body>
+</html>

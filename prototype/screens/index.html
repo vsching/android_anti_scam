@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safe Anot? — Screen Directory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Quicksand', -apple-system, sans-serif;
+    background: #FAFAFA;
+    color: #1E293B;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #4F46E5, #6366F1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  p.subtitle {
+    color: #64748B;
+    font-size: 15px;
+    margin-bottom: 32px;
+  }
+  .screen-list {
+    list-style: none;
+    padding: 0;
+  }
+  .screen-list li {
+    margin-bottom: 8px;
+  }
+  .screen-list a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: white;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 12px;
+    text-decoration: none;
+    color: #1E293B;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .screen-list a:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-color: #4F46E5;
+  }
+  .screen-list .badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-main { background: #EEF2FF; color: #4F46E5; }
+  .badge-sub { background: #F0FDFA; color: #0D9488; }
+  .badge-check { background: rgba(220,38,38,0.1); color: #DC2626; }
+</style>
+</head>
+<body>
+
+<h1>Safe Anot? Screens</h1>
+<p class="subtitle">Click any screen to view it standalone.</p>
+
+<ul class="screen-list">
+  <li>
+    <a href="shield.html">
+      <span class="badge badge-main">E02</span>
+      Shield — Phone Security Scanner
+    </a>
+  </li>
+  <li>
+    <a href="check.html">
+      <span class="badge badge-main">E03</span>
+      Check — Link Checker
+    </a>
+  </li>
+  <li>
+    <a href="check-dangerous.html">
+      <span class="badge badge-check">E03</span>
+      Check Dangerous — Verdict Overlay
+    </a>
+  </li>
+  <li>
+    <a href="alerts.html">
+      <span class="badge badge-main">E04</span>
+      Alerts — Scam Alerts Feed
+    </a>
+  </li>
+  <li>
+    <a href="profile.html">
+      <span class="badge badge-main">E05</span>
+      Profile — Settings & Stats
+    </a>
+  </li>
+  <li>
+    <a href="fix-detail.html">
+      <span class="badge badge-sub">E02</span>
+      Fix Detail — App Fix Flow
+    </a>
+  </li>
+  <li>
+    <a href="guardian-pairing.html">
+      <span class="badge badge-sub">E08</span>
+      Guardian Pairing — Link Family Devices
+    </a>
+  </li>
+  <li>
+    <a href="guardian-dashboard.html">
+      <span class="badge badge-sub">E08</span>
+      Guardian Dashboard — Family Overview
+    </a>
+  </li>
+  <li>
+    <a href="guardian-detail.html">
+      <span class="badge badge-sub">E08</span>
+      Guardian Detail — Ward Device Status
+    </a>
+  </li>
+</ul>
+
+</body>
+</html>

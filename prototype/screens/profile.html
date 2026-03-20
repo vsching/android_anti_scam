@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Safe Anot? — Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="screen-standalone" id="screen-profile">
+  <div class="profile-header">
+    <h2>My Safe Anot?</h2>
+  </div>
+
+  <div class="stats-card">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-number">12</div>
+        <div class="stat-label">Links Checked</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" style="color: var(--red);">3</div>
+        <div class="stat-label">Scams Caught</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" id="profileScore">72%</div>
+        <div class="stat-label">Security Score</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" style="color: var(--green); font-size: 18px; padding-top: 6px;">Mar 2026</div>
+        <div class="stat-label">Protected Since</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guardian Card: Setup mode -->
+  <div class="guardian-profile-card" id="guardianCardSetup">
+    <div class="guardian-profile-header">
+      <div class="guardian-profile-icon">
+        <span class="material-symbols-rounded">family_restroom</span>
+      </div>
+      <div class="guardian-profile-info">
+        <h3>Family Guardian</h3>
+        <p>Protect your family</p>
+      </div>
+    </div>
+    <button class="btn-guardian-setup" id="btnGuardianSetup">
+      Set Up Guardian
+    </button>
+  </div>
+
+  <!-- Guardian Card: Linked mode -->
+  <div class="guardian-profile-card" id="guardianCardLinked" style="display:none;">
+    <div class="guardian-profile-header">
+      <div class="guardian-profile-icon">
+        <span class="material-symbols-rounded">family_restroom</span>
+      </div>
+      <div class="guardian-profile-info">
+        <h3>Family Guardian</h3>
+        <p>Protect your family</p>
+      </div>
+    </div>
+    <div class="guardian-profile-summary">
+      <span class="material-symbols-rounded">monitoring</span>
+      Monitoring 2 family members
+    </div>
+    <button class="btn-guardian-dashboard" id="btnGuardianDashboard">
+      View Dashboard
+    </button>
+  </div>
+
+  <div class="settings-card">
+    <div class="settings-card-title">Reminders</div>
+    <div class="settings-row">
+      <label class="settings-row-label" for="reminderToggle">Weekly reminders</label>
+      <button class="toggle-btn" id="reminderToggle" role="switch" aria-checked="true" aria-label="Weekly reminders"></button>
+    </div>
+    <div class="settings-row">
+      <label class="settings-row-label" for="reminderDay">Reminder day</label>
+      <select class="settings-select" id="reminderDay">
+        <option selected>Monday</option>
+        <option>Tuesday</option>
+        <option>Wednesday</option>
+        <option>Thursday</option>
+        <option>Friday</option>
+        <option>Saturday</option>
+        <option>Sunday</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="settings-card">
+    <div class="settings-card-title">Appearance</div>
+    <div class="settings-row" style="flex-wrap: wrap;">
+      <label class="settings-row-label">Dark mode</label>
+      <button class="toggle-btn" id="darkModeToggle" role="switch" aria-checked="true" aria-label="Dark mode" disabled style="opacity: 0.7; cursor: default;"></button>
+      <div style="width: 100%; font-size: 13px; color: var(--text-secondary); margin-top: 4px;">Dark mode is always on in this version</div>
+    </div>
+  </div>
+
+  <div class="settings-card">
+    <div class="settings-card-title">Anti-Scam Tips</div>
+    <div class="accordion-item">
+      <button class="accordion-btn" aria-expanded="false">
+        <span class="accordion-label">Never install APKs from WhatsApp or Telegram</span>
+        <span class="material-symbols-rounded" aria-hidden="true">expand_more</span>
+      </button>
+      <div class="accordion-content" role="region">
+        <p>Scammers send APK files through messaging apps disguised as legitimate apps, updates, or tools. Never download and install APK files received through these channels.</p>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-btn" aria-expanded="false">
+        <span class="accordion-label">Only install apps from Google Play Store</span>
+        <span class="material-symbols-rounded" aria-hidden="true">expand_more</span>
+      </button>
+      <div class="accordion-content" role="region">
+        <p>The Google Play Store screens apps for malware and malicious behavior. Installing apps from other sources bypasses these safety checks.</p>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-btn" aria-expanded="false">
+        <span class="accordion-label">Keep Google Play Protect enabled</span>
+        <span class="material-symbols-rounded" aria-hidden="true">expand_more</span>
+      </button>
+      <div class="accordion-content" role="region">
+        <p>Google Play Protect continuously scans your device for potentially harmful apps. It should always be enabled for maximum protection.</p>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-btn" aria-expanded="false">
+        <span class="accordion-label">If someone asks you to install an APK, it's a scam</span>
+        <span class="material-symbols-rounded" aria-hidden="true">expand_more</span>
+      </button>
+      <div class="accordion-content" role="region">
+        <p>Legitimate companies never ask you to sideload an APK. If someone sends you an APK file and asks you to install it, treat it as a scam.</p>
+      </div>
+    </div>
+  </div>
+
+  <button class="share-app-btn" id="btnShareApp">
+    <span class="material-symbols-rounded" aria-hidden="true">share</span>
+    Share Safe Anot? with Friends
+  </button>
+
+  <div class="about-section">
+    <div class="version">Version 1.0.0</div>
+    <div class="made-with">Made with &#10084;&#65039; to fight scams in MY/SG</div>
+  </div>
+</div>
+
+<script>
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+function toggleAccordion(btn) {
+  const item = btn.parentElement;
+  const content = item.querySelector('.accordion-content');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.accordion-item.open').forEach(i => {
+    i.classList.remove('open');
+    i.querySelector('.accordion-content').style.maxHeight = '0';
+    i.querySelector('.accordion-btn').setAttribute('aria-expanded', 'false');
+  });
+  if (!isOpen) {
+    item.classList.add('open');
+    content.style.maxHeight = content.scrollHeight + 'px';
+    btn.setAttribute('aria-expanded', 'true');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('reminderToggle').addEventListener('click', function() {
+    const isOn = this.getAttribute('aria-checked') === 'true';
+    this.setAttribute('aria-checked', isOn ? 'false' : 'true');
+  });
+  document.getElementById('btnShareApp').addEventListener('click', () => showToast('Share link copied!'));
+  document.querySelectorAll('.accordion-btn').forEach(btn => {
+    btn.addEventListener('click', () => toggleAccordion(btn));
+  });
+});
+</script>
+</body>
+</html>

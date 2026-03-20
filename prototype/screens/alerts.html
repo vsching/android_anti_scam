@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Safe Anot? — Alerts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<div class="screen-standalone" id="screen-alerts">
+  <div class="alerts-header">
+    <h2>Scam Alerts</h2>
+  </div>
+
+  <div class="alerts-subheader">This Week in Scams</div>
+
+  <div class="alert-card" role="button" tabindex="0" aria-expanded="false">
+    <div class="alert-card-top">
+      <div class="alert-severity high" aria-label="High severity">
+        <span class="material-symbols-rounded">phishing</span>
+      </div>
+      <div>
+        <div class="alert-title">Fake Maybank Login Pages Spreading on WhatsApp</div>
+      </div>
+    </div>
+    <div class="alert-meta">
+      <span>2 days ago</span>
+      <span class="dot"></span>
+      <span class="alert-reports"><span class="material-symbols-rounded">warning</span> 237 reports in Selangor</span>
+    </div>
+    <div class="alert-expand">Scammers are distributing fake Maybank2u login pages via WhatsApp. These pages look identical to the real thing but steal your credentials. Always type maybank2u.com.my directly into your browser.</div>
+  </div>
+
+  <div class="alert-card" role="button" tabindex="0" aria-expanded="false">
+    <div class="alert-card-top">
+      <div class="alert-severity high" aria-label="High severity">
+        <span class="material-symbols-rounded">bug_report</span>
+      </div>
+      <div>
+        <div class="alert-title">Fake "LHDN Tax Refund" SMS Targeting KL Residents</div>
+      </div>
+    </div>
+    <div class="alert-meta">
+      <span>3 days ago</span>
+      <span class="dot"></span>
+      <span class="alert-reports"><span class="material-symbols-rounded">warning</span> 182 reports in KL</span>
+    </div>
+    <div class="alert-expand">SMS messages claiming you have a tax refund from LHDN are fake. They link to phishing pages that steal your banking info. LHDN never sends refund links via SMS.</div>
+  </div>
+
+  <div class="alert-card" role="button" tabindex="0" aria-expanded="false">
+    <div class="alert-card-top">
+      <div class="alert-severity medium" aria-label="Medium severity">
+        <span class="material-symbols-rounded">shopping_cart</span>
+      </div>
+      <div>
+        <div class="alert-title">Fake Shopee "Lucky Draw" Links on Facebook</div>
+      </div>
+    </div>
+    <div class="alert-meta">
+      <span>5 days ago</span>
+      <span class="dot"></span>
+      <span class="alert-reports"><span class="material-symbols-rounded">warning</span> 94 reports in Penang</span>
+    </div>
+    <div class="alert-expand">Ads on Facebook promising Shopee lucky draw prizes are scams. They lead to fake sites that collect your personal data. Shopee only runs promotions within their official app.</div>
+  </div>
+
+  <div class="alert-card" role="button" tabindex="0" aria-expanded="false">
+    <div class="alert-card-top">
+      <div class="alert-severity high" aria-label="High severity">
+        <span class="material-symbols-rounded">smartphone</span>
+      </div>
+      <div>
+        <div class="alert-title">Malicious APK Disguised as "TNG eWallet Update"</div>
+      </div>
+    </div>
+    <div class="alert-meta">
+      <span>1 week ago</span>
+      <span class="dot"></span>
+      <span class="alert-reports"><span class="material-symbols-rounded">warning</span> 156 reports in Johor</span>
+    </div>
+    <div class="alert-expand">A fake APK file is being shared on Telegram claiming to be a TNG eWallet update. It installs malware that steals your OTP codes. Only update apps through Google Play Store.</div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.alert-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const wasExpanded = card.classList.contains('expanded');
+      document.querySelectorAll('.alert-card.expanded').forEach(c => {
+        c.classList.remove('expanded');
+        c.setAttribute('aria-expanded', 'false');
+      });
+      if (!wasExpanded) {
+        card.classList.add('expanded');
+        card.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>

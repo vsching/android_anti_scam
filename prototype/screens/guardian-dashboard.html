@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Safe Anot? — Guardian Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<div class="screen-standalone" id="screen-guardian-dashboard">
+  <div class="guardian-top-bar">
+    <button class="guardian-top-bar-back" id="btnGuardianDashBack" aria-label="Back to Profile">
+      <span class="material-symbols-rounded">arrow_back</span>
+    </button>
+    <span class="guardian-top-bar-title">Family Guardian</span>
+  </div>
+
+  <div class="pull-refresh">
+    <span class="material-symbols-rounded">sync</span>
+    Updated just now
+  </div>
+
+  <div class="dashboard-content" id="guardianDashboardContent">
+    <!-- Ward Card 1 -->
+    <div class="ward-card" data-ward="mum" id="wardMum">
+      <div class="ward-card-top">
+        <div class="ward-score-ring">
+          <svg viewBox="0 0 56 56">
+            <circle class="ring-bg" cx="28" cy="28" r="24"/>
+            <circle class="ring-fill" cx="28" cy="28" r="24" stroke="var(--green)" stroke-dasharray="150.8" stroke-dashoffset="150.8" data-target="22"/>
+          </svg>
+          <div class="ward-score-text" style="color: var(--green);">85%</div>
+        </div>
+        <div class="ward-card-info">
+          <div class="ward-card-name">Mum's Phone</div>
+          <div class="ward-card-heartbeat">
+            <span class="material-symbols-rounded">favorite</span>
+            Just now
+          </div>
+        </div>
+        <div class="ward-card-arrow">
+          <span class="material-symbols-rounded">chevron_right</span>
+        </div>
+      </div>
+      <div class="ward-card-badges">
+        <div class="ward-badge play-protect-on">
+          <span class="material-symbols-rounded">verified_user</span>
+          Play Protect On
+        </div>
+      </div>
+    </div>
+
+    <!-- Ward Card 2 -->
+    <div class="ward-card" data-ward="dad" id="wardDad">
+      <div class="ward-card-top">
+        <div class="ward-score-ring">
+          <svg viewBox="0 0 56 56">
+            <circle class="ring-bg" cx="28" cy="28" r="24"/>
+            <circle class="ring-fill" cx="28" cy="28" r="24" stroke="var(--orange)" stroke-dasharray="150.8" stroke-dashoffset="150.8" data-target="82"/>
+          </svg>
+          <div class="ward-score-text" style="color: var(--orange);">57%</div>
+        </div>
+        <div class="ward-card-info">
+          <div class="ward-card-name">Dad's Phone</div>
+          <div class="ward-card-heartbeat">
+            <span class="material-symbols-rounded">favorite</span>
+            2h ago
+          </div>
+        </div>
+        <div class="ward-card-arrow">
+          <span class="material-symbols-rounded">chevron_right</span>
+        </div>
+      </div>
+      <div class="ward-card-badges">
+        <div class="ward-badge play-protect-off">
+          <span class="material-symbols-rounded">gpp_bad</span>
+          Play Protect Off
+        </div>
+      </div>
+    </div>
+
+    <!-- Ward Card 3 (Went Dark) -->
+    <div class="ward-card" data-ward="uncle" id="wardUncle">
+      <div class="ward-card-top">
+        <div class="ward-score-ring">
+          <svg viewBox="0 0 56 56">
+            <circle class="ring-bg" cx="28" cy="28" r="24"/>
+            <circle class="ring-fill" cx="28" cy="28" r="24" stroke="var(--red)" stroke-dasharray="150.8" stroke-dashoffset="150.8" data-target="113"/>
+          </svg>
+          <div class="ward-score-text" style="color: var(--red);">25%</div>
+        </div>
+        <div class="ward-card-info">
+          <div class="ward-card-name">Uncle Lim's Phone</div>
+          <div class="ward-card-heartbeat">
+            <span class="material-symbols-rounded">favorite</span>
+            3 days ago
+          </div>
+        </div>
+        <div class="ward-card-arrow">
+          <span class="material-symbols-rounded">chevron_right</span>
+        </div>
+      </div>
+      <div class="ward-card-badges">
+        <div class="ward-badge play-protect-off">
+          <span class="material-symbols-rounded">gpp_bad</span>
+          Play Protect Off
+        </div>
+        <div class="ward-badge went-dark">
+          <span class="material-symbols-rounded">cloud_off</span>
+          Went Dark
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function animateWardRings() {
+  document.querySelectorAll('.ward-score-ring .ring-fill').forEach(ring => {
+    const target = parseFloat(ring.getAttribute('data-target'));
+    ring.style.transition = 'none';
+    ring.setAttribute('stroke-dashoffset', '150.8');
+    ring.getBoundingClientRect();
+    ring.style.transition = 'stroke-dashoffset 1s ease';
+    setTimeout(() => ring.setAttribute('stroke-dashoffset', target), 100);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  animateWardRings();
+});
+</script>
+</body>
+</html>

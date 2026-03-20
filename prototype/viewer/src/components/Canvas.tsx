@@ -4,34 +4,10 @@ import { epicColor } from '../theme';
 import PhoneFrame from './PhoneFrame';
 import FlowArrow from './FlowArrow';
 import type { ScreenDefinition } from '../types';
-import {
-  OnboardingScreen, ShieldScreen, CheckScreen, AlertsScreen,
-  ProfileScreen, FixDetailScreen, CheckDangerousScreen,
-  WarningPickerScreen, ShareScoreScreen, GuardianPairingScreen,
-  GuardianDashboardScreen, WardDetailScreen, AlertDetailScreen,
-  ScamOfTheWeekScreen,
-} from '../screens';
 
 const SCREEN_W = 220;
 const SCREEN_H = 340;
 const FRAME_W = 180;
-
-const screenComponents: Record<string, React.FC> = {
-  'onboarding': OnboardingScreen,
-  'shield': ShieldScreen,
-  'check': CheckScreen,
-  'alerts': AlertsScreen,
-  'profile': ProfileScreen,
-  'fix-detail': FixDetailScreen,
-  'check-dangerous': CheckDangerousScreen,
-  'warning-picker': WarningPickerScreen,
-  'share-score': ShareScoreScreen,
-  'guardian-pairing': GuardianPairingScreen,
-  'guardian-dashboard': GuardianDashboardScreen,
-  'ward-detail': WardDetailScreen,
-  'alert-detail': AlertDetailScreen,
-  'scam-of-the-week': ScamOfTheWeekScreen,
-};
 
 interface CanvasProps {
   zoom: number;
@@ -240,9 +216,7 @@ const Canvas: React.FC<CanvasProps> = ({
 
         {/* Screen cards */}
         {screens.map(s => {
-          const Component = screenComponents[s.id];
           const hidden = !filteredIds.has(s.id);
-          if (!Component) return null;
 
           return (
             <div
@@ -261,13 +235,12 @@ const Canvas: React.FC<CanvasProps> = ({
               }}
             >
               <PhoneFrame
+                screenId={s.id}
                 name={s.name}
                 epic={s.epic}
                 status={s.status}
                 selected={s.id === selectedScreen}
-              >
-                <Component />
-              </PhoneFrame>
+              />
             </div>
           );
         })}

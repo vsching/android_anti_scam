@@ -1,14 +1,2 @@
-export { default as OnboardingScreen } from './OnboardingScreen';
-export { default as ShieldScreen } from './ShieldScreen';
-export { default as CheckScreen } from './CheckScreen';
-export { default as AlertsScreen } from './AlertsScreen';
-export { default as ProfileScreen } from './ProfileScreen';
-export { default as FixDetailScreen } from './FixDetailScreen';
-export { default as CheckDangerousScreen } from './CheckDangerousScreen';
-export { default as WarningPickerScreen } from './WarningPickerScreen';
-export { default as ShareScoreScreen } from './ShareScoreScreen';
-export { default as GuardianPairingScreen } from './GuardianPairingScreen';
-export { default as GuardianDashboardScreen } from './GuardianDashboardScreen';
-export { default as WardDetailScreen } from './WardDetailScreen';
-export { default as AlertDetailScreen } from './AlertDetailScreen';
-export { default as ScamOfTheWeekScreen } from './ScamOfTheWeekScreen';
+// Screen mockup components are no longer needed.
+// The canvas viewer now renders screens via iframes loading from /screens/*.html

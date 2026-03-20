@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Safe Anot? — Guardian Pairing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="screen-standalone" id="screen-guardian-pairing">
+  <div class="guardian-top-bar">
+    <button class="guardian-top-bar-back" id="btnGuardianPairingBack" aria-label="Back to Profile">
+      <span class="material-symbols-rounded">arrow_back</span>
+    </button>
+    <span class="guardian-top-bar-title">Family Guardian</span>
+  </div>
+
+  <div class="pairing-intro">
+    <h1>Protect your <span>family</span></h1>
+    <p>Link devices to monitor security status and keep your loved ones safe from scams.</p>
+  </div>
+
+  <!-- Role Selection Cards -->
+  <div class="role-cards" id="guardianRoleCards">
+    <div class="role-card protect" id="guardianCardProtect">
+      <div class="role-card-icon">
+        <span class="material-symbols-rounded">shield_with_heart</span>
+      </div>
+      <h3>Protect This Phone</h3>
+      <p>Set up this device to be monitored by a family guardian</p>
+      <div class="role-card-arrow">
+        <span class="material-symbols-rounded">chevron_right</span>
+      </div>
+    </div>
+
+    <div class="role-card monitor" id="guardianCardMonitor">
+      <div class="role-card-icon">
+        <span class="material-symbols-rounded">monitoring</span>
+      </div>
+      <h3>Monitor Family Member</h3>
+      <p>Enter a code from a family member's phone to start monitoring</p>
+      <div class="role-card-arrow">
+        <span class="material-symbols-rounded">chevron_right</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code Generation Panel -->
+  <div class="code-panel" id="guardianCodePanel">
+    <div class="code-display">
+      <div class="code-display-label">Your Pairing Code</div>
+      <div class="code-display-value" id="guardianPairingCode">A7K2M9</div>
+      <div class="code-display-timer">
+        <span class="material-symbols-rounded">timer</span>
+        <span id="guardianCodeTimer">15:00</span>
+      </div>
+      <div class="code-display-instruction">
+        Show this code to your <strong>family member</strong> so they can link to this device.
+      </div>
+    </div>
+    <button class="btn-generate" id="btnGuardianRegenerate">
+      <span class="material-symbols-rounded">refresh</span>
+      Generate New Code
+    </button>
+    <button class="btn-back-to-roles" id="btnGuardianBackFromCode">Back</button>
+  </div>
+
+  <!-- Link Input Panel -->
+  <div class="guardian-link-panel" id="guardianLinkPanel">
+    <div class="code-input-wrapper">
+      <div class="code-input-label">Enter Pairing Code</div>
+      <input type="text" class="code-input" id="guardianCodeInput" maxlength="6" placeholder="------" autocomplete="off" spellcheck="false">
+    </div>
+    <button class="btn-guardian-link" id="btnGuardianLinkDevice" disabled>
+      <span class="material-symbols-rounded">link</span>
+      Link Device
+    </button>
+    <button class="btn-back-to-roles" id="btnGuardianBackFromLink">Back</button>
+
+    <div class="guardian-link-success" id="guardianLinkSuccess">
+      <div class="guardian-link-success-check">
+        <span class="material-symbols-rounded">check</span>
+      </div>
+      <h3>Successfully Linked!</h3>
+      <p>You are now monitoring <strong id="guardianLinkedName">Mum's Phone</strong></p>
+    </div>
+  </div>
+
+  <!-- Linked Family Members -->
+  <div class="linked-section" id="guardianLinkedSection">
+    <div class="linked-section-title">Linked Family</div>
+
+    <div class="linked-member">
+      <div class="linked-member-avatar guardian">S</div>
+      <div class="linked-member-info">
+        <div class="linked-member-name">Sarah (Daughter)</div>
+        <div class="linked-member-role">Guardian</div>
+      </div>
+      <button class="btn-unlink-small">Unlink</button>
+    </div>
+
+    <div class="linked-member">
+      <div class="linked-member-avatar protected">M</div>
+      <div class="linked-member-info">
+        <div class="linked-member-name">Mum's Phone</div>
+        <div class="linked-member-role">Protected</div>
+      </div>
+      <button class="btn-unlink-small">Unlink</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let guardianTimerInterval = null;
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+function showGuardianRoleCards() {
+  document.getElementById('guardianRoleCards').style.display = 'flex';
+  document.getElementById('guardianCodePanel').classList.remove('visible');
+  document.getElementById('guardianLinkPanel').classList.remove('visible');
+  document.getElementById('guardianLinkSuccess').classList.remove('visible');
+}
+
+function guardianGenerateCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  document.getElementById('guardianPairingCode').textContent = code;
+  guardianStartTimer(15 * 60);
+}
+
+function guardianStartTimer(seconds) {
+  clearInterval(guardianTimerInterval);
+  let remaining = seconds;
+  const timerEl = document.getElementById('guardianCodeTimer');
+  function update() {
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    timerEl.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+    if (remaining <= 0) { clearInterval(guardianTimerInterval); timerEl.textContent = 'Expired'; timerEl.style.color = 'var(--red)'; }
+    remaining--;
+  }
+  update();
+  timerEl.style.color = '';
+  guardianTimerInterval = setInterval(update, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const guardianCodeInput = document.getElementById('guardianCodeInput');
+  const btnGuardianLinkDevice = document.getElementById('btnGuardianLinkDevice');
+
+  document.getElementById('guardianCardProtect').addEventListener('click', () => {
+    document.getElementById('guardianRoleCards').style.display = 'none';
+    document.getElementById('guardianCodePanel').classList.add('visible');
+    guardianGenerateCode();
+  });
+
+  document.getElementById('guardianCardMonitor').addEventListener('click', () => {
+    document.getElementById('guardianRoleCards').style.display = 'none';
+    document.getElementById('guardianLinkPanel').classList.add('visible');
+    document.getElementById('guardianLinkSuccess').classList.remove('visible');
+    guardianCodeInput.value = '';
+    btnGuardianLinkDevice.disabled = true;
+    setTimeout(() => guardianCodeInput.focus(), 300);
+  });
+
+  document.getElementById('btnGuardianBackFromCode').addEventListener('click', () => {
+    clearInterval(guardianTimerInterval);
+    showGuardianRoleCards();
+  });
+  document.getElementById('btnGuardianBackFromLink').addEventListener('click', showGuardianRoleCards);
+  document.getElementById('btnGuardianRegenerate').addEventListener('click', guardianGenerateCode);
+
+  guardianCodeInput.addEventListener('input', function() {
+    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    btnGuardianLinkDevice.disabled = this.value.length < 6;
+  });
+
+  btnGuardianLinkDevice.addEventListener('click', () => {
+    if (guardianCodeInput.value.length < 6) return;
+    btnGuardianLinkDevice.innerHTML = '<span class="material-symbols-rounded" style="animation: guardianSpin 1s linear infinite;">sync</span> Linking...';
+    btnGuardianLinkDevice.disabled = true;
+    setTimeout(() => {
+      btnGuardianLinkDevice.innerHTML = '<span class="material-symbols-rounded">link</span> Link Device';
+      document.getElementById('guardianLinkSuccess').classList.add('visible');
+      showToast('Device linked successfully!');
+    }, 1500);
+  });
+
+  document.querySelectorAll('.btn-unlink-small').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const member = btn.closest('.linked-member');
+      member.style.opacity = '0';
+      member.style.transform = 'translateX(20px)';
+      member.style.transition = 'all 0.3s ease';
+      setTimeout(() => { member.style.display = 'none'; showToast('Member unlinked'); }, 300);
+    });
+  });
+});
+</script>
+</body>
+</html>

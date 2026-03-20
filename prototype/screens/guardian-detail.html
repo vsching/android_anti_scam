@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Safe Anot? — Guardian Detail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Confirmation Dialog -->
+<div class="guardian-confirm-overlay" id="guardianConfirmOverlay">
+  <div class="guardian-confirm-card">
+    <h3>Unlink Family Member?</h3>
+    <p>You will no longer be able to monitor this device's security status.</p>
+    <div class="guardian-confirm-buttons">
+      <button class="btn-guardian-confirm-cancel" id="btnGuardianConfirmCancel">Cancel</button>
+      <button class="btn-guardian-confirm-unlink" id="btnGuardianConfirmUnlink">Unlink</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen-standalone" id="screen-guardian-detail">
+  <div class="guardian-top-bar">
+    <button class="guardian-top-bar-back" id="btnGuardianDetailBack" aria-label="Back to Dashboard">
+      <span class="material-symbols-rounded">arrow_back</span>
+    </button>
+    <span class="guardian-top-bar-title" id="guardianDetailWardName">Mum's Phone</span>
+  </div>
+
+  <div class="detail-score-area">
+    <div class="detail-score-ring">
+      <svg viewBox="0 0 140 140">
+        <circle class="ring-bg" cx="70" cy="70" r="60"/>
+        <circle class="ring-fill" id="guardianDetailRingFill" cx="70" cy="70" r="60" stroke="var(--green)" stroke-dasharray="376.99" stroke-dashoffset="376.99" data-target="56"/>
+      </svg>
+      <div class="detail-score-value" id="guardianDetailScoreValue" style="color: var(--green);">85%</div>
+    </div>
+    <div class="detail-score-band good" id="guardianDetailScoreBand">GOOD</div>
+    <div class="detail-score-sub" id="guardianDetailScoreSub">Last updated just now</div>
+  </div>
+
+  <div class="detail-section-title">Device Status</div>
+  <div class="status-cards" id="guardianStatusCards">
+    <div class="status-card">
+      <div class="status-card-icon green">
+        <span class="material-symbols-rounded">verified_user</span>
+      </div>
+      <div class="status-card-info">
+        <div class="status-card-label">Play Protect</div>
+        <div class="status-card-value">Active and scanning</div>
+      </div>
+    </div>
+    <div class="status-card">
+      <div class="status-card-icon green">
+        <span class="material-symbols-rounded">block</span>
+      </div>
+      <div class="status-card-info">
+        <div class="status-card-label">Unknown Sources</div>
+        <div class="status-card-value">Blocked (0 sideloaded apps)</div>
+      </div>
+    </div>
+    <div class="status-card">
+      <div class="status-card-icon green">
+        <span class="material-symbols-rounded">event_available</span>
+      </div>
+      <div class="status-card-info">
+        <div class="status-card-label">Last Audit</div>
+        <div class="status-card-value">Today, 9:15 AM</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-section-title">7-Day Score History</div>
+  <div class="history-chart">
+    <div class="chart-container">
+      <div class="chart-bars" id="guardianChartBars">
+        <div class="chart-bar-col">
+          <div class="chart-bar green" data-height="72" style="height: 0;"></div>
+          <div class="chart-day">Mon</div>
+        </div>
+        <div class="chart-bar-col">
+          <div class="chart-bar green" data-height="80" style="height: 0;"></div>
+          <div class="chart-day">Tue</div>
+        </div>
+        <div class="chart-bar-col">
+          <div class="chart-bar green" data-height="85" style="height: 0;"></div>
+          <div class="chart-day">Wed</div>
+        </div>
+        <div class="chart-bar-col">
+          <div class="chart-bar orange" data-height="58" style="height: 0;"></div>
+          <div class="chart-day">Thu</div>
+        </div>
+        <div class="chart-bar-col">
+          <div class="chart-bar orange" data-height="62" style="height: 0;"></div>
+          <div class="chart-day">Fri</div>
+        </div>
+        <div class="chart-bar-col">
+          <div class="chart-bar green" data-height="78" style="height: 0;"></div>
+          <div class="chart-day">Sat</div>
+        </div>
+        <div class="chart-bar-col">
+          <div class="chart-bar green" data-height="85" style="height: 0;"></div>
+          <div class="chart-day">Sun</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-actions">
+    <button class="btn-unlink-danger" id="btnGuardianUnlinkDanger">
+      <span class="material-symbols-rounded">link_off</span>
+      Unlink Device
+    </button>
+  </div>
+</div>
+
+<script>
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+function animateDetailRing() {
+  const ring = document.getElementById('guardianDetailRingFill');
+  if (!ring) return;
+  const target = parseFloat(ring.getAttribute('data-target'));
+  const circumference = 2 * Math.PI * 60;
+  ring.style.transition = 'none';
+  ring.setAttribute('stroke-dashoffset', circumference);
+  ring.getBoundingClientRect();
+  ring.style.transition = 'stroke-dashoffset 1.2s ease';
+  setTimeout(() => ring.setAttribute('stroke-dashoffset', target), 150);
+}
+
+function animateChartBars() {
+  document.querySelectorAll('.chart-bar').forEach((bar, i) => {
+    const height = parseFloat(bar.dataset.height);
+    bar.style.height = '0';
+    setTimeout(() => {
+      bar.style.transition = 'height 0.6s ease';
+      bar.style.height = height + 'px';
+    }, 100 + i * 80);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  animateDetailRing();
+  animateChartBars();
+
+  document.getElementById('btnGuardianUnlinkDanger').addEventListener('click', () => {
+    document.getElementById('guardianConfirmOverlay').classList.add('visible');
+  });
+  document.getElementById('btnGuardianConfirmCancel').addEventListener('click', () => {
+    document.getElementById('guardianConfirmOverlay').classList.remove('visible');
+  });
+  document.getElementById('btnGuardianConfirmUnlink').addEventListener('click', () => {
+    document.getElementById('guardianConfirmOverlay').classList.remove('visible');
+    showToast('Device unlinked');
+  });
+});
+</script>
+</body>
+</html>
