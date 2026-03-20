@@ -24,6 +24,7 @@ dev = [
 
 [project.scripts]
 seed-database = "seed_database:main"
+weekly-report = "src.weekly_report:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
