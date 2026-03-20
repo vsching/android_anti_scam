@@ -17,4 +17,7 @@ interface Env {
   // Firebase (for FCM push notifications)
   FIREBASE_API_KEY: string;
   FIREBASE_PROJECT_ID: string;
+
+  // Guardian pairing HMAC secret
+  GUARDIAN_HMAC_SECRET: string;
 }

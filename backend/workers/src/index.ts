@@ -17,6 +17,13 @@ import {
   handleDataDelta,
   handleDataBloom,
 } from './routes/data';
+import {
+  handleGeneratePairingCode,
+  handleClaimPairingCode,
+  handleGetWards,
+  handleGetGuardians,
+  handleDeletePairing,
+} from './routes/guardian';
 
 const router = new Router();
 
@@ -28,6 +35,13 @@ router.post('/api/check', handleCheck);
 
 // Share event analytics
 router.post('/api/score/share', handleShare);
+
+// Guardian pairing
+router.post('/api/guardian/pair/generate', handleGeneratePairingCode);
+router.post('/api/guardian/pair/claim', handleClaimPairingCode);
+router.get('/api/guardian/wards', handleGetWards);
+router.get('/api/guardian/guardians', handleGetGuardians);
+router.delete('/api/guardian/pair/:pairingId', handleDeletePairing);
 
 // Data download endpoints (R2 artifacts)
 router.get('/api/data/latest', handleDataLatest);

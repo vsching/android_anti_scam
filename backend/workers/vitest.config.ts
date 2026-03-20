@@ -15,6 +15,9 @@ export default defineWorkersConfig({
           kvNamespaces: ['VERDICTS'],
           r2Buckets: ['DATA_BUCKET'],
           d1Databases: ['DB'],
+          bindings: {
+            GUARDIAN_HMAC_SECRET: 'test-hmac-secret',
+          },
         },
       },
     },

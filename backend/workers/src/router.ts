@@ -35,6 +35,10 @@ export class Router {
     this.register('POST', pattern, handler);
   }
 
+  delete(pattern: string, handler: RouteHandler): void {
+    this.register('DELETE', pattern, handler);
+  }
+
   /**
    * Match an incoming request against registered routes.
    * Returns the handler response or null if no route matched.
