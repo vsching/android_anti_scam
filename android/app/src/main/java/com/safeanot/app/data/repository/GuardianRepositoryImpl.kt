@@ -60,12 +60,7 @@ class GuardianRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deletePairing(pairingId: String) {
-        val deviceId = deviceIdProvider.getOrCreateDeviceId()
-        val request = DeletePairingRequest(
-            deviceId = deviceId,
-            pairingId = pairingId,
-        )
-        api.deletePairing(request)
+        api.deletePairing(pairingId.toLong())
         guardianDao.deleteById(pairingId)
     }
 

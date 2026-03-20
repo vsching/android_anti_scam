@@ -52,10 +52,10 @@ interface SafeAnotApi {
     @POST("api/score/share")
     suspend fun postShareEvents(@Body request: ShareEventBatchRequest): Response<Unit>
 
-    @POST("api/guardian/generate")
+    @POST("api/guardian/pair/generate")
     suspend fun generatePairingCode(@Body request: GeneratePairingCodeRequest): PairingCodeResponse
 
-    @POST("api/guardian/claim")
+    @POST("api/guardian/pair/claim")
     suspend fun claimPairingCode(@Body request: ClaimPairingCodeRequest): GuardianPairingDto
 
     @GET("api/guardian/wards")
@@ -64,8 +64,8 @@ interface SafeAnotApi {
     @GET("api/guardian/guardians")
     suspend fun getGuardians(@Query("device_id") deviceId: String): List<GuardianPairingDto>
 
-    @HTTP(method = "DELETE", path = "api/guardian/delete", hasBody = true)
-    suspend fun deletePairing(@Body request: DeletePairingRequest): Response<Unit>
+    @HTTP(method = "DELETE", path = "api/guardian/pair/{pairingId}", hasBody = false)
+    suspend fun deletePairing(@retrofit2.http.Path("pairingId") pairingId: Long): Response<Unit>
 
     @POST("api/guardian/heartbeat")
     suspend fun postHeartbeat(@Body request: HeartbeatRequest): Response<Unit>
@@ -73,9 +73,9 @@ interface SafeAnotApi {
     @POST("api/guardian/fcm-token")
     suspend fun registerFcmToken(@Body request: RegisterFcmTokenRequest): Response<Unit>
 
-    @GET("api/guardian/wards/heartbeats")
+    @GET("api/guardian/wards/{deviceId}/heartbeats")
     suspend fun getWardHeartbeats(
-        @Query("device_id") wardDeviceId: String,
+        @retrofit2.http.Path("deviceId") wardDeviceId: String,
         @Query("days") days: Int = 7,
     ): List<WardHeartbeatDto>
 
