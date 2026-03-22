@@ -6,7 +6,7 @@ import { extractRootDomain, getTLD, isPunycode } from './domain';
 
 /** Result of a heuristic check. */
 export interface HeuristicResult {
-  verdict: 'safe' | 'suspicious' | 'dangerous';
+  verdict: 'safe' | 'suspicious' | 'dangerous' | 'unknown';
   reason: string;
   confidence: number;
   details: {
@@ -16,48 +16,76 @@ export interface HeuristicResult {
   };
 }
 
-// --- Allowlisted legitimate domains (Malaysian + Singaporean banks, gov) ---
+// --- Allowlisted legitimate domains (synced with pipeline allowlist.py) ---
 const LEGITIMATE_DOMAINS: Record<string, string> = {
-  'maybank2u.com.my': 'Maybank',
-  'maybank.com.my': 'Maybank',
-  'maybank.com': 'Maybank',
-  'cimbclicks.com.my': 'CIMB',
-  'cimb.com.my': 'CIMB',
-  'cimb.com': 'CIMB',
-  'rhbgroup.com': 'RHB',
-  'rhbnow.com': 'RHB',
-  'pbebank.com': 'Public Bank',
-  'hongleongconnect.my': 'Hong Leong',
-  'hlb.com.my': 'Hong Leong',
-  'ambankgroup.com': 'AmBank',
-  'ambank.com.my': 'AmBank',
-  'bankislam.com': 'Bank Islam',
-  'bankrakyat.com.my': 'Bank Rakyat',
-  'bsn.com.my': 'BSN',
-  'dbs.com.sg': 'DBS',
-  'dbs.com': 'DBS',
-  'ocbc.com': 'OCBC',
-  'ocbc.com.sg': 'OCBC',
-  'uob.com.sg': 'UOB',
-  'uob.com': 'UOB',
-  'posb.com.sg': 'POSB',
-  'sc.com': 'Standard Chartered',
-  'hsbc.com.my': 'HSBC',
-  'citibank.com.my': 'Citibank',
-  'hasil.gov.my': 'LHDN',
-  'lhdn.gov.my': 'LHDN',
-  'kwsp.gov.my': 'KWSP/EPF',
-  'jpj.gov.my': 'JPJ',
-  'iras.gov.sg': 'IRAS',
-  'cpf.gov.sg': 'CPF',
-  'singpass.gov.sg': 'Singpass',
-  'grab.com': 'Grab',
-  'shopee.com.my': 'Shopee',
-  'shopee.sg': 'Shopee',
-  'lazada.com.my': 'Lazada',
-  'lazada.sg': 'Lazada',
-  'touchngo.com.my': 'Touch n Go',
-  'tngdigital.com.my': 'TNG Digital',
+  // Malaysian banks
+  'maybank2u.com.my': 'Maybank', 'maybank.com.my': 'Maybank', 'maybank.com': 'Maybank',
+  'cimb.com.my': 'CIMB', 'cimbclicks.com.my': 'CIMB',
+  'pbebank.com': 'Public Bank', 'publicbank.com.my': 'Public Bank',
+  'rhbgroup.com': 'RHB', 'rhb.com.my': 'RHB', 'rhbinvest.com.my': 'RHB Investment',
+  'hlb.com.my': 'Hong Leong', 'hlbb.hongleong.com.my': 'Hong Leong',
+  'bankislam.com.my': 'Bank Islam',
+  'affinbank.com.my': 'Affin Bank', 'affinonline.com': 'Affin Bank',
+  'ambank.com.my': 'AmBank', 'ambankgroup.com': 'AmBank',
+  'mybsn.com.my': 'BSN', 'bsn.com.my': 'BSN',
+  'bankrakyat.com.my': 'Bank Rakyat', 'irakyat.com.my': 'Bank Rakyat',
+  'alliancebank.com.my': 'Alliance Bank', 'allianceonline.com.my': 'Alliance Bank',
+  'muamalat.com.my': 'Bank Muamalat', 'agrobank.com.my': 'Agrobank',
+  'mbsbbank.com': 'MBSB Bank', 'mbsb.com.my': 'MBSB Bank',
+  'alrajhibank.com.my': 'Al Rajhi Bank', 'cgsi.com': 'CGS-CIMB',
+  'hsbc.com.my': 'HSBC MY', 'citibank.com.my': 'Citibank MY',
+  'sc.com.my': 'Standard Chartered MY',
+  'bankofchina.com.my': 'Bank of China MY',
+  'ocbc.com.my': 'OCBC MY', 'uob.com.my': 'UOB MY',
+  // Singapore banks
+  'dbs.com.sg': 'DBS', 'dbs.com': 'DBS', 'posb.com.sg': 'POSB',
+  'ocbc.com': 'OCBC', 'ocbc.com.sg': 'OCBC',
+  'uob.com.sg': 'UOB', 'uob.com': 'UOB',
+  'sc.com.sg': 'Standard Chartered SG', 'hsbc.com.sg': 'HSBC SG',
+  'citibank.com.sg': 'Citibank SG',
+  'maybank.com.sg': 'Maybank SG', 'maybank2u.com.sg': 'Maybank SG',
+  'cimb.com.sg': 'CIMB SG', 'bankofchina.com.sg': 'Bank of China SG',
+  'icbc.com.sg': 'ICBC SG', 'rhbbank.com.sg': 'RHB SG',
+  // Global banks
+  'hsbc.com': 'HSBC', 'citibank.com': 'Citibank', 'citi.com': 'Citibank',
+  'sc.com': 'Standard Chartered', 'boc.cn': 'Bank of China',
+  'bankofchina.com': 'Bank of China', 'icbc.com.cn': 'ICBC',
+  'db.com': 'Deutsche Bank', 'jpmorgan.com': 'JP Morgan',
+  'goldmansachs.com': 'Goldman Sachs',
+  // MY government
+  'hasil.gov.my': 'LHDN', 'jpj.gov.my': 'JPJ', 'rmp.gov.my': 'PDRM',
+  'kwsp.gov.my': 'KWSP/EPF', 'mysejahtera.malaysia.gov.my': 'MySejahtera',
+  'malaysia.gov.my': 'MyGovernment', 'bnm.gov.my': 'BNM',
+  'mcmc.gov.my': 'MCMC', 'skmm.gov.my': 'MCMC',
+  'kpdnhep.gov.my': 'KPDNHEP', 'jpn.gov.my': 'JPN', 'imi.gov.my': 'Immigration',
+  'ssm.com.my': 'SSM', 'bursamalaysia.com': 'Bursa Malaysia',
+  // SG government
+  'singpass.gov.sg': 'Singpass', 'cpf.gov.sg': 'CPF', 'iras.gov.sg': 'IRAS',
+  'gov.sg': 'Gov.sg', 'mas.gov.sg': 'MAS', 'hdb.gov.sg': 'HDB',
+  'moh.gov.sg': 'MOH', 'police.gov.sg': 'SPF', 'ica.gov.sg': 'ICA',
+  'mom.gov.sg': 'MOM', 'myinfo.gov.sg': 'MyInfo',
+  // E-commerce & payments
+  'shopee.com.my': 'Shopee', 'shopee.sg': 'Shopee', 'shopee.com': 'Shopee',
+  'lazada.com.my': 'Lazada', 'lazada.sg': 'Lazada', 'lazada.com': 'Lazada',
+  'grab.com': 'Grab', 'tngdigital.com.my': 'TNG Digital', 'touchngo.com.my': 'Touch n Go',
+  'myboost.com.my': 'Boost', 'bigpayme.com': 'BigPay',
+  'shopeepay.com.my': 'ShopeePay', 'grabpay.com': 'GrabPay',
+  'myfave.com': 'FavePay', 'gopay.com.my': 'GoPay',
+  'paynet.my': 'PayNet', 'setel.com': 'Setel', 'mae.com.my': 'MAE',
+  'pos.com.my': 'Pos Laju', 'jtexpress.my': 'J&T Express',
+  'dhl.com.my': 'DHL MY', 'ninjavan.co': 'Ninja Van',
+  'abs.org.sg': 'PayNow', 'qoo10.sg': 'Qoo10',
+  'carousell.sg': 'Carousell', 'carousell.com': 'Carousell',
+  'fairprice.com.sg': 'FairPrice', 'singpost.com': 'SingPost',
+  // Global platforms
+  'apple.com': 'Apple', 'google.com': 'Google',
+  'google.com.my': 'Google MY', 'google.com.sg': 'Google SG',
+  'whatsapp.com': 'WhatsApp', 'netflix.com': 'Netflix',
+  'facebook.com': 'Facebook', 'instagram.com': 'Instagram', 'tiktok.com': 'TikTok',
+  // Telcos
+  'maxis.com.my': 'Maxis', 'celcom.com.my': 'Celcom', 'digi.com.my': 'Digi',
+  'u.com.my': 'U Mobile', 'unifi.com.my': 'Unifi',
+  'singtel.com': 'Singtel', 'starhub.com': 'StarHub', 'm1.com.sg': 'M1',
 };
 
 // Bank/brand keywords for pattern matching
@@ -142,18 +170,22 @@ export function runHeuristics(domain: string): HeuristicResult {
   const subdomainResult = checkSubdomainAbuse(domain, rootDomain);
   if (subdomainResult) results.push(subdomainResult);
 
+  // 8. Country-suffix brand impersonation (e.g., applemy.com, grabsg.com)
+  const countrySuffixResult = checkCountrySuffixPattern(domain, rootDomain);
+  if (countrySuffixResult) results.push(countrySuffixResult);
+
   // Return the most severe result
   if (results.length === 0) {
     return {
-      verdict: 'safe',
-      reason: 'No suspicious patterns detected',
-      confidence: 0.5,
+      verdict: 'unknown',
+      reason: 'Domain not in our database — proceed with caution',
+      confidence: 0.0,
       details: { check_type: 'none' },
     };
   }
 
-  // Sort by severity: dangerous > suspicious > safe
-  const severityOrder: Record<string, number> = { dangerous: 2, suspicious: 1, safe: 0 };
+  // Sort by severity: dangerous > suspicious > unknown > safe
+  const severityOrder: Record<string, number> = { dangerous: 3, suspicious: 2, unknown: 1, safe: 0 };
   results.sort((a, b) => severityOrder[b.verdict] - severityOrder[a.verdict]);
 
   return results[0];
@@ -320,6 +352,54 @@ function checkSubdomainAbuse(domain: string, rootDomain: string): HeuristicResul
               subdomain: sub,
               root_domain: rootDomain,
               keyword,
+            },
+          };
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+// Country codes used in brand impersonation (e.g., applemy.com, grabsg.com)
+const COUNTRY_SUFFIXES = new Set([
+  'my', 'sg', 'ph', 'id', 'th', 'vn', 'hk', 'tw', 'jp', 'kr', 'in',
+  'uk', 'us', 'au', 'nz', 'asia',
+]);
+
+// Brand names for country-suffix detection (legitimate brands never use brandcountry.com)
+const BRAND_NAMES = [
+  'apple', 'google', 'netflix', 'amazon', 'microsoft', 'whatsapp',
+  'facebook', 'instagram', 'tiktok', 'telegram', 'paypal', 'youtube',
+  'twitter', 'linkedin', 'spotify', 'uber', 'airbnb',
+  'maybank', 'cimb', 'rhb', 'ocbc', 'uob', 'dbs', 'hsbc', 'citibank',
+  'grab', 'shopee', 'lazada', 'boost', 'bigpay', 'setel',
+  'maxis', 'celcom', 'digi', 'unifi', 'singtel', 'starhub',
+  'singpass', 'poslaju', 'ninjavan',
+];
+
+function checkCountrySuffixPattern(_domain: string, rootDomain: string): HeuristicResult | null {
+  const domainBase = rootDomain.split('.')[0].toLowerCase();
+
+  for (const brand of BRAND_NAMES) {
+    for (const country of COUNTRY_SUFFIXES) {
+      // Match patterns like: applemy, applemalaysia, grabsg, grabsingapore
+      const patterns = [brand + country];
+      if (country === 'my') patterns.push(brand + 'malaysia');
+      if (country === 'sg') patterns.push(brand + 'singapore');
+
+      for (const pattern of patterns) {
+        if (domainBase === pattern) {
+          return {
+            verdict: 'suspicious',
+            reason: `Likely brand impersonation: "${brand}" + country code "${country}". Real ${brand} uses ${brand}.com or ${brand}.com.${country}`,
+            confidence: 0.85,
+            details: {
+              check_type: 'country_suffix',
+              brand,
+              country_code: country,
+              expected_domain: `${brand}.com.${country}`,
             },
           };
         }

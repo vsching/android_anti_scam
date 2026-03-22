@@ -137,10 +137,16 @@ body {
   box-shadow: var(--shadow-lg), -4px 0 30px rgba(245, 158, 11, 0.1);
 }
 
+.verdict-display.unknown {
+  border-left: 6px solid #6B7280;
+  box-shadow: var(--shadow-lg), -4px 0 30px rgba(107, 114, 128, 0.1);
+}
+
 .v-icon { font-size: 72px; margin-bottom: 16px; }
 .verdict-display.dangerous .v-icon { color: var(--red); }
 .verdict-display.safe .v-icon { color: var(--green); }
 .verdict-display.suspicious .v-icon { color: var(--amber); }
+.verdict-display.unknown .v-icon { color: #6B7280; }
 
 .v-label {
   font-size: 2rem;
@@ -152,6 +158,7 @@ body {
 .verdict-display.dangerous .v-label { color: var(--red); }
 .verdict-display.safe .v-label { color: var(--green); }
 .verdict-display.suspicious .v-label { color: var(--amber); }
+.verdict-display.unknown .v-label { color: #6B7280; }
 
 .v-domain {
   font-size: 1rem;
@@ -354,7 +361,7 @@ footer .tiktok {
   const params = new URLSearchParams(window.location.search);
   const domain = params.get('domain') || '';
   const verdict = params.get('verdict') || '';
-  const emojis = { dangerous: '⚠️ DANGEROUS', safe: '✅ SAFE', suspicious: '⚡ SUSPICIOUS' };
+  const emojis = { dangerous: '⚠️ DANGEROUS', safe: '✅ SAFE', suspicious: '⚡ SUSPICIOUS', unknown: '❓ UNVERIFIED' };
   if (domain && verdict) {
     document.title = `${emojis[verdict] || verdict.toUpperCase()} — ${domain} | Safe Anot?`;
   }
@@ -429,8 +436,8 @@ footer .tiktok {
 
 <script>
 const API_BASE = 'https://safeanot-api.management-481.workers.dev';
-const VALID_VERDICTS = ['dangerous', 'safe', 'suspicious'];
-const VERDICT_ICONS = { dangerous: 'gpp_bad', safe: 'verified_user', suspicious: 'gpp_maybe' };
+const VALID_VERDICTS = ['dangerous', 'safe', 'suspicious', 'unknown'];
+const VERDICT_ICONS = { dangerous: 'gpp_bad', safe: 'verified_user', suspicious: 'gpp_maybe', unknown: 'help' };
 
 var params = new URLSearchParams(window.location.search);
 var domain = params.get('domain');

@@ -172,11 +172,11 @@ describe('POST /api/check', () => {
       expect(body.details.check_type).toBe('url_shortener');
     });
 
-    it('returns safe for unknown harmless domain', async () => {
+    it('returns unknown for unrecognized domain', async () => {
       const response = await postCheck({ domain: 'totally-unique-domain-abc123.com' });
       expect(response.status).toBe(200);
       const body = await response.json<CheckResponse>();
-      expect(body.verdict).toBe('safe');
+      expect(body.verdict).toBe('unknown');
     });
 
     it('detects bank name pattern with suspicious TLD', async () => {

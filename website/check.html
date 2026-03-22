@@ -277,10 +277,16 @@ body {
   box-shadow: var(--shadow-md), -4px 0 20px rgba(245, 158, 11, 0.1);
 }
 
+.result-card.unknown {
+  border-left: 5px solid #6B7280;
+  box-shadow: var(--shadow-md), -4px 0 20px rgba(107, 114, 128, 0.1);
+}
+
 .result-icon { font-size: 56px; margin-bottom: 12px; }
 .result-card.dangerous .result-icon { color: var(--red); }
 .result-card.safe .result-icon { color: var(--green); }
 .result-card.suspicious .result-icon { color: var(--amber); }
+.result-card.unknown .result-icon { color: #6B7280; }
 
 .result-verdict {
   font-size: 1.6rem;
@@ -292,6 +298,7 @@ body {
 .result-card.dangerous .result-verdict { color: var(--red); }
 .result-card.safe .result-verdict { color: var(--green); }
 .result-card.suspicious .result-verdict { color: var(--amber); }
+.result-card.unknown .result-verdict { color: #6B7280; }
 
 .result-domain {
   font-size: 0.88rem;
@@ -592,7 +599,7 @@ footer .tiktok {
 
 <script>
 const API_BASE = 'https://safeanot-api.management-481.workers.dev';
-const VALID_VERDICTS = ['dangerous', 'safe', 'suspicious'];
+const VALID_VERDICTS = ['dangerous', 'safe', 'suspicious', 'unknown'];
 
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -685,8 +692,8 @@ function showError(message) {
 
 function showResult(domain, verdict, reason, real) {
   var resultDiv = document.getElementById('result');
-  var icons = { dangerous: 'gpp_bad', safe: 'verified_user', suspicious: 'gpp_maybe' };
-  var labels = { dangerous: 'DANGEROUS', safe: 'SAFE', suspicious: 'SUSPICIOUS' };
+  var icons = { dangerous: 'gpp_bad', safe: 'verified_user', suspicious: 'gpp_maybe', unknown: 'help' };
+  var labels = { dangerous: 'DANGEROUS', safe: 'SAFE', suspicious: 'SUSPICIOUS', unknown: 'UNVERIFIED' };
 
   var safeVerdict = VALID_VERDICTS.includes(verdict) ? verdict : 'suspicious';
 
@@ -694,6 +701,8 @@ function showResult(domain, verdict, reason, real) {
     ? '\u26A0\uFE0F WARNING: ' + domain + ' is a SCAM site! Check before you click: ' + window.location.origin + '/check'
     : safeVerdict === 'suspicious'
     ? '\u26A0\uFE0F ' + domain + ' looks suspicious. Check your links here: ' + window.location.origin + '/check'
+    : safeVerdict === 'unknown'
+    ? '\u2753 ' + domain + ' is unverified — not in our database. Check your links: ' + window.location.origin + '/check'
     : '\u2705 ' + domain + ' is safe. Check any link here: ' + window.location.origin + '/check';
 
   var whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent(shareText);
