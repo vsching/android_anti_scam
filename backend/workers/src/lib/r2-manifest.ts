@@ -87,3 +87,15 @@ export function daysBetween(date1: string, date2: string): number {
 
 /** Maximum age in days for which a delta is considered valid. */
 export const MAX_DELTA_AGE_DAYS = 7;
+
+/**
+ * Compute the number of hours since the given ISO build timestamp.
+ * Returns 0 if the timestamp is invalid or in the future.
+ */
+export function computeFreshnessHours(buildTimestamp: string): number {
+  const parsed = Date.parse(buildTimestamp);
+  if (isNaN(parsed)) return 0;
+  const diff = Date.now() - parsed;
+  if (diff < 0) return 0;
+  return Math.floor(diff / 3600000);
+}

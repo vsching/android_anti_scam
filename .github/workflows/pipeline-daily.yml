@@ -53,6 +53,12 @@ jobs:
             exit 1
           fi
 
+      - name: Run smoke tests
+        if: always()
+        env:
+          API_BASE_URL: https://safeanot-api.management-481.workers.dev
+        run: bash ${{ github.workspace }}/scripts/smoke-test.sh
+
       - name: Upload pipeline logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -61,3 +67,9 @@ jobs:
           path: backend/pipeline/*.log
           retention-days: 30
           if-no-files-found: ignore
+
+      - name: Annotate failure
+        if: failure()
+        run: |
+          echo "::error::Daily pipeline or smoke tests failed. Check the logs for details."
+          echo "::warning::Pipeline run ${{ github.run_id }} completed with failures. Review artifact logs and smoke test output."

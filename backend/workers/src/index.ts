@@ -19,6 +19,7 @@ import {
   handleDataDelta,
   handleDataBloom,
 } from './routes/data';
+import { handleHealth } from './routes/health';
 import {
   handleGeneratePairingCode,
   handleClaimPairingCode,
@@ -54,6 +55,9 @@ router.post('/api/guardian/heartbeat', handlePostHeartbeat);
 router.get('/api/guardian/wards/:deviceId/heartbeats', handleGetWardHeartbeats);
 router.post('/api/guardian/fcm-token', handleRegisterFcmToken);
 router.post('/api/guardian/help-request', handleHelpRequest);
+
+// Pipeline health
+router.get('/api/health', handleHealth);
 
 // Data download endpoints (R2 artifacts)
 router.get('/api/data/latest', handleDataLatest);
