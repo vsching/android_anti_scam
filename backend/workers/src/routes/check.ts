@@ -142,7 +142,31 @@ export async function handleCheck(
     return runHeuristics(domain!);
   });
 
-  // 7. Build response
+  // 7. Re-check KV before caching — admin may have written during in-flight heuristic
+  const kvRecheck = await env.VERDICTS.get(`allowlist:${domain}`) ?? await env.VERDICTS.get(domain);
+  if (kvRecheck !== null) {
+    const parsed = (() => { try { return JSON.parse(kvRecheck); } catch { return null; } })();
+    if (parsed && parsed.verdict) {
+      const kvResult: CheckResponse = {
+        domain,
+        verdict: parsed.verdict,
+        reason: parsed.reason ?? 'Domain found in KV (post-heuristic recheck)',
+        confidence: parsed.confidence ?? 1.0,
+        details: { check_type: 'kv_recheck', source: 'kv' },
+      };
+      const cacheResp = new Response(JSON.stringify(kvResult), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': `s-maxage=${CACHE_TTL}`,
+        },
+      });
+      await cache.put(cacheRequest, cacheResp);
+      return jsonResponse(kvResult, 200);
+    }
+  }
+
+  // 8. Build response
   const checkResponse: CheckResponse = {
     domain,
     verdict: heuristicResult.verdict,
@@ -151,7 +175,7 @@ export async function handleCheck(
     details: heuristicResult.details,
   };
 
-  // 8. Cache result in Cache API (NOT in KV)
+  // 9. Cache result in Cache API (NOT in KV)
   const responseToCacheBody = JSON.stringify(checkResponse);
   const responseToCache = new Response(responseToCacheBody, {
     status: 200,
@@ -162,7 +186,7 @@ export async function handleCheck(
   });
   await cache.put(cacheRequest, responseToCache);
 
-  // 9. If suspicious or dangerous, write to D1 pending_discoveries
+  // 10. If suspicious or dangerous, write to D1 pending_discoveries
   if (
     heuristicResult.verdict === 'suspicious' ||
     heuristicResult.verdict === 'dangerous'
@@ -173,7 +197,7 @@ export async function handleCheck(
     });
   }
 
-  // 10. Return verdict
+  // 11. Return verdict
   return new Response(JSON.stringify(checkResponse), {
     status: 200,
     headers: { 'Content-Type': 'application/json', 'X-Cache': 'MISS' },

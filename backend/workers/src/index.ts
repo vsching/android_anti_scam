@@ -31,6 +31,21 @@ import {
   handleRegisterFcmToken,
   handleHelpRequest,
 } from './routes/guardian';
+import {
+  handleAdminAllowlistAdd,
+  handleAdminAllowlistRemove,
+  handleAdminAllowlistList,
+} from './routes/admin-allowlist';
+import {
+  handleAdminBlocklistAdd,
+  handleAdminBlocklistRemove,
+  handleAdminBlocklistList,
+} from './routes/admin-blocklist';
+import { handleAdminCachePurge } from './routes/admin-cache';
+import {
+  handleAdminDiscoveriesList,
+  handleAdminDiscoveriesDelete,
+} from './routes/admin-discoveries';
 
 const router = new Router();
 
@@ -64,6 +79,17 @@ router.get('/api/data/latest', handleDataLatest);
 router.get('/api/data/full', handleDataFull);
 router.get('/api/data/delta', handleDataDelta);
 router.get('/api/data/bloom', handleDataBloom);
+
+// Admin endpoints (auth-protected)
+router.post('/api/admin/allowlist', handleAdminAllowlistAdd);
+router.delete('/api/admin/allowlist/:domain', handleAdminAllowlistRemove);
+router.get('/api/admin/allowlist', handleAdminAllowlistList);
+router.post('/api/admin/blocklist', handleAdminBlocklistAdd);
+router.delete('/api/admin/blocklist/:domain', handleAdminBlocklistRemove);
+router.get('/api/admin/blocklist', handleAdminBlocklistList);
+router.delete('/api/admin/cache/:domain', handleAdminCachePurge);
+router.get('/api/admin/discoveries', handleAdminDiscoveriesList);
+router.delete('/api/admin/discoveries/:id', handleAdminDiscoveriesDelete);
 
 // Health / version endpoint
 router.get('/', (_request, _env, _params) => {

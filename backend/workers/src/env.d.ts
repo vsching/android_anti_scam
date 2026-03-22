@@ -26,4 +26,7 @@ interface Env {
 
   // Pipeline authentication secret (for /api/alerts/notify)
   PIPELINE_SECRET: string;
+
+  // Admin API authentication secret
+  ADMIN_SECRET: string;
 }

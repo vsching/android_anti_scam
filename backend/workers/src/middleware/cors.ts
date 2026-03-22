@@ -6,8 +6,8 @@ const ALLOWED_ORIGINS = [
   'https://safeanot.pages.dev',
 ];
 
-const ALLOWED_METHODS = 'GET, POST, OPTIONS';
-const ALLOWED_HEADERS = 'Content-Type, Authorization';
+const ALLOWED_METHODS = 'GET, POST, DELETE, OPTIONS';
+const ALLOWED_HEADERS = 'Content-Type, Authorization, X-Admin-Key';
 const MAX_AGE = '86400';
 
 /**
