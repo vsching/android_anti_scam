@@ -62,11 +62,25 @@ const LEGITIMATE_DOMAINS: Record<string, string> = {
 
 // Bank/brand keywords for pattern matching
 const BANK_KEYWORDS = [
-  'maybank', 'cimb', 'rhb', 'publicbank', 'hongleong', 'ambank',
-  'bankislam', 'bankrakyat', 'bsn', 'dbs', 'ocbc', 'uob', 'posb',
-  'hsbc', 'citibank', 'standardchartered', 'affin', 'alliancebank',
-  'lhdn', 'kwsp', 'epf', 'jpj', 'iras', 'cpf', 'singpass',
-  'grab', 'shopee', 'lazada', 'touchngo', 'tngdigital', 'maybank2u',
+  // Malaysian banks
+  'maybank', 'maybank2u', 'cimb', 'cimbclicks', 'rhb', 'publicbank', 'pbebank',
+  'hongleong', 'ambank', 'bankislam', 'bankrakyat', 'bsn', 'affin',
+  'alliancebank', 'muamalat', 'agrobank', 'mbsb', 'alrajhi',
+  // Singapore banks
+  'dbs', 'posb', 'ocbc', 'uob',
+  // Global banks
+  'hsbc', 'citibank', 'standardchartered', 'bankofchina', 'icbc',
+  // MY government
+  'lhdn', 'hasil', 'kwsp', 'epf', 'jpj', 'bnm', 'mcmc', 'kpdnhep', 'ssm',
+  // SG government
+  'singpass', 'cpf', 'iras', 'myinfo',
+  // E-commerce & payments
+  'grab', 'grabpay', 'shopee', 'shopeepay', 'lazada', 'touchngo', 'tngdigital',
+  'boost', 'bigpay', 'favepay', 'setel', 'mae', 'paynet',
+  // Telcos
+  'maxis', 'celcom', 'digi', 'umobile', 'unifi', 'singtel', 'starhub',
+  // Delivery (commonly spoofed)
+  'poslaju', 'jtexpress', 'ninjavan',
 ];
 
 // Suspicious TLDs commonly used in scam domains

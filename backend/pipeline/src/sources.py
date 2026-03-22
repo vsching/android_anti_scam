@@ -114,7 +114,7 @@ class ScamBlocklistSource:
 
     URL = (
         "https://raw.githubusercontent.com/"
-        "jarelllama/Scam-Blocklist/main/lists/adguard/scams.txt"
+        "jarelllama/Scam-Blocklist/main/lists/wildcard_domains/scams.txt"
     )
 
     @property

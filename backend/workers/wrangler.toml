@@ -10,8 +10,7 @@ ENVIRONMENT = "production"
 # KV — allowlist + new domain discoveries only (NOT bulk domain store)
 [[kv_namespaces]]
 binding = "VERDICTS"
-id = "PLACEHOLDER_KV_NAMESPACE_ID"
-preview_id = "PLACEHOLDER_KV_PREVIEW_NAMESPACE_ID"
+id = "af9c8116ef6d45aca90dbbd4970acf1d"
 
 # R2 — bulk scam database (SQLite, Bloom filter, delta files)
 [[r2_buckets]]
@@ -23,7 +22,7 @@ preview_bucket_name = "safeanot-data-preview"
 [[d1_databases]]
 binding = "DB"
 database_name = "safeanot-db"
-database_id = "PLACEHOLDER_D1_DATABASE_ID"
+database_id = "a05d4663-f225-4ce0-a4fb-bad6fb77a35e"
 migrations_dir = "migrations"
 
 # Cron triggers — retention handler runs daily at 3am UTC

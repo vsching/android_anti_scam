@@ -1,6 +1,2 @@
-/check /check.html 200
-/result /result.html 200
-/challenge /challenge.html 200
-/join /join.html 200
-/privacy /privacy.html 200
-/terms /terms.html 200
+# Cloudflare Pages auto-serves .html files without extension (pretty URLs)
+# Only add custom redirects here if needed

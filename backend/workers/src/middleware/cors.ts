@@ -3,6 +3,7 @@
 
 const ALLOWED_ORIGINS = [
   'https://safeanot.com',
+  'https://safeanot.pages.dev',
 ];
 
 const ALLOWED_METHODS = 'GET, POST, OPTIONS';
@@ -18,7 +19,7 @@ function isAllowedOrigin(origin: string | null): boolean {
   if (ALLOWED_ORIGINS.includes(origin)) return true;
   if (/^http:\/\/localhost(:\d+)?$/.test(origin)) return true;
   // Allow Cloudflare Pages preview deployments (e.g. abc123.safeanot-app.pages.dev)
-  if (/^https:\/\/[a-z0-9-]+\.safeanot-app\.pages\.dev$/.test(origin)) return true;
+  if (/^https:\/\/[a-z0-9-]+\.safeanot\.pages\.dev$/.test(origin)) return true;
   return false;
 }
 
