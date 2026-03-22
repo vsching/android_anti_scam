@@ -125,6 +125,7 @@ def run_pipeline(
     force: bool = False,
     output_dir: str | None = None,
     skip_upload: bool = False,
+    version: str | None = None,
 ) -> dict[str, Any]:
     """Run the full seed pipeline.
 
@@ -136,11 +137,13 @@ def run_pipeline(
         force: Override anti-poisoning gates.
         output_dir: Directory for output artifacts (None for temp dir).
         skip_upload: If True, skip R2/KV uploads (useful for testing).
+        version: Explicit version string (None to derive from UTC clock).
 
     Returns:
         Dict with pipeline results (domain_count, artifacts, etc.).
     """
-    version = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    if version is None:
+        version = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     if output_dir is None:
         output_dir = tempfile.mkdtemp(prefix="safeanot-pipeline-")
 
@@ -376,6 +379,25 @@ def main(force: bool, output_dir: str | None, skip_upload: bool) -> None:
 
     if result.get("success"):
         logger.info("Pipeline completed successfully: %s", result)
+        # Structured summary for CI observability
+        summary = {
+            "pipeline_version": result.get("version"),
+            "domain_count": result.get("domain_count"),
+            "sources_succeeded": result.get("sources_succeeded"),
+            "sources_failed": result.get("sources_failed"),
+            "discoveries_promoted": result.get("discoveries_promoted", 0),
+            "artifacts": result.get("artifacts", {}),
+        }
+        # Log artifact file sizes when output_dir is available
+        result_output_dir = result.get("output_dir")
+        if result_output_dir:
+            artifact_sizes = {}
+            for artifact_type, filename in summary["artifacts"].items():
+                filepath = os.path.join(result_output_dir, filename)
+                if os.path.exists(filepath):
+                    artifact_sizes[artifact_type] = os.path.getsize(filepath)
+            summary["artifact_sizes_bytes"] = artifact_sizes
+        logger.info("PIPELINE_SUMMARY: %s", json.dumps(summary))
     else:
         logger.error("Pipeline failed: %s", result)
         sys.exit(1)

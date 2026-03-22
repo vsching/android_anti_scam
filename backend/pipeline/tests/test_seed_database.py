@@ -279,6 +279,37 @@ class TestRunPipeline:
         )
         assert result1["domain_count"] == result2["domain_count"]
 
+    def test_idempotent_rerun_explicit_version(self, sample_sources, output_dir):
+        """Two runs with the same explicit version produce identical results."""
+        result1 = run_pipeline(
+            sources=sample_sources,
+            output_dir=output_dir,
+            skip_upload=True,
+            version="2026-01-01",
+        )
+        result2 = run_pipeline(
+            sources=sample_sources,
+            output_dir=output_dir,
+            skip_upload=True,
+            version="2026-01-01",
+        )
+        assert result1["success"] is True
+        assert result2["success"] is True
+        assert result1["version"] == "2026-01-01"
+        assert result2["version"] == "2026-01-01"
+        assert result1["domain_count"] == result2["domain_count"]
+
+    def test_explicit_version_parameter(self, sample_sources, output_dir):
+        """Explicit version string is used instead of UTC clock."""
+        result = run_pipeline(
+            sources=sample_sources,
+            output_dir=output_dir,
+            skip_upload=True,
+            version="2025-06-15",
+        )
+        assert result["success"] is True
+        assert result["version"] == "2025-06-15"
+
 
 class TestAntiPoisoningValidation:
     def test_pass_when_no_previous(self):
