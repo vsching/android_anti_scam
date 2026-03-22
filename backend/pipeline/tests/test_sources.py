@@ -7,11 +7,15 @@ import pytest
 
 from src.sources import (
     FetchResult,
+    OpenPhishSource,
     PhishingArmySource,
     PhishingDatabaseSource,
     ScamBlocklistSource,
+    URLhausSource,
+    _extract_domain,
     _fetch_text_list,
     fetch_all_sources,
+    get_default_sources,
 )
 
 
@@ -177,3 +181,164 @@ class TestFetchAllSources:
     def test_empty_source_list(self):
         results = fetch_all_sources(sources=[])
         assert results == []
+
+
+class TestFetchTextListFallback:
+    """Tests for multi-URL fallback support in _fetch_text_list."""
+
+    def test_primary_succeeds(self):
+        """When primary URL works, no fallback needed."""
+        client = httpx.Client(
+            transport=MockTransport("domain1.com\ndomain2.com")
+        )
+        result = _fetch_text_list(
+            ["http://primary.example.com", "http://fallback.example.com"],
+            "test",
+            client=client,
+            max_retries=1,
+        )
+        assert result.success is True
+        assert len(result.domains) == 2
+        assert result.error is None  # no fallback warning
+        client.close()
+
+    def test_fallback_used_on_primary_failure(self):
+        """When primary fails, fallback URL is tried."""
+        call_count = 0
+
+        class FallbackTransport(httpx.BaseTransport):
+            def handle_request(self, request):
+                nonlocal call_count
+                call_count += 1
+                if "primary" in str(request.url):
+                    raise httpx.ConnectError("Connection refused")
+                return httpx.Response(
+                    status_code=200,
+                    text="fallback-domain.com",
+                    request=request,
+                )
+
+        client = httpx.Client(transport=FallbackTransport())
+        result = _fetch_text_list(
+            ["http://primary.example.com", "http://fallback.example.com"],
+            "test",
+            client=client,
+            max_retries=1,
+        )
+        assert result.success is True
+        assert result.domains == ["fallback-domain.com"]
+        assert result.error is not None  # fallback warning
+        assert "fallback" in result.error.lower()
+        client.close()
+
+    def test_all_urls_fail(self):
+        """When all URLs fail, result is failure."""
+        client = httpx.Client(
+            transport=MockTransport(error=httpx.ConnectError("down"))
+        )
+        result = _fetch_text_list(
+            ["http://url1.example.com", "http://url2.example.com"],
+            "test",
+            client=client,
+            max_retries=1,
+        )
+        assert result.success is False
+        client.close()
+
+
+class TestOpenPhishSource:
+    def test_source_name(self):
+        source = OpenPhishSource()
+        assert source.name == "openphish"
+
+    def test_url_to_domain_parsing(self):
+        """Full URLs should be parsed down to just the domain."""
+        content = (
+            "https://evil.com/phish/page\n"
+            "http://www.bad-site.org/login.php\n"
+            "https://scam.example.net/path?q=1\n"
+        )
+        client = httpx.Client(transport=MockTransport(content))
+        source = OpenPhishSource()
+        result = source.fetch(client=client)
+        assert result.success is True
+        assert "evil.com" in result.domains
+        assert "bad-site.org" in result.domains  # www. stripped
+        assert "scam.example.net" in result.domains
+        client.close()
+
+    def test_empty_lines_ignored(self):
+        content = "https://evil.com/page\n\n\nhttps://bad.com/x\n"
+        client = httpx.Client(transport=MockTransport(content))
+        source = OpenPhishSource()
+        result = source.fetch(client=client)
+        assert result.success is True
+        assert len(result.domains) == 2
+        client.close()
+
+
+class TestURLhausSource:
+    def test_source_name(self):
+        source = URLhausSource()
+        assert source.name == "urlhaus"
+
+    def test_comment_filtering(self):
+        """Lines starting with # should be skipped."""
+        content = (
+            "# URLhaus database dump\n"
+            "# Last updated: 2026-01-01\n"
+            "http://malware.example.com/payload.exe\n"
+            "https://dropper.bad.net/dl\n"
+        )
+        client = httpx.Client(transport=MockTransport(content))
+        source = URLhausSource()
+        result = source.fetch(client=client)
+        assert result.success is True
+        assert len(result.domains) == 2
+        assert "malware.example.com" in result.domains
+        assert "dropper.bad.net" in result.domains
+        client.close()
+
+    def test_url_to_domain_parsing(self):
+        content = "http://evil.com:8080/malware\nhttps://www.bad.org/payload\n"
+        client = httpx.Client(transport=MockTransport(content))
+        source = URLhausSource()
+        result = source.fetch(client=client)
+        assert result.success is True
+        assert "evil.com" in result.domains
+        assert "bad.org" in result.domains  # www. stripped
+        client.close()
+
+
+class TestExtractDomain:
+    def test_simple_url(self):
+        assert _extract_domain("https://evil.com/phish/page") == "evil.com"
+
+    def test_www_stripped(self):
+        assert _extract_domain("http://www.example.com/path") == "example.com"
+
+    def test_port_stripped(self):
+        assert _extract_domain("http://evil.com:8080/path") == "evil.com"
+
+    def test_empty_string(self):
+        assert _extract_domain("") is None
+
+    def test_bare_domain(self):
+        assert _extract_domain("evil.com") == "evil.com"
+
+
+class TestGetDefaultSources:
+    def test_returns_five_sources(self):
+        sources = get_default_sources()
+        assert len(sources) == 5
+
+    def test_source_names(self):
+        sources = get_default_sources()
+        names = {s.name for s in sources}
+        assert names == {
+            "phishing_database",
+            "scam_blocklist",
+            "phishing_army",
+            "openphish",
+            "urlhaus",
+        }

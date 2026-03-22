@@ -382,3 +382,59 @@ class TestAntiPoisoningValidation:
         )
         assert result["success"] is True
         assert result["domain_count"] == 1  # only valid-scam.com
+
+
+class TestPartialFailureResilience:
+    """Integration tests for pipeline resilience with multiple source failures."""
+
+    def test_pipeline_succeeds_with_two_of_five_failing(self, tmp_path):
+        """Pipeline should succeed when 2 of 5 sources fail."""
+        sources = [
+            MockSource("src_a", ["domain-a1.com", "domain-a2.com"]),
+            MockSource("src_b", ["domain-b1.com"]),
+            MockSource("src_c", ["domain-c1.com", "domain-c2.com"]),
+            MockSource("src_d", [], should_fail=True),
+            MockSource("src_e", [], should_fail=True),
+        ]
+        result = run_pipeline(
+            sources=sources,
+            output_dir=str(tmp_path),
+            skip_upload=True,
+        )
+        assert result["success"] is True
+        assert result["sources_succeeded"] == 3
+        assert result["sources_failed"] == 2
+        assert result["domain_count"] == 5
+
+    def test_pipeline_succeeds_with_one_of_five_surviving(self, tmp_path):
+        """Pipeline should succeed even with only 1 of 5 sources working."""
+        sources = [
+            MockSource("src_a", ["sole-survivor.com"]),
+            MockSource("src_b", [], should_fail=True),
+            MockSource("src_c", [], should_fail=True),
+            MockSource("src_d", [], should_fail=True),
+            MockSource("src_e", [], should_fail=True),
+        ]
+        result = run_pipeline(
+            sources=sources,
+            output_dir=str(tmp_path),
+            skip_upload=True,
+        )
+        assert result["success"] is True
+        assert result["sources_succeeded"] == 1
+        assert result["sources_failed"] == 4
+        assert result["domain_count"] == 1
+
+    def test_pipeline_aborts_when_all_five_fail(self, tmp_path):
+        """Pipeline should abort when all 5 sources fail."""
+        sources = [
+            MockSource(f"src_{i}", [], should_fail=True)
+            for i in range(5)
+        ]
+        result = run_pipeline(
+            sources=sources,
+            output_dir=str(tmp_path),
+            skip_upload=True,
+        )
+        assert result["success"] is False
+        assert "All sources failed" in result.get("error", "")

@@ -41,3 +41,16 @@ class PipelineConfig:
     def from_env(cls) -> PipelineConfig:
         """Create config from current environment variables."""
         return cls()
+
+
+def get_sources_json() -> str | None:
+    """Return raw PIPELINE_SOURCES_JSON env var value, or None if unset.
+
+    When set, the value should be a JSON list of {name, urls} objects, e.g.:
+        [{"name": "custom_feed", "urls": ["https://example.com/feed.txt"]}]
+
+    This function only retrieves the raw string; parsing and source
+    construction is deferred to the caller.
+    """
+    value = os.environ.get("PIPELINE_SOURCES_JSON", "").strip()
+    return value if value else None
