@@ -12,20 +12,27 @@
 #   blocklist-remove <domain>                     Remove domain from blocklist
 #   list --allowlist                              List allowlisted domains
 #   list --blocklist                              List blocklisted domains
+#   discoveries-list                              List pending discoveries (last 50)
+#   discoveries-clear                             Clear discoveries older than 30 days
 #
 # Environment variables:
+#   KV_NAMESPACE_ID — KV namespace ID (default: production namespace)
 #   ADMIN_SECRET   — Required for cache purge after writes (optional, warns if unset)
 #   API_BASE       — Base URL for cache purge endpoint (default: https://api.safeanot.com)
 #
 # Notes:
 #   - wrangler kv key list handles pagination automatically.
 #   - For very large lists, use --limit flag to cap output.
+#   - ADMIN_SECRET is passed via curl -H and may be visible in `ps` output.
+#     This is acceptable for a developer-only local tool. Do not use in CI/CD
+#     pipelines or shared environments where process listings are exposed.
 #
 
 set -euo pipefail
 
 WORKERS_DIR="backend/workers"
-KV_NAMESPACE_ID="af9c8116ef6d45aca90dbbd4970acf1d"
+# Production KV namespace ID. Override via KV_NAMESPACE_ID env var for staging.
+KV_NAMESPACE_ID="${KV_NAMESPACE_ID:-af9c8116ef6d45aca90dbbd4970acf1d}"
 API_BASE="${API_BASE:-https://api.safeanot.com}"
 
 # ──────────────────────────────────────────────
@@ -43,10 +50,13 @@ Subcommands:
   blocklist-remove <domain>                     Remove domain from blocklist
   list --allowlist                              List allowlisted domains
   list --blocklist                              List blocklisted domains
+  discoveries-list                              List pending discoveries (last 50)
+  discoveries-clear                             Clear discoveries older than 30 days
 
 Environment:
-  ADMIN_SECRET   Secret key for cache purge (optional, warns if unset)
-  API_BASE       API base URL (default: https://api.safeanot.com)
+  ADMIN_SECRET     Secret key for cache purge (optional, warns if unset)
+  API_BASE         API base URL (default: https://api.safeanot.com)
+  KV_NAMESPACE_ID  KV namespace ID (default: production namespace)
 USAGE
   exit 1
 }
@@ -110,8 +120,19 @@ cmd_allowlist_add() {
   validate_domain "$domain" || exit 1
 
   local json
-  json=$(printf '{"domain":"%s","verdict":"safe","category":"%s","entity":"%s","reason":"Manually allowlisted"}' \
-    "$domain" "$category" "$entity")
+  if command -v jq &>/dev/null; then
+    json=$(jq -n --arg domain "$domain" --arg category "$category" --arg entity "$entity" \
+      --arg added_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+      '{domain:$domain,verdict:"safe",category:$category,entity:$entity,reason:"Manually allowlisted",added_at:$added_at}')
+  else
+    # Fallback: basic escaping of " and \ for JSON safety
+    local esc_domain esc_entity esc_category
+    esc_domain="${domain//\\/\\\\}"; esc_domain="${esc_domain//\"/\\\"}"
+    esc_entity="${entity//\\/\\\\}"; esc_entity="${esc_entity//\"/\\\"}"
+    esc_category="${category//\\/\\\\}"; esc_category="${esc_category//\"/\\\"}"
+    json=$(printf '{"domain":"%s","verdict":"safe","category":"%s","entity":"%s","reason":"Manually allowlisted","added_at":"%s"}' \
+      "$esc_domain" "$esc_category" "$esc_entity" "$(date -u +%Y-%m-%dT%H:%M:%SZ)")
+  fi
 
   echo "Adding '${domain}' to allowlist (entity=${entity}, category=${category})..."
   (cd "${WORKERS_DIR}" && npx wrangler kv key put \
@@ -156,8 +177,18 @@ cmd_blocklist_add() {
   validate_domain "$domain" || exit 1
 
   local json
-  json=$(printf '{"domain":"%s","verdict":"dangerous","reason":"%s","source":"manual_override","confidence":1.0}' \
-    "$domain" "$reason")
+  if command -v jq &>/dev/null; then
+    json=$(jq -n --arg domain "$domain" --arg reason "$reason" \
+      --arg added_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+      '{domain:$domain,verdict:"dangerous",reason:$reason,source:"manual_override",confidence:1.0,added_at:$added_at}')
+  else
+    # Fallback: basic escaping of " and \ for JSON safety
+    local esc_domain esc_reason
+    esc_domain="${domain//\\/\\\\}"; esc_domain="${esc_domain//\"/\\\"}"
+    esc_reason="${reason//\\/\\\\}"; esc_reason="${esc_reason//\"/\\\"}"
+    json=$(printf '{"domain":"%s","verdict":"dangerous","reason":"%s","source":"manual_override","confidence":1.0,"added_at":"%s"}' \
+      "$esc_domain" "$esc_reason" "$(date -u +%Y-%m-%dT%H:%M:%SZ)")
+  fi
 
   echo "Adding '${domain}' to blocklist (reason=${reason})..."
   (cd "${WORKERS_DIR}" && npx wrangler kv key put \
@@ -242,6 +273,7 @@ cmd_list() {
       --namespace-id "${KV_NAMESPACE_ID}")
 
     # Filter out allowlist:, alerts:, data:, cache: prefixed keys
+    # Keep in sync with EXCLUDED_PREFIXES in backend/workers/src/lib/admin-kv.ts
     local filtered
     filtered=$(echo "$output" | grep -v -E '"name"\s*:\s*"(allowlist:|alerts:|data:|cache:)' || true)
 
@@ -251,6 +283,25 @@ cmd_list() {
       echo "$filtered"
     fi
   fi
+}
+
+cmd_discoveries_list() {
+  echo "Listing pending discoveries (last 50)..."
+  (cd "${WORKERS_DIR}" && npx wrangler d1 execute safeanot-db --remote \
+    --command "SELECT * FROM pending_discoveries ORDER BY last_seen_at DESC LIMIT 50")
+}
+
+cmd_discoveries_clear() {
+  read -r -p "Clear discoveries older than 30 days? [y/N] " confirm
+  if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+    echo "Aborted."
+    exit 0
+  fi
+
+  echo "Clearing old discoveries..."
+  (cd "${WORKERS_DIR}" && npx wrangler d1 execute safeanot-db --remote \
+    --command "DELETE FROM pending_discoveries WHERE last_seen_at < datetime('now', '-30 days')")
+  echo "Old discoveries cleared."
 }
 
 # ──────────────────────────────────────────────
@@ -270,6 +321,8 @@ case "$SUBCOMMAND" in
   blocklist-add)     cmd_blocklist_add "$@" ;;
   blocklist-remove)  cmd_blocklist_remove "$@" ;;
   list)              cmd_list "$@" ;;
+  discoveries-list)  cmd_discoveries_list ;;
+  discoveries-clear) cmd_discoveries_clear ;;
   help|--help|-h)    usage ;;
   *)
     echo "Error: Unknown subcommand '${SUBCOMMAND}'" >&2

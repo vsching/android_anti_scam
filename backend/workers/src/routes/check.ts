@@ -8,6 +8,8 @@ import { extractDomain } from '../lib/domain';
 import { runHeuristics, HeuristicResult } from '../lib/heuristics';
 import { coalesce } from '../lib/inflight';
 import { recordDiscovery } from '../lib/discovery';
+import { jsonResponse } from '../lib/response';
+import { cacheApiKey } from '../lib/cache';
 
 /** Maximum request body size in bytes (10 KB). */
 const MAX_BODY_SIZE = 10 * 1024;
@@ -22,14 +24,6 @@ interface CheckResponse {
   reason: string;
   confidence: number;
   details: Record<string, unknown>;
-}
-
-/**
- * Build a Cache API key URL for a given domain.
- * Cache API requires a valid URL as key.
- */
-function cacheApiKey(domain: string): string {
-  return `https://cache.safeanot.internal/check/${encodeURIComponent(domain)}`;
 }
 
 /**
@@ -204,9 +198,3 @@ export async function handleCheck(
   });
 }
 
-function jsonResponse(data: unknown, status: number): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
-}

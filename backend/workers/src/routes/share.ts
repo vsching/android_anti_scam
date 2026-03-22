@@ -10,6 +10,8 @@
 //
 // LOGGING POLICY: Only log anonymised counts, never content IDs or device IDs.
 
+import { jsonResponse } from '../lib/response';
+
 /** Maximum request body size in bytes (10 KB). */
 const MAX_BODY_SIZE = 10 * 1024;
 
@@ -53,13 +55,6 @@ interface ShareEventInput {
 interface ShareBatchInput {
   device_id: string;
   events: ShareEventInput[];
-}
-
-function jsonResponse(data: unknown, status: number): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
 }
 
 /**

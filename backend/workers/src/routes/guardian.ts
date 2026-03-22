@@ -5,6 +5,7 @@
 
 import { verifyDeviceHmac } from '../middleware/guardian-auth';
 import { sendFcmNotification } from '../lib/fcm';
+import { jsonResponse } from '../lib/response';
 
 /** Maximum request body size in bytes (10 KB). */
 const MAX_BODY_SIZE = 10 * 1024;
@@ -41,13 +42,6 @@ const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 
 /** Length of generated pairing codes. */
 const CODE_LENGTH = 6;
-
-function jsonResponse(data: unknown, status: number): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
 
 /**
  * Read and validate the JSON body from the request.

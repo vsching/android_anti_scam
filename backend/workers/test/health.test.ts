@@ -79,6 +79,17 @@ describe('GET /api/health', () => {
     expect(body.error).toBe('No manifest found');
   });
 
+  it('returns status "unknown" when manifest is invalid JSON', async () => {
+    await env.DATA_BUCKET.put('latest.json', 'this is not valid json!!!');
+
+    const response = await SELF.fetch('http://localhost/api/health');
+    expect(response.status).toBe(200);
+
+    const body = await response.json<HealthResponse>();
+    expect(body.status).toBe('unknown');
+    expect(body.error).toBe('Invalid manifest');
+  });
+
   it('returns JSON content type', async () => {
     const manifest = makeManifest(new Date().toISOString());
     await env.DATA_BUCKET.put('latest.json', JSON.stringify(manifest));

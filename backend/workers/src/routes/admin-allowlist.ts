@@ -3,6 +3,7 @@
 import { validateAdminAuth } from '../middleware/admin-auth';
 import { writeAllowlistEntry, deleteAllowlistEntry, listAllowlistEntries } from '../lib/admin-kv';
 import { logAdminAction } from '../lib/admin-audit';
+import { jsonResponse } from '../lib/response';
 
 /**
  * POST /api/admin/allowlist
@@ -13,7 +14,7 @@ export async function handleAdminAllowlistAdd(
   env: Env,
   _params: Record<string, string>,
 ): Promise<Response> {
-  const authError = validateAdminAuth(request, env);
+  const authError = await validateAdminAuth(request, env);
   if (authError) return authError;
 
   let body: { domain?: string; entity?: string; category?: string };
@@ -41,7 +42,7 @@ export async function handleAdminAllowlistRemove(
   env: Env,
   params: Record<string, string>,
 ): Promise<Response> {
-  const authError = validateAdminAuth(request, env);
+  const authError = await validateAdminAuth(request, env);
   if (authError) return authError;
 
   const domain = params.domain;
@@ -63,17 +64,10 @@ export async function handleAdminAllowlistList(
   env: Env,
   _params: Record<string, string>,
 ): Promise<Response> {
-  const authError = validateAdminAuth(request, env);
+  const authError = await validateAdminAuth(request, env);
   if (authError) return authError;
 
   const entries = await listAllowlistEntries(env.VERDICTS);
 
   return jsonResponse({ entries }, 200);
-}
-
-function jsonResponse(data: unknown, status: number): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
 }

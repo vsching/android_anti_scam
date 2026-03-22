@@ -37,6 +37,16 @@ const SCHEMA_SQL = [
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     processed BOOLEAN DEFAULT FALSE, processed_at DATETIME)`,
   `CREATE INDEX IF NOT EXISTS idx_pending_unprocessed ON pending_discoveries(processed, created_at)`,
+  `CREATE TABLE IF NOT EXISTS admin_audit_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    domain TEXT NOT NULL,
+    action TEXT NOT NULL,
+    payload_json TEXT,
+    admin_ip TEXT,
+    request_id TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')))`,
+  `CREATE INDEX IF NOT EXISTS idx_admin_audit_created_at ON admin_audit_logs(created_at)`,
+  `CREATE INDEX IF NOT EXISTS idx_admin_audit_domain ON admin_audit_logs(domain)`,
 ];
 
 const SEED_SQL = [
@@ -63,7 +73,7 @@ describe('D1 Migrations', () => {
   });
 
   describe('Table existence', () => {
-    const tables = ['reports', 'alerts', 'guardian_pairs', 'shared_scores', 'pending_discoveries'];
+    const tables = ['reports', 'alerts', 'guardian_pairs', 'shared_scores', 'pending_discoveries', 'admin_audit_logs'];
 
     for (const table of tables) {
       it(`table "${table}" exists`, async () => {
@@ -115,6 +125,22 @@ describe('D1 Migrations', () => {
         .bind('ss-1')
         .first<{ score_percent: number }>();
       expect(row?.score_percent).toBe(85);
+    });
+
+    it('can INSERT and SELECT from admin_audit_logs', async () => {
+      await env.DB.prepare(
+        `INSERT INTO admin_audit_logs (domain, action, payload_json, admin_ip, request_id)
+         VALUES (?, ?, ?, ?, ?)`,
+      )
+        .bind('audit-test.com', 'allowlist_add', '{"entity":"Test"}', '127.0.0.1', 'req-001')
+        .run();
+
+      const row = await env.DB.prepare('SELECT * FROM admin_audit_logs WHERE domain = ?')
+        .bind('audit-test.com')
+        .first<{ domain: string; action: string; admin_ip: string }>();
+      expect(row?.domain).toBe('audit-test.com');
+      expect(row?.action).toBe('allowlist_add');
+      expect(row?.admin_ip).toBe('127.0.0.1');
     });
 
     it('can INSERT and SELECT from pending_discoveries', async () => {

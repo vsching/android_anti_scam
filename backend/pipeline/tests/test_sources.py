@@ -12,6 +12,7 @@ from src.sources import (
     PhishingDatabaseSource,
     ScamBlocklistSource,
     URLhausSource,
+    _apply_domain_extraction,
     _extract_domain,
     _fetch_text_list,
     fetch_all_sources,
@@ -116,6 +117,18 @@ class TestScamBlocklistSource:
         assert "scam-domain.com" in result.domains
         assert "another-scam.xyz" in result.domains
         assert "plain-domain.net" in result.domains
+        client.close()
+
+
+    def test_adguard_format_without_trailing_caret(self):
+        """The ||domain format (without ^) should also be parsed correctly."""
+        content = "||no-caret-domain.com\n||with-caret.org^"
+        client = httpx.Client(transport=MockTransport(content))
+        source = ScamBlocklistSource()
+        result = source.fetch(client=client)
+        assert result.success is True
+        assert "no-caret-domain.com" in result.domains
+        assert "with-caret.org" in result.domains
         client.close()
 
 

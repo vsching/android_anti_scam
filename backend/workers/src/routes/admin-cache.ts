@@ -2,6 +2,8 @@
 
 import { validateAdminAuth } from '../middleware/admin-auth';
 import { logAdminAction } from '../lib/admin-audit';
+import { jsonResponse } from '../lib/response';
+import { cacheApiKey } from '../lib/cache';
 
 /**
  * DELETE /api/admin/cache/:domain
@@ -11,7 +13,7 @@ export async function handleAdminCachePurge(
   env: Env,
   params: Record<string, string>,
 ): Promise<Response> {
-  const authError = validateAdminAuth(request, env);
+  const authError = await validateAdminAuth(request, env);
   if (authError) return authError;
 
   const domain = params.domain;
@@ -19,18 +21,10 @@ export async function handleAdminCachePurge(
     return jsonResponse({ error: 'Missing domain parameter' }, 400);
   }
 
-  const cacheKey = `https://cache.safeanot.internal/check/${encodeURIComponent(domain)}`;
   const cache = caches.default;
-  await cache.delete(new Request(cacheKey));
+  await cache.delete(new Request(cacheApiKey(domain)));
 
   logAdminAction(env.DB, request, domain, 'cache_purge', { domain });
 
   return jsonResponse({ purged: true, domain }, 200);
-}
-
-function jsonResponse(data: unknown, status: number): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
 }

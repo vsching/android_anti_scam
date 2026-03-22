@@ -1,5 +1,14 @@
-// Reusable KV cache helpers for list endpoints.
-// Stores serialized JSON strings with metadata-based TTL tracking.
+// Reusable cache helpers.
+// KV cache: serialized JSON strings with metadata-based TTL tracking.
+// Cache API key builder: shared between check and admin-cache routes.
+
+/**
+ * Build a Cache API key URL for a given domain.
+ * Cache API requires a valid URL as key.
+ */
+export function cacheApiKey(domain: string): string {
+  return `https://cache.safeanot.internal/check/${encodeURIComponent(domain)}`;
+}
 
 /** Default cache TTL in seconds (15 minutes). */
 export const DEFAULT_CACHE_TTL = 900;

@@ -116,6 +116,24 @@ else
   fail "missing args did not show usage"
 fi
 
+# ── Test 11: discoveries-list appears in help ──
+echo "Test 11: discoveries-list in help output"
+output=$(capture "$ADMIN_SH" --help)
+if echo "$output" | grep -q "discoveries-list"; then
+  pass "help mentions discoveries-list"
+else
+  fail "help missing discoveries-list"
+fi
+
+# ── Test 12: discoveries-clear appears in help ──
+echo "Test 12: discoveries-clear in help output"
+output=$(capture "$ADMIN_SH" --help)
+if echo "$output" | grep -q "discoveries-clear"; then
+  pass "help mentions discoveries-clear"
+else
+  fail "help missing discoveries-clear"
+fi
+
 # ── Summary ──
 echo ""
 echo "=== Results: ${PASS} passed, ${FAIL} failed ==="

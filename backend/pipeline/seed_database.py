@@ -22,7 +22,6 @@ import click
 from src.allowlist import get_all_allowlisted_domains, get_allowlist_domain_set
 from src.bloom_filter import generate_bloom_filter
 from src.cloudflare import D1Client, KVClient, R2Client
-from src.config import get_sources_json
 from src.discovery_processor import process_discoveries
 from src.manifest import generate_latest_json, generate_manifest
 from src.normalize import deduplicate, normalize_domain, validate_domain_format
@@ -152,12 +151,6 @@ def run_pipeline(
 
     # Step 1: Fetch from all sources
     if sources is None:
-        custom_sources_json = get_sources_json()
-        if custom_sources_json:
-            logger.info(
-                "PIPELINE_SOURCES_JSON is set — custom sources configured "
-                "(not yet implemented, using defaults)"
-            )
         sources = get_default_sources()
     results = fetch_all_sources(sources=sources)
 

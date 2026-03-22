@@ -1,6 +1,11 @@
 // Type definitions for Cloudflare Worker bindings.
 // Kept in sync with wrangler.toml bindings.
 
+/** Cloudflare rate limiter binding (unsafe.bindings type="ratelimit"). */
+interface RateLimit {
+  limit(options: { key: string }): Promise<{ success: boolean }>;
+}
+
 interface Env {
   // KV — allowlist + new domain discoveries only (NOT bulk domain store)
   VERDICTS: KVNamespace;
@@ -29,4 +34,7 @@ interface Env {
 
   // Admin API authentication secret
   ADMIN_SECRET: string;
+
+  // Rate limiters (Cloudflare unsafe bindings)
+  RATE_LIMITER_ADMIN: RateLimit;
 }

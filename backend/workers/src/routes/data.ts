@@ -11,6 +11,7 @@ import {
   MAX_DELTA_AGE_DAYS,
   type LatestManifest,
 } from '../lib/r2-manifest';
+import { jsonResponse } from '../lib/response';
 
 /**
  * GET /api/data/latest
@@ -139,12 +140,5 @@ async function streamR2Object(
       'Content-Length': object.size.toString(),
       'Cache-Control': 'public, max-age=3600',
     },
-  });
-}
-
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
   });
 }

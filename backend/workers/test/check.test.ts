@@ -257,6 +257,29 @@ describe('POST /api/check', () => {
     });
   });
 
+  describe('KV recheck race condition', () => {
+    it('returns KV verdict when blocklist entry is added during heuristic run', async () => {
+      // Pre-seed a bare domain key (blocklist format) in KV.
+      // The first KV check uses the allowlist prefix and will miss,
+      // heuristics will run, but the KV recheck before cache write should catch it.
+      const domain = 'race-condition-test.com';
+      await env.VERDICTS.put(
+        domain,
+        JSON.stringify({ verdict: 'dangerous', reason: 'admin blocklisted' }),
+      );
+
+      const response = await postCheck({ domain });
+      expect(response.status).toBe(200);
+      const body = await response.json<CheckResponse>();
+      // The domain should be found via KV (either first check or recheck)
+      expect(body.verdict).toBe('dangerous');
+      expect(body.details.source).toBe('kv');
+
+      // Clean up
+      await env.VERDICTS.delete(domain);
+    });
+  });
+
   describe('response format', () => {
     it('returns JSON content type', async () => {
       const response = await postCheck({ domain: 'example.com' });

@@ -2,6 +2,7 @@
 
 import { validateAdminAuth } from '../middleware/admin-auth';
 import { logAdminAction } from '../lib/admin-audit';
+import { jsonResponse } from '../lib/response';
 
 /**
  * GET /api/admin/discoveries
@@ -11,7 +12,7 @@ export async function handleAdminDiscoveriesList(
   env: Env,
   _params: Record<string, string>,
 ): Promise<Response> {
-  const authError = validateAdminAuth(request, env);
+  const authError = await validateAdminAuth(request, env);
   if (authError) return authError;
 
   const result = await env.DB.prepare(
@@ -32,7 +33,7 @@ export async function handleAdminDiscoveriesDelete(
   env: Env,
   params: Record<string, string>,
 ): Promise<Response> {
-  const authError = validateAdminAuth(request, env);
+  const authError = await validateAdminAuth(request, env);
   if (authError) return authError;
 
   const id = params.id;
@@ -53,11 +54,4 @@ export async function handleAdminDiscoveriesDelete(
   logAdminAction(env.DB, request, existing.domain, 'discovery_dismiss', { id });
 
   return jsonResponse({ ok: true, id }, 200);
-}
-
-function jsonResponse(data: unknown, status: number): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
 }

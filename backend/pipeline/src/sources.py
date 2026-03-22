@@ -61,7 +61,6 @@ def _fetch_text_list(
         should_close = True
 
     try:
-        used_fallback = False
         for url_index, url in enumerate(urls):
             last_error: str | None = None
             for attempt in range(max_retries):
@@ -79,7 +78,7 @@ def _fetch_text_list(
                         "Fetched %d domains from %s", len(domains), source_name
                     )
                     warning = None
-                    if used_fallback:
+                    if url_index > 0:
                         warning = (
                             f"Primary URL failed; used fallback URL index {url_index}"
                         )
@@ -108,7 +107,6 @@ def _fetch_text_list(
                 source_name,
                 url_index,
             )
-            used_fallback = True
 
         logger.error("All URLs exhausted for %s: %s", source_name, last_error)
         return FetchResult(
@@ -197,6 +195,18 @@ class PhishingArmySource:
         return _fetch_text_list(self.URLS, self.name, client=client)
 
 
+def _apply_domain_extraction(result: FetchResult) -> FetchResult:
+    """Extract domains from full URLs in a successful FetchResult."""
+    if result.success:
+        domains: list[str] = []
+        for line in result.domains:
+            domain = _extract_domain(line)
+            if domain:
+                domains.append(domain)
+        result.domains = domains
+    return result
+
+
 class OpenPhishSource:
     """Adapter for OpenPhish phishing feed.
 
@@ -211,14 +221,7 @@ class OpenPhishSource:
 
     def fetch(self, client: httpx.Client | None = None) -> FetchResult:
         result = _fetch_text_list(self.URLS, self.name, client=client)
-        if result.success:
-            domains: list[str] = []
-            for line in result.domains:
-                domain = _extract_domain(line)
-                if domain:
-                    domains.append(domain)
-            result.domains = domains
-        return result
+        return _apply_domain_extraction(result)
 
 
 class URLhausSource:
@@ -236,14 +239,7 @@ class URLhausSource:
 
     def fetch(self, client: httpx.Client | None = None) -> FetchResult:
         result = _fetch_text_list(self.URLS, self.name, client=client)
-        if result.success:
-            domains: list[str] = []
-            for line in result.domains:
-                domain = _extract_domain(line)
-                if domain:
-                    domains.append(domain)
-            result.domains = domains
-        return result
+        return _apply_domain_extraction(result)
 
 
 def get_default_sources() -> list[SourceAdapter]:

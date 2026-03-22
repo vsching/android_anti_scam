@@ -4,6 +4,7 @@
 // Rate limited to 10 requests per minute via KV counter.
 
 import { sendFcmTopicMessage } from '../lib/firebase-messaging';
+import { jsonResponse } from '../lib/response';
 
 /** Shape of an alert row from D1. */
 interface Alert {
@@ -164,11 +165,4 @@ export async function handleAlertsNotify(
   }
 
   return jsonResponse({ sent: anySucceeded, topics, results });
-}
-
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
 }

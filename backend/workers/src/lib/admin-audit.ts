@@ -12,6 +12,8 @@ export function logAdminAction(
   action: string,
   payload: unknown,
 ): void {
+  // CF-Connecting-IP is trusted only when the worker runs behind Cloudflare proxy.
+  // In non-proxied environments this header could be spoofed by the client.
   const adminIp = request.headers.get('CF-Connecting-IP') ?? 'unknown';
   const requestId = request.headers.get('CF-Ray') ?? crypto.randomUUID();
   const payloadJson = payload ? JSON.stringify(payload) : null;

@@ -100,3 +100,13 @@ class TestPipelineDailyWorkflow:
     def test_runs_on_ubuntu_latest(self):
         wf = _load_workflow()
         assert wf["jobs"]["pipeline"]["runs-on"] == "ubuntu-latest"
+
+    def test_smoke_test_step_present(self):
+        wf = _load_workflow()
+        steps = wf["jobs"]["pipeline"]["steps"]
+        smoke_steps = [
+            s for s in steps
+            if "smoke" in s.get("name", "").lower()
+            or "smoke-test" in s.get("run", "")
+        ]
+        assert len(smoke_steps) >= 1, "Missing smoke-test step in workflow"

@@ -2,6 +2,7 @@
 // Results are cached in KV for 15 minutes to reduce D1 reads.
 
 import { cacheKey, cacheGet, cachePut, DEFAULT_CACHE_TTL } from '../lib/cache';
+import { jsonResponse } from '../lib/response';
 
 /** Shape of an alert row from D1. */
 interface Alert {
@@ -67,11 +68,4 @@ export async function handleAlerts(
   await cachePut(env.VERDICTS, key, alerts, DEFAULT_CACHE_TTL);
 
   return jsonResponse(alerts);
-}
-
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
 }

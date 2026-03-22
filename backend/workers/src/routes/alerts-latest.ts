@@ -3,6 +3,7 @@
 // Results are cached in KV for 5 minutes.
 
 import { cacheKey, cacheGet, cachePut } from '../lib/cache';
+import { jsonResponse } from '../lib/response';
 
 /** Cache TTL for the latest alert: 5 minutes. */
 const LATEST_ALERT_CACHE_TTL = 300;
@@ -73,11 +74,4 @@ export async function handleAlertsLatest(
   await cachePut(env.VERDICTS, key, alert, LATEST_ALERT_CACHE_TTL);
 
   return jsonResponse(alert);
-}
-
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
 }

@@ -43,15 +43,7 @@ jobs:
           CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
 
       - name: Verify artifacts
-        run: |
-          echo "Pipeline completed successfully"
-          echo "Checking for output artifacts..."
-          if [ $? -eq 0 ]; then
-            echo "Pipeline exit code: 0 (success)"
-          else
-            echo "Pipeline exit code: $? (failure)"
-            exit 1
-          fi
+        run: echo "Pipeline step completed successfully"
 
       - name: Run smoke tests
         if: always()

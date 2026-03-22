@@ -115,6 +115,16 @@ describe('Admin API', () => {
       });
       expect(response.status).toBe(401);
     });
+
+    it('returns 401 for correct-length but wrong admin key', async () => {
+      // Use a key with the same length as the real secret to test timing-safe comparison
+      const wrongKey = 'x'.repeat(ADMIN_SECRET.length);
+      const response = await SELF.fetch('http://localhost/api/admin/allowlist', {
+        method: 'GET',
+        headers: { ...noAuthHeaders(), 'X-Admin-Key': wrongKey },
+      });
+      expect(response.status).toBe(401);
+    });
   });
 
   describe('POST /api/admin/allowlist', () => {
@@ -135,6 +145,16 @@ describe('Admin API', () => {
       const parsed = JSON.parse(kvValue!);
       expect(parsed.verdict).toBe('safe');
       expect(parsed.entity).toBe('Maybank');
+
+      // Verify audit log entry was written
+      const auditRow = await env.DB.prepare(
+        'SELECT * FROM admin_audit_logs WHERE domain = ? AND action = ?',
+      )
+        .bind('maybank2u.com.my', 'allowlist_add')
+        .first<{ domain: string; action: string; payload_json: string }>();
+      expect(auditRow).not.toBeNull();
+      expect(auditRow!.domain).toBe('maybank2u.com.my');
+      expect(auditRow!.action).toBe('allowlist_add');
     });
 
     it('returns 400 for missing fields', async () => {
@@ -207,6 +227,15 @@ describe('Admin API', () => {
       expect(parsed.verdict).toBe('dangerous');
     });
 
+    it('returns 400 for invalid JSON body', async () => {
+      const response = await SELF.fetch('http://localhost/api/admin/blocklist', {
+        method: 'POST',
+        headers: adminHeaders(),
+        body: 'not-json',
+      });
+      expect(response.status).toBe(400);
+    });
+
     it('returns 400 for missing reason', async () => {
       const response = await SELF.fetch('http://localhost/api/admin/blocklist', {
         method: 'POST',
@@ -247,15 +276,40 @@ describe('Admin API', () => {
   });
 
   describe('DELETE /api/admin/cache/:domain', () => {
-    it('returns purged: true', async () => {
-      const response = await SELF.fetch('http://localhost/api/admin/cache/example.com', {
+    it('returns purged: true and removes cached entry', async () => {
+      // First, populate the Cache API with a known entry
+      const domain = 'cache-test.com';
+      const cacheKey = `https://cache.safeanot.internal/check/${encodeURIComponent(domain)}`;
+      const cache = caches.default;
+      const cacheRequest = new Request(cacheKey);
+      await cache.put(
+        cacheRequest,
+        new Response(JSON.stringify({ domain, verdict: 'safe' }), {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 's-maxage=3600',
+          },
+        }),
+      );
+
+      // Verify it exists
+      const beforePurge = await cache.match(new Request(cacheKey));
+      expect(beforePurge).not.toBeUndefined();
+
+      // Call purge
+      const response = await SELF.fetch(`http://localhost/api/admin/cache/${domain}`, {
         method: 'DELETE',
         headers: adminHeaders(),
       });
       expect(response.status).toBe(200);
       const body = await response.json<{ purged: boolean; domain: string }>();
       expect(body.purged).toBe(true);
-      expect(body.domain).toBe('example.com');
+      expect(body.domain).toBe(domain);
+
+      // Verify the cache entry is gone
+      const afterPurge = await cache.match(new Request(cacheKey));
+      expect(afterPurge).toBeUndefined();
     });
   });
 
