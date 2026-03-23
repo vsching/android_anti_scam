@@ -135,6 +135,7 @@ fun ShieldScreen(
         onRefresh = { viewModel.onRefresh() },
         modifier = Modifier.fillMaxSize(),
     ) {
+      Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
@@ -296,6 +297,7 @@ fun ShieldScreen(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter),
         )
+      }
     }
 
     // Confirmation dialog for "Help Me Fix This"

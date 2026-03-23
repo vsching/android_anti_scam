@@ -27,7 +27,7 @@ android {
             arg("room.schemaLocation", "$projectDir/schemas")
         }
 
-        buildConfigField("String", "API_BASE_URL", "\"https://safeanot-api.workers.dev/\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://safeanot-api.management-481.workers.dev/\"")
     }
 
     buildTypes {
@@ -74,7 +74,7 @@ android {
 
 dependencies {
     // Compose BOM
-    val composeBom = platform("androidx.compose:compose-bom:2024.02.00")
+    val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
     implementation(composeBom)
 
     // Compose
@@ -124,6 +124,7 @@ dependencies {
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-messaging-ktx")
+    implementation("com.google.firebase:firebase-analytics")
 
     // Networking
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
