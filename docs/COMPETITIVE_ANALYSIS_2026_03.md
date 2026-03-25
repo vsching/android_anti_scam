@@ -133,3 +133,51 @@ Three defensible pillars:
 1. **Notification Shield** — free Kaspersky alternative, privacy-first, on-device
 2. **Kena Scam Emergency Mode** — guided first-hour response (nobody else does this)
 3. **Scam Simulator** — behavior change, not just awareness
+
+---
+
+## 6. Phone Shield Technical Limitation
+
+> **Tested:** 2026-03-25
+> **Finding:** Phone Shield cannot actually detect permission state. Feature is a guided checklist, not a scanner.
+
+### The Problem
+
+There is **no Android API** to check if another app has "Install unknown apps" permission enabled/disabled. The permission state of other apps is intentionally sandboxed by Android.
+
+| What's possible | API | Status |
+|---|---|---|
+| Check if an app is **installed** | `PackageManager.getPackageInfo()` | Works (current code does this) |
+| Check **own app's** install permission | `canRequestPackageInstalls()` | Works, but irrelevant |
+| Check if **WhatsApp/Chrome/etc** has install permission enabled | No API exists | **Impossible** |
+
+### What Phone Shield Actually Does
+
+1. Calls `getPackageInfo()` to detect if each of 20 tracked apps is installed
+2. Marks all installed apps as `NEEDS_REVIEW` (not based on actual permission state)
+3. Opens system settings via `ACTION_MANAGE_UNKNOWN_APP_SOURCES` intent
+4. Shows confirmation dialog: "Did you disable it?"
+5. If user clicks "Yes" → marks as `SECURED` — **trusts user input with no verification**
+6. No re-verification — once marked `SECURED`, stays `SECURED` forever
+
+### Can It Be Fixed?
+
+| Workaround | Viable? | Why not |
+|---|---|---|
+| Accessibility Service | No | Play Store restricts heavily; same technique malware uses |
+| Device Admin / MDM | No | Enterprise-only, requires device owner privileges |
+| Root access | No | Not viable for consumer app |
+| `canRequestPackageInstalls()` | No | Only checks your own app's permission, not other apps |
+
+### Implications
+
+- Security score is based on **self-reported data**, not actual device state
+- Cannot be marketed as "detection" or "scanning"
+- Feature is fundamentally a **guided education checklist** — still helpful, but not a differentiator
+- Reinforces need to pivot away from Phone Shield as a core feature
+
+### Relevant Code Files
+
+- `android/.../util/PackageChecker.kt` — only checks installation, not permission state
+- `android/.../data/repository/AuditRepositoryImpl.kt` — maps INSTALLED → NEEDS_REVIEW (no permission check)
+- `android/.../feature/fix/FixViewModel.kt` — user confirmation flow with no re-verification
